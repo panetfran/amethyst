@@ -467,7 +467,7 @@ function handleSendEnvelope() {
         addMessage({ id: Date.now(), sender: 'user', text: `【寄出的信】\n${text}`, timestamp: new Date(), status: 'sent', type: 'normal' });
     }
 
-    const minHours = 10, maxHours = 24;
+    const minHours = 2, maxHours = 12;
     const randomHours = Math.random() * (maxHours - minHours) + minHours;
     const replyTime = Date.now() + randomHours * 60 * 60 * 1000;
     const newId = 'env_' + Date.now() + '_' + Math.random().toString(36).substr(2,4);
