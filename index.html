@@ -522,21 +522,27 @@
                             <div id="env-view-sign-name" style="font-size:14px;color:var(--accent-color);text-align:right;font-weight:600;letter-spacing:1px;"></div>
                             <div id="env-reply-container" style="text-align: right; margin-top: 15px;">
     <button id="env-reply-btn" 
-            onclick="
-                /* 1. 关掉读信框 */
-                document.getElementById('envelope-view-modal').style.display = 'none';
-                /* 2. 尝试触发写信函数 (如果你的函数叫别的名字，在这里改一下) */
-                if (typeof openEnvelopeCompose === 'function') {
-                    openEnvelopeCompose();
-                } else if (document.getElementById('env-compose-form')) {
-                    document.getElementById('env-compose-form').style.display = 'block';
-                }
-                console.log('联动触发');
-            " 
-            style="background: var(--accent-color); color: white; border: none; padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer;">
-        回复此信
-    </button>
-</div>
+        onclick="
+            /* 1. 关掉看信弹窗 */
+            const viewModal = document.getElementById('envelope-view-modal');
+            if (viewModal) viewModal.style.display = 'none';
+
+            /* 2. 显示写信区域 */
+            const composeForm = document.getElementById('env-compose-form');
+            if (composeForm) {
+                composeForm.style.display = 'block';
+                
+                /* 3. 核心：平滑滚动到写信的位置 */
+                composeForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                /* 4. 自动点进输入框，方便直接打字 */
+                const input = composeForm.querySelector('textarea') || document.getElementById('envelope-input');
+                if (input) setTimeout(() => input.focus(), 500);
+            }
+        " 
+        style="background: var(--accent-color); color: white; border: none; padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; margin-top: 10px;">
+    回复此信
+</button>
                       </div>
                     </div>
                 </div>
