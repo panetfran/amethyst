@@ -156,12 +156,15 @@ window.openEnvelopeAndViewReply = function(replyId) {
 
 function generateEnvelopeReplyText() {
     const sourcePool = [...customReplies];
-    const sentenceCount = Math.floor(Math.random() * (12 - 8 + 1)) + 8;
+    const sentenceCount = Math.floor(Math.random() * (25 - 8 + 1)) + 8;
     let replyContent = "";
     for (let i = 0; i < sentenceCount; i++) {
         const randomSentence = sourcePool[Math.floor(Math.random() * sourcePool.length)];
         const punctuation = Math.random() < 0.2 ? "！" : (Math.random() < 0.2 ? "..." : "。");
         replyContent += randomSentence + punctuation;
+        if (Math.random() < 0.25 && i < sentenceCount - 1) {
+            replyContent += "\n\n";
+        }
     }
     return replyContent;
 }
