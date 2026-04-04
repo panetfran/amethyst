@@ -521,22 +521,6 @@
                             <div id="env-view-sign-date" style="font-size:11px;color:var(--text-secondary);text-align:right;margin-bottom:4px;letter-spacing:0.5px;"></div>
                             <div id="env-view-sign-name" style="font-size:14px;color:var(--accent-color);text-align:right;font-weight:600;letter-spacing:1px;"></div>
                             <div id="env-reply-container" style="text-align: right; margin-top: 15px;">
-    <button id="env-reply-btn" 
-        onclick="
-            /* 1. 强制关闭看信弹窗 */
-            document.getElementById('envelope-view-modal').style.display = 'none';
-            
-            /* 2. 强制显示写信表单 (请确保 ID 叫 env-compose-form) */
-            var form = document.getElementById('env-compose-form');
-            if(form) {
-                form.style.display = 'block';
-                /* 3. 滚动到该位置 */
-                form.scrollIntoView({behavior: 'smooth'});
-            }
-        " 
-        style="background: #66ccff; color: white; border: none; padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; margin-top: 10px;">
-    回复此信
-</button>
                       </div>
                     </div>
                 </div>
