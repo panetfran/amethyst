@@ -24,11 +24,23 @@ function saveEnvelopeData() {
     localforage.setItem(getStorageKey('envelopeData'), envelopeData);
 }
 
+// --- 替换开始：更主动的“一加一”回合制逻辑 ---
 async function checkEnvelopeStatus() {
     await loadEnvelopeData();
     const now = Date.now();
     let changed = false;
     let newReplyLetter = null;
+
+    // 【状态检查】
+    // 检查你是否有一封“寄出去还没回”的信 (pending)
+    const hasPendingOutbox = envelopeData.outbox.some(l => l.status === 'pending');
+    // 检查收件箱里是否有一封“还没拆开”的信 (isNew)
+    const hasUnreadInbox = envelopeData.inbox.some(l => l.isNew === true);
+    
+    // 只有当这两个都是 false 时，系统才处于“空闲”状态，可以主动发信
+    const isBusy = hasPendingOutbox || hasUnreadInbox;
+
+    // 1. 处理：你寄给系统的信（倒计时结束则生成回信）
     envelopeData.outbox.forEach(letter => {
         if (letter.status === 'pending' && now >= letter.replyTime) {
             letter.status = 'replied';
@@ -48,11 +60,44 @@ async function checkEnvelopeStatus() {
             playSound('message');
         }
     });
+
+    // 2. 处理：系统主动寄信给你
+    if (!isBusy) {
+        const lastActiveTime = localStorage.getItem('last_system_mail_time') || 0;
+        
+        // --- 这里修改了参数 ---
+        const cooldown = 2 * 60 * 60 * 1000; // 冷却时间缩短为：2小时
+        const chance = 0.3; // 触发概率调高为：30% (只要空闲，很大几率会收到信)
+
+        if (now - lastActiveTime > cooldown && Math.random() < chance) {
+            const activeContent = generateEnvelopeReplyText();
+            const activeId = 'sys_active_' + Date.now();
+            const systemLetter = {
+                id: activeId,
+                refId: null,
+                originalContent: null,
+                content: activeContent,
+                receivedTime: now,
+                isNew: true
+            };
+            envelopeData.inbox.push(systemLetter);
+            newReplyLetter = systemLetter;
+            changed = true;
+            
+            // 记录这次主动发信的时间
+            localStorage.setItem('last_system_mail_time', now);
+            playSound('message');
+        }
+    }
+
     if (changed) {
         saveEnvelopeData();
         if (newReplyLetter) showEnvelopeReplyPopup(newReplyLetter);
+        // 刷新列表显示（比如气泡上的红点）
+        renderEnvelopeLists();
     }
 }
+// --- 替换结束 ---
 
 function showEnvelopeReplyPopup(letter) {
     const existing = document.getElementById('envelope-reply-popup');
