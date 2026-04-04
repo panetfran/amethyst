@@ -24,32 +24,24 @@ function saveEnvelopeData() {
     localforage.setItem(getStorageKey('envelopeData'), envelopeData);
 }
 
-// --- 替换开始：更主动的“一加一”回合制逻辑 ---
 async function checkEnvelopeStatus() {
     await loadEnvelopeData();
     const now = Date.now();
     let changed = false;
     let newReplyLetter = null;
 
-    // 【状态检查】
-    // 检查你是否有一封“寄出去还没回”的信 (pending)
-    const hasPendingOutbox = envelopeData.outbox.some(l => l.status === 'pending');
-    // 检查收件箱里是否有一封“还没拆开”的信 (isNew)
-    const hasUnreadInbox = envelopeData.inbox.some(l => l.isNew === true);
-    
-    // 只有当这两个都是 false 时，系统才处于“空闲”状态，可以主动发信
-    const isBusy = hasPendingOutbox || hasUnreadInbox;
+    // 判定是否忙碌：有没回的信，或者有没读的信
+    const isBusy = envelopeData.outbox.some(l => l.status === 'pending') || 
+                   envelopeData.inbox.some(l => l.isNew === true);
 
-    // 1. 处理：你寄给系统的信（倒计时结束则生成回信）
+    // 逻辑 A：处理你寄出的信的回信
     envelopeData.outbox.forEach(letter => {
         if (letter.status === 'pending' && now >= letter.replyTime) {
             letter.status = 'replied';
             const replyContent = generateEnvelopeReplyText();
-            const replyId = 'reply_' + Date.now() + '_' + Math.random().toString(36).substr(2,4);
             const inboxLetter = {
-                id: replyId,
+                id: 'reply_' + Date.now(),
                 refId: letter.id,
-                originalContent: letter.content,
                 content: replyContent,
                 receivedTime: Date.now(),
                 isNew: true
@@ -61,21 +53,15 @@ async function checkEnvelopeStatus() {
         }
     });
 
-    // 2. 处理：系统主动寄信给你
+    // 逻辑 B：系统主动找你
     if (!isBusy) {
         const lastActiveTime = localStorage.getItem('last_system_mail_time') || 0;
-        
-        // --- 这里修改了参数 ---
-        const cooldown = 2 * 60 * 60 * 1000; // 冷却时间缩短为：2小时
-        const chance = 0.3; // 触发概率调高为：30% (只要空闲，很大几率会收到信)
-
-        if (now - lastActiveTime > cooldown && Math.random() < chance) {
+        const cooldown = 1 * 60 * 60 * 1000; // 缩短到 1 小时
+        if (now - lastActiveTime > cooldown && Math.random() < 0.5) { // 50% 概率
             const activeContent = generateEnvelopeReplyText();
-            const activeId = 'sys_active_' + Date.now();
             const systemLetter = {
-                id: activeId,
+                id: 'sys_' + Date.now(),
                 refId: null,
-                originalContent: null,
                 content: activeContent,
                 receivedTime: now,
                 isNew: true
@@ -83,8 +69,6 @@ async function checkEnvelopeStatus() {
             envelopeData.inbox.push(systemLetter);
             newReplyLetter = systemLetter;
             changed = true;
-            
-            // 记录这次主动发信的时间
             localStorage.setItem('last_system_mail_time', now);
             playSound('message');
         }
@@ -93,11 +77,9 @@ async function checkEnvelopeStatus() {
     if (changed) {
         saveEnvelopeData();
         if (newReplyLetter) showEnvelopeReplyPopup(newReplyLetter);
-        // 刷新列表显示（比如气泡上的红点）
         renderEnvelopeLists();
     }
 }
-// --- 替换结束 ---
 
 function showEnvelopeReplyPopup(letter) {
     const existing = document.getElementById('envelope-reply-popup');
@@ -294,6 +276,7 @@ window.viewEnvLetter = function(section, id) {
     const letters = section === 'outbox' ? envelopeData.outbox : envelopeData.inbox;
     const letter = letters.find(l => l.id === id);
     if (!letter) return;
+    
     if (section === 'inbox' && letter.isNew) {
         letter.isNew = false;
         saveEnvelopeData();
@@ -302,7 +285,8 @@ window.viewEnvLetter = function(section, id) {
     editingEnvId = id;
     editingEnvSection = section;
 
-    document.getElementById('env-view-title').textContent = section === 'outbox' ? '寄出的信' : '收到的回信';
+    // --- 修改文案：让它更像双向通信 ---
+    document.getElementById('env-view-title').textContent = section === 'outbox' ? '致对方的信' : '对方寄来的信';
 
     const dateObj = letter.timestamp ? new Date(letter.timestamp) : new Date();
     const y = dateObj.getFullYear();
@@ -327,7 +311,8 @@ window.viewEnvLetter = function(section, id) {
     } else {
         const myName = (typeof settings !== 'undefined' && settings.myName) || '你';
         if (toLine) toLine.textContent = `致 ${myName}：`;
-        if (greetingLine) greetingLine.textContent = '见字如面，一切皆好。';
+        // 如果是系统主动发的信，换个稍微不一样的问候语
+        greetingLine.textContent = letter.refId ? '见字如面，一切皆好。' : '突然想写封信给你，见字如面。';
     }
 
     const textEl = document.getElementById('env-view-text');
@@ -349,6 +334,8 @@ window.viewEnvLetter = function(section, id) {
     document.getElementById('env-view-edit').style.display = 'none';
     document.getElementById('env-view-edit-btn').style.display = 'inline-flex';
     document.getElementById('env-view-save-btn').style.display = 'none';
+
+    // 处理回信引用
     const origCtx = document.getElementById('env-view-original-ctx');
     const origText = document.getElementById('env-view-original-text');
     const origExpand = document.getElementById('env-view-original-expand');
@@ -365,6 +352,32 @@ window.viewEnvLetter = function(section, id) {
             origCtx.style.display = 'none';
         }
     }
+
+    // --- [核心新增]：点击回复按钮时，把当前信件内容“带走” ---
+    const replyBtn = document.getElementById('env-view-reply-btn'); // 假设你的按钮ID是这个
+    if (replyBtn) {
+        replyBtn.onclick = () => {
+            // 记住内容
+            window._pendingReplyContent = letter.content; 
+            // 关闭当前窗口
+            hideModal(document.getElementById('envelope-view-modal'));
+            // 打开写信窗口
+            window.openEnvelopeCompose(); 
+            
+            // 在输入框上方显示预览
+            let pBox = document.getElementById('reply-preview-box');
+            if (!pBox) {
+                pBox = document.createElement('div');
+                pBox.id = 'reply-preview-box';
+                pBox.style = "background:#f4f1ff; border-left:4px solid #7c4dff; padding:8px; margin-bottom:10px; font-size:13px; border-radius:4px; color:#666;";
+                const inputArea = document.getElementById('envelope-input');
+                inputArea.parentNode.insertBefore(pBox, inputArea);
+            }
+            pBox.innerHTML = `<small style="color:#7c4dff">正在回复对方：</small><br>${letter.content.substring(0, 50)}${letter.content.length > 50 ? '...' : ''}`;
+            pBox.style.display = 'block';
+        };
+    }
+
     showModal(document.getElementById('envelope-view-modal'));
 };
 
@@ -430,6 +443,11 @@ window.openNewEnvelopeForm = function() {
 };
 
 window.cancelEnvelopeCompose = function() {
+    // --- 新增：清理回信预览框 ---
+    const pBox = document.getElementById('reply-preview-box');
+    if (pBox) pBox.style.display = 'none';
+    // -------------------------
+
     document.getElementById('env-compose-form').style.display = 'none';
     document.getElementById('env-main-close-btn').style.display = 'flex';
     if (currentEnvTab === 'outbox') {
@@ -440,6 +458,8 @@ window.cancelEnvelopeCompose = function() {
 };
 
 function handleSendEnvelope() {
+    const pBox = document.getElementById('reply-preview-box');
+    if (pBox) pBox.style.display = 'none';
     const text = document.getElementById('envelope-input').value.trim();
     if (!text) { showNotification('信件内容不能为空', 'warning'); return; }
 
