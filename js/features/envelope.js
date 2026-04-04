@@ -513,39 +513,39 @@ const observer = new MutationObserver(() => {
 if (document.getElementById('envelope-view-modal')) {
     observer.observe(document.getElementById('envelope-view-modal'), { attributes: true });
 }
-// 监听全局点击事件，这样无论按钮什么时候出现都能管用
-document.addEventListener('click', function(e) {
-    // 检查点击的是不是我们那个“回复此信”按钮
-    if (e.target && e.target.id === 'env-reply-btn') {
+// 使用 window.onload 确保在网页完全加载后再绑定按钮
+window.addEventListener('load', function() {
+    document.addEventListener('click', function(e) {
+        // 增加了一个 e.target.closest，防止点到按钮文字没反应
+        const replyBtn = e.target.closest('#env-reply-btn');
         
-        // 1. 获取当前正在看的信件内容（为了给回信提供参考）
-        const originalContent = document.getElementById('env-view-text').innerText;
-        
-        // 2. 把内容存到一个临时变量里（可选，以后可以做预览）
-        window._replyingTo = originalContent;
+        if (replyBtn) {
+            // 1. 获取原文内容
+            const textElem = document.getElementById('env-view-text');
+            const originalContent = textElem ? textElem.innerText : "";
+            window._replyingTo = originalContent;
 
-        // 3. 关掉当前的“看信”弹窗
-        // 这里的 ID 必须和你 HTML 里的看信弹窗 ID 一致
-        const viewModal = document.getElementById('envelope-view-modal');
-        if (viewModal) {
-            // 如果你有现成的 hideModal 函数就用它，没有就直接设为 none
-            if (typeof hideModal === 'function') {
-                hideModal(viewModal);
-            } else {
-                viewModal.style.display = 'none';
+            // 2. 尝试关闭看信弹窗
+            const viewModal = document.getElementById('envelope-view-modal');
+            if (viewModal) {
+                // 优先尝试调用你原本就有的 hideModal
+                if (typeof hideModal === 'function') {
+                    hideModal(viewModal);
+                } else {
+                    viewModal.style.display = 'none';
+                }
             }
-        }
 
-        // 4. 【核心联动】触发写信功能
-        // 就像你点击主页面的“提笔写信”一样
-        if (typeof openEnvelopeCompose === 'function') {
-            openEnvelopeCompose();
-        } else {
-            // 如果函数名不对，尝试直接显示写信的表单
-            const composeForm = document.getElementById('env-compose-form');
-            if (composeForm) composeForm.style.display = 'block';
+            // 3. 联动：触发写信功能
+            // 这里我们双管齐下：既尝试调用函数，也尝试直接显示表单
+            if (typeof openEnvelopeCompose === 'function') {
+                openEnvelopeCompose();
+            } else {
+                const composeForm = document.getElementById('env-compose-form');
+                if (composeForm) composeForm.style.display = 'block';
+            }
+            
+            console.log("联动成功！");
         }
-        
-        console.log("联动成功！已从读信切换到写信。");
-    }
+    });
 });
