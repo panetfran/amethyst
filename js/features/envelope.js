@@ -482,34 +482,3 @@ function handleSendEnvelope() {
     switchEnvTab('outbox');
     showNotification(`信件已寄出，预计 ${Math.floor(randomHours)} 小时后收到回信 ✉️`, 'success');
 }
-
-// --- 独立插件模式：监听弹窗打开并激活回复按钮 ---
-const observer = new MutationObserver(() => {
-    const viewModal = document.getElementById('envelope-view-modal');
-    const replyBtn = document.getElementById('env-reply-btn');
-    
-    // 如果弹窗开了，且我们能找到按钮
-    if (viewModal && viewModal.style.display === 'block' && replyBtn) {
-        // 获取当前信件内容（假设你之前的逻辑把内容存到了某个地方，或者我们直接从页面抓）
-        const letterContent = document.getElementById('env-view-text').innerText;
-        
-        replyBtn.onclick = () => {
-            // 1. 关闭看信弹窗
-            viewModal.style.display = 'none';
-            // 2. 打开写信弹窗 (调用你原本就有的函数)
-            if (typeof openEnvelopeCompose === 'function') {
-                openEnvelopeCompose();
-            }
-            // 3. (可选) 给输入框加个焦点
-            setTimeout(() => {
-                const input = document.getElementById('envelope-input');
-                if (input) input.focus();
-            }, 100);
-        };
-    }
-});
-
-// 开始监听弹窗的变化
-if (document.getElementById('envelope-view-modal')) {
-    observer.observe(document.getElementById('envelope-view-modal'), { attributes: true });
-}
