@@ -377,11 +377,6 @@ window.viewEnvLetter = function(section, id) {
             pBox.style.display = 'block';
         };
     }
-    // 如果 section 是 'outbox' (寄件箱)，就藏起回复按钮；否则显示
-const replyBtn = document.getElementById('env-reply-btn');
-if (replyBtn) {
-    replyBtn.style.display = (section === 'inbox') ? 'inline-flex' : 'none';
-}
     showModal(document.getElementById('envelope-view-modal'));
 };
 
