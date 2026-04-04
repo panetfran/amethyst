@@ -377,40 +377,6 @@ window.viewEnvLetter = function(section, id) {
             pBox.style.display = 'block';
         };
     }
- // 让回复按钮生效
-    const replyBtn = document.getElementById('env-reply-btn');
-    if (replyBtn) {
-        // 只有在查看“收到的信”时才显示回复按钮
-        replyBtn.parentElement.style.display = (section === 'inbox') ? 'block' : 'none';
-        
-        replyBtn.onclick = () => {
-            // 1. 记住原信内容（用于预览）
-            window._pendingReplyContent = letter.content;
-            
-            // 2. 关闭当前阅读窗口
-            hideModal(document.getElementById('envelope-view-modal'));
-            
-            // 3. 打开写信窗口
-            if (typeof openEnvelopeCompose === 'function') {
-                openEnvelopeCompose();
-            } else {
-                document.getElementById('env-compose-form').style.display = 'block';
-                document.getElementById('env-main-close-btn').style.display = 'none';
-            }
-
-            // 4. 显示那个紫色预览框
-            let pBox = document.getElementById('reply-preview-box');
-            if (!pBox) {
-                pBox = document.createElement('div');
-                pBox.id = 'reply-preview-box';
-                pBox.style = "background:rgba(var(--accent-color-rgb), 0.1); border-left:3px solid var(--accent-color); padding:8px; margin-bottom:12px; font-size:12px; border-radius:4px; color:var(--text-primary);";
-                const inputArea = document.getElementById('envelope-input');
-                inputArea.parentNode.insertBefore(pBox, inputArea);
-            }
-            pBox.innerHTML = `<small style="opacity:0.7;">正在回复：</small><br>${letter.content.substring(0, 30)}...`;
-            pBox.style.display = 'block';
-        };
-    }
     showModal(document.getElementById('envelope-view-modal'));
 };
 
