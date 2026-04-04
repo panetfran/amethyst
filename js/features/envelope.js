@@ -513,39 +513,3 @@ const observer = new MutationObserver(() => {
 if (document.getElementById('envelope-view-modal')) {
     observer.observe(document.getElementById('envelope-view-modal'), { attributes: true });
 }
-// 使用 window.onload 确保在网页完全加载后再绑定按钮
-window.addEventListener('load', function() {
-    document.addEventListener('click', function(e) {
-        // 增加了一个 e.target.closest，防止点到按钮文字没反应
-        const replyBtn = e.target.closest('#env-reply-btn');
-        
-        if (replyBtn) {
-            // 1. 获取原文内容
-            const textElem = document.getElementById('env-view-text');
-            const originalContent = textElem ? textElem.innerText : "";
-            window._replyingTo = originalContent;
-
-            // 2. 尝试关闭看信弹窗
-            const viewModal = document.getElementById('envelope-view-modal');
-            if (viewModal) {
-                // 优先尝试调用你原本就有的 hideModal
-                if (typeof hideModal === 'function') {
-                    hideModal(viewModal);
-                } else {
-                    viewModal.style.display = 'none';
-                }
-            }
-
-            // 3. 联动：触发写信功能
-            // 这里我们双管齐下：既尝试调用函数，也尝试直接显示表单
-            if (typeof openEnvelopeCompose === 'function') {
-                openEnvelopeCompose();
-            } else {
-                const composeForm = document.getElementById('env-compose-form');
-                if (composeForm) composeForm.style.display = 'block';
-            }
-            
-            console.log("联动成功！");
-        }
-    });
-});
