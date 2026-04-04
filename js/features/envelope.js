@@ -66,8 +66,8 @@ async function checkEnvelopeStatus() {
         const lastActiveTime = localStorage.getItem('last_system_mail_time') || 0;
         
         // --- 这里修改了参数 ---
-        const cooldown = 0; // 冷却时间缩短为：2小时
-        const chance = 1; // 触发概率调高为：30% (只要空闲，很大几率会收到信)
+        const cooldown = 2 * 60 * 60 * 1000; // 冷却时间缩短为：2小时
+        const chance = 0.3; // 触发概率调高为：30% (只要空闲，很大几率会收到信)
 
         if (now - lastActiveTime > cooldown && Math.random() < chance) {
             const activeContent = generateEnvelopeReplyText();
