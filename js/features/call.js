@@ -651,19 +651,40 @@ html:not([data-theme="dark"])[data-color-theme="black-white"] .message-sent{
     }
 
     function sendSystemFarewell() {
-        // 随机发送 1-2 张字卡
-        const count = Math.floor(Math.random() * 2) + 1;
-        for (let i = 0; i < count; i++) {
-            // 自动调用你回复池里的句子
-            if (window.customReplies && window.customReplies.length > 0) {
-                const text = window.customReplies[Math.floor(Math.random() * window.customReplies.length)];
+        console.log("正在准备发送告别字卡...");
+
+        // 1. 尝试获取回复池（兼容多种可能的变量名）
+        const replies = window.customReplies || []; 
+        
+        if (replies.length > 0) {
+            // 随机发 1-2 张
+            const count = Math.floor(Math.random() * 2) + 1;
+            for (let i = 0; i < count; i++) {
+                const text = replies[Math.floor(Math.random() * replies.length)];
+                
+                // 2. 确保调用的是正确的发消息函数
+                // 你的项目里可能是 _addMessage 或 appendMessage
                 if (window._addMessage) {
-                    window._addMessage({ role: 'partner', content: text, type: 'text' });
+                    window._addMessage({ 
+                        role: 'partner', 
+                        content: text, 
+                        type: 'text' 
+                    });
+                } else {
+                    console.log("找不到 _addMessage 函数，无法显示字卡内容");
                 }
             }
+        } else {
+            console.log("找不到 customReplies 回复池或内容为空");
         }
-        // 延迟 2 秒正式挂断，这样你能看到“通话结束”提示
-        setTimeout(() => { if (S.active) endCall(); }, 2000);
+
+        // 3. 无论字卡发没发成功，2秒后都必须挂断
+        S.systemHangUpTimer = setTimeout(() => {
+            if (S.active) {
+                console.log("执行最终挂断");
+                endCall();
+            }
+        }, 2000);
     }
     
     function endCall() {
