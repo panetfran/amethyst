@@ -7,7 +7,7 @@
     const KEY_PILL_POS = 'callPillPos';
     const BG_LF_KEY    = 'callBgImageData';
 
-    const S = {
+   const S = {
         enabled:         localStorage.getItem(KEY_ENABLED) !== 'false',
         active:          false,
         startTime:       null,
@@ -26,6 +26,10 @@
         incomingTimer:   null,
         connectingTimer: null,
         randomCallTimer: null,
+        // --- 在这里加入这两个新变量 ---
+        checkIntervalTimer: null, // 用来存那个“每半小时检查一次”的闹钟
+        systemHangUpTimer:  null, // 用来存最后决定挂断时的那个小延迟
+        // --------------------------
         isPartnerCall:   false,
     };
 
@@ -627,12 +631,49 @@ html:not([data-theme="dark"])[data-color-theme="black-white"] .message-sent{
                 if (conn) conn.classList.remove('visible');
                 if (body) body.style.display = '';
                 tick();
-            }, 1400 + Math.random() * 1400);
+
+                // --- 新增：每隔一段时间检查是否要挂断 ---
+                const CHECK_INTERVAL = 5 * 1000; 
+
+                S.checkIntervalTimer = setInterval(() => {
+                    if (S.active) { 1.1
+                        if (Math.random() < 1.1 ) {
+                            console.log("系统决定结束本次长时间通话");
+                            sendSystemFarewell(); 
+                            clearInterval(S.checkIntervalTimer);
+                        }
+                    }
+                }, CHECK_INTERVAL); 
+                // ------------------------------------
+
+            }, 1400 + Math.random() * 1400); // 这一行是原本 setTimeout 的结尾
         }
     }
 
+    function sendSystemFarewell() {
+        // 随机发送 1-2 张字卡
+        const count = Math.floor(Math.random() * 2) + 1;
+        for (let i = 0; i < count; i++) {
+            // 自动调用你回复池里的句子
+            if (window.customReplies && window.customReplies.length > 0) {
+                const text = window.customReplies[Math.floor(Math.random() * window.customReplies.length)];
+                if (window._addMessage) {
+                    window._addMessage({ role: 'partner', content: text, type: 'text' });
+                }
+            }
+        }
+        // 延迟 2 秒正式挂断，这样你能看到“通话结束”提示
+        setTimeout(() => { if (S.active) endCall(); }, 2000);
+    }
+    
     function endCall() {
         if (!S.active) return;
+
+        clearInterval(S.checkIntervalTimer); 
+        clearTimeout(S.systemHangUpTimer);
+        S.checkIntervalTimer = null;
+        S.systemHangUpTimer = null;
+        
         const dur = S.elapsed;
         S.active = false; S.startTime = null;
         cancelAnimationFrame(S.timerRAF);
