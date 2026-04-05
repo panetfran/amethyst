@@ -632,12 +632,12 @@ html:not([data-theme="dark"])[data-color-theme="black-white"] .message-sent{
                 tick();
 
                 // --- 新增：每隔一段时间检查是否要挂断 ---
-                const CHECK_TIME = 5000; 
+                const CHECK_TIME = 30 * 60 * 1000 ; 
 
                 S.checkIntervalTimer = setInterval(() => {
-                    if (S.active) { 1.1
+                    if (S.active) {
                         // 40% 的概率系统决定挂断
-                        if (Math.random() < 1.1) {
+                        if (Math.random() < 0.4) {
                             console.log("系统随机判定：通话结束");
                             endCall(); // 直接调用挂断，会显示正常的通话结束界面
                             clearInterval(S.checkIntervalTimer);
