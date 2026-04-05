@@ -26,9 +26,8 @@
         incomingTimer:   null,
         connectingTimer: null,
         randomCallTimer: null,
-        // --- 在这里加入这两个新变量 ---
+        // --- 在这里加入新变量 ---
         checkIntervalTimer: null, // 用来存那个“每半小时检查一次”的闹钟
-        systemHangUpTimer:  null, // 用来存最后决定挂断时的那个小延迟
         // --------------------------
         isPartnerCall:   false,
     };
@@ -633,17 +632,18 @@ html:not([data-theme="dark"])[data-color-theme="black-white"] .message-sent{
                 tick();
 
                 // --- 新增：每隔一段时间检查是否要挂断 ---
-                const CHECK_INTERVAL = 5 * 1000; 
+                const CHECK_TIME = 5000; 
 
                 S.checkIntervalTimer = setInterval(() => {
                     if (S.active) { 1.1
-                        if (Math.random() < 1.1 ) {
-                            console.log("系统决定结束本次长时间通话");
-                            sendSystemFarewell(); 
+                        // 40% 的概率系统决定挂断
+                        if (Math.random() < 1.1) {
+                            console.log("系统随机判定：通话结束");
+                            endCall(); // 直接调用挂断，会显示正常的通话结束界面
                             clearInterval(S.checkIntervalTimer);
                         }
                     }
-                }, CHECK_INTERVAL); 
+                }, CHECK_TIME); 
                 // ------------------------------------
 
             }, 1400 + Math.random() * 1400); // 这一行是原本 setTimeout 的结尾
