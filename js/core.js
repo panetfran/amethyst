@@ -1909,7 +1909,7 @@ if (customStatuses && customStatuses.length > 0) {
     settings.partnerStatus = getRandomItem(customStatuses);
 }
                 settings.lastStatusChange = Date.now();
-                settings.nextStatusChange = 1 + Math.random() * 7;
+                settings.nextStatusChange = 0.83 + Math.random() * 0.33;
                 DOMElements.partner.status.textContent = settings.partnerStatus;
                 throttledSaveData();
             }
