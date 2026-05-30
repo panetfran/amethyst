@@ -3,7 +3,7 @@
     const STORAGE_KEY = 'async_board_messages';
     const TIME_KEY = 'async_board_last_partner_time';
     
-    // 对方多长时间来贴一次长便签：默认 12 小时（测试时你可以改成 5 * 1000 也就是5秒）
+    // 对方多长时间来贴一次长便签：默认 12 小时
     const PARTNER_LEAVE_INTERVAL = 5 * 1000; 
 
     // 获取 HTML 元素
@@ -47,37 +47,9 @@
         let now = Date.now();
 
         if (now - lastTime > PARTNER_LEAVE_INTERVAL) {
-            
-            // 🌟 【这里是唯一的修改点】：从 localStorage 尝试抓取你的字卡库 🌟
-            let pool = [];
-            try {
-                // 尝试抓取可能存在的各种名字的字卡缓存
-                const savedReplies = localStorage.getItem('customReplies') || 
-                                     localStorage.getItem('customStatuses') || 
-                                     localStorage.getItem('envelopeData');
-                if (savedReplies) {
-                    pool = JSON.parse(savedReplies);
-                    // 如果拿到的是复杂的信件对象或字典，提取出纯文本数组
-                    if (pool && !Array.isArray(pool) && typeof pool === 'object') {
-                        pool = Object.values(pool);
-                    }
-                }
-            } catch(e) {
-                pool = [];
-            }
-
-            // 🚨 【安全防空兜底】：如果上面没捞到你的字卡，就用这些精美句子，确保百分之百能出纸条
-            if (!pool || pool.length === 0) {
-                pool = [
-                    "今天的天气很好……",
-                    "你在听吗？",
-                    "我一直在想一件事……",
-                    "有些话想留在这里。",
-                    "起风了……",
-                    "听到了熟悉的声音。",
-                    "这边的留白，我很喜欢。"
-                ];
-            }
+            // 获取你的自定义回复字卡池
+            const pool = window.customReplies || [];
+            if (pool.length === 0) return; 
 
             // 确定这次抽取几张字卡（3 到 5 张）
             const count = Math.floor(Math.random() * 3) + 3; 
@@ -90,20 +62,10 @@
             for (let i = 0; i < count; i++) {
                 // 随机捞一张字卡
                 let cardText = pool[Math.floor(Math.random() * pool.length)];
-                
-                // 兼容处理：如果是对象格式，把里面的文本内容抽出来
-                if (cardText && typeof cardText === 'object') {
-                    cardText = cardText.content || cardText.text || JSON.stringify(cardText);
-                }
-                
-                if (cardText) {
-                    combinedPieces.push(cardText);
-                }
+                combinedPieces.push(cardText);
             }
 
-            if (combinedPieces.length === 0) return;
-
-            // 把捞出来的几张字卡，中间随机塞入不同的符号拼起来
+            // 【关键核心】：把捞出来的几张字卡，中间随机塞入不同的符号拼起来
             let finalSentence = "";
             for(let i = 0; i < combinedPieces.length; i++) {
                 finalSentence += combinedPieces[i];
