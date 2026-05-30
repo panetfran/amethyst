@@ -4,7 +4,7 @@
     const TIME_KEY = 'async_board_last_partner_time';
     
     // 对方多长时间来贴一次长便签：默认 12 小时
-    const PARTNER_LEAVE_INTERVAL = 12 * 60 * 60 * 1000; 
+    const PARTNER_LEAVE_INTERVAL = 5 * 1000; 
 
     // 获取 HTML 元素
     const toggleBtn = document.getElementById('board-toggle-btn');
