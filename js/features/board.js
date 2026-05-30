@@ -1,9 +1,5 @@
 (function() {
-    // 1. 基础缓存配置（智能对接你系统的存储加密前缀机制）
-    const STORAGE_KEY = typeof getStorageKey === 'function' ? getStorageKey('async_board_messages') : 'async_board_messages';
-    const TIME_KEY = typeof getStorageKey === 'function' ? getStorageKey('async_board_last_partner_time') : 'async_board_last_partner_time';
-    
-    // ⏳ 对方多长时间来贴一次长便签：默认 12 小时（测试时你可以随时改为 5 * 1000 也就是 5 秒）
+    // ⏳ 对方贴长便签的判定时间间隔：12 小时（测试时你可以随时改为 5000 也就是 5 秒）
     const PARTNER_LEAVE_INTERVAL = 5 * 1000; 
 
     // 获取 HTML 元素
@@ -14,9 +10,24 @@
     const inputField = document.getElementById('board-input');
     const boardWall = document.getElementById('board-wall');
 
-    // 2. 事件绑定
-    if (toggleBtn) toggleBtn.addEventListener('click', openBoard);
-    if (closeBtn) closeBtn.addEventListener('click', closeBoard);
+    // 1. 干净的点击与键盘事件绑定（放在最顶层，确保百分之百绑定成功，绝不被任何未初始化的代码阻塞）
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', function() {
+            if (modal) {
+                modal.style.display = 'flex';
+                renderBoard();
+                // 延迟 100 毫秒再判定，给系统充足的时间
+                setTimeout(checkAndGeneratePartnerMsg, 100);
+            }
+        });
+    }
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+            if (modal) modal.style.display = 'none';
+        });
+    }
+
     if (sendBtn) sendBtn.addEventListener('click', handleSend);
     if (inputField) {
         inputField.addEventListener('keypress', (e) => {
@@ -24,30 +35,20 @@
         });
     }
 
-    // 初始化时自动在后台检查一次
-    checkAndGeneratePartnerMsg();
+    // 网页加载 3 秒后（确保 session_id 肯定初始化完毕了），再在后台悄悄判定一次
+    setTimeout(checkAndGeneratePartnerMsg, 3000);
 
-    // 3. 打开与关闭
-    function openBoard() {
-        if (modal) {
-            modal.style.display = 'flex';
-            renderBoard();
-            checkAndGeneratePartnerMsg(); 
-        }
-    }
-
-    function closeBoard() {
-        if (modal) modal.style.display = 'none';
-    }
-
-    // 4. 核心：【拼接机制】把 3-5 张字卡加上随机连接符拼成一张纸条
+    // 2. 核心：【拼接机制】
     function checkAndGeneratePartnerMsg() {
-        // 使用标准的带安全保护的 localforage 获取，防止卡死初始化
         if (typeof localforage === 'undefined') return;
 
+        // 🌟【核心修复】：在需要用的时候，再在函数内部动态获取存储键，绝不在全局提早触发安全锁！
+        const REAL_STORAGE_KEY = typeof getStorageKey === 'function' ? getStorageKey('async_board_messages') : 'async_board_messages';
+        const REAL_TIME_KEY = typeof getStorageKey === 'function' ? getStorageKey('async_board_last_partner_time') : 'async_board_last_partner_time';
+
         Promise.all([
-            localforage.getItem(STORAGE_KEY),
-            localforage.getItem(TIME_KEY)
+            localforage.getItem(REAL_STORAGE_KEY),
+            localforage.getItem(REAL_TIME_KEY)
         ]).then(async (results) => {
             let messages = results[0] || [];
             let lastTime = parseInt(results[1] || '0');
@@ -55,40 +56,35 @@
 
             if (now - lastTime > PARTNER_LEAVE_INTERVAL) {
                 
-                // 无论有没有抽中，都更新时间戳，保证判定频率正常
-                await localforage.setItem(TIME_KEY, now.toString());
+                // 无论抽中与否，立刻锁定判定周期
+                await localforage.setItem(REAL_TIME_KEY, now.toString());
 
-                // 🎲 核心机制：每半小时判定一次，这里是 50% 概率
-                // 【提示】：如果你将时间改为 5 秒进行测试，可以把 0.5 临时改为 1.0 (即 100% 成功)
+                // 🎲 核心概率判定：这里设置为 50% 的概率（测试时你可以改成 true 也就是 100% 触发）
                 const isLucky = Math.random() < 0.5;
                 if (!isLucky) return;
 
-                // 🌟 【精准定位字卡库】：对接你系统里的自定义回复库 🌟
+                // 🌟【从 envelope.js 得到启发】：你的系统数据池直接叫 envelopeData 或存储在 customReplies 里
+                // 我们去安全提取系统里的回复池
                 const REPLIES_KEY = typeof getStorageKey === 'function' ? getStorageKey('customReplies') : 'customReplies';
                 let pool = await localforage.getItem(REPLIES_KEY) || [];
 
-                // 兼容处理：如果是对象格式则提取出数组
+                // 兼容性处理
                 if (pool && !Array.isArray(pool) && typeof pool === 'object') {
                     pool = Object.values(pool);
                 }
 
-                // 🚨 【防空安全兜底】：如果读取失败或回复库为空，用精美废话兜底，绝对不报错卡死
+                // 🚨 终极防空安全兜底
                 if (!pool || pool.length === 0) {
-                    pool = ["今天的天气很好……", "你在听吗？", "我一直在想一件事……", "有些话想留在这里。", "起风了……"];
+                    pool = ["今天的天气很好……", "你在听吗？", "我一直在想一件事……", "有些话想留在这里。", "起风了……", "这边的留白，我很喜欢。"];
                 }
 
                 // 确定这次抽取几张字卡（3 到 5 张）
                 const count = Math.floor(Math.random() * 3) + 3; 
-                
-                // 定义在字卡中间随机加入的连接符/碎碎念语气词
                 const connectors = ['…… ', '。 ', '， ', '……还有，', '……？ ', ' 或者是 ', '。也是，', '、', '……其实，'];
                 
                 let combinedPieces = [];
-                
                 for (let i = 0; i < count; i++) {
                     let cardText = pool[Math.floor(Math.random() * pool.length)];
-                    
-                    // 解包深层对象（比如你信件格式里的 .content）
                     if (cardText && typeof cardText === 'object' && cardText.content) {
                         cardText = cardText.content;
                     }
@@ -99,7 +95,7 @@
 
                 if (combinedPieces.length === 0) return;
 
-                // 把捞出来的几张字卡，中间随机塞入不同的符号拼起来
+                // 拼成长句
                 let finalSentence = "";
                 for(let i = 0; i < combinedPieces.length; i++) {
                     finalSentence += combinedPieces[i];
@@ -109,7 +105,7 @@
                     }
                 }
 
-                // 最终只作为「一条」完整的长便签塞进历史记录
+                // 生成对方的丁香淡紫便签
                 messages.push({
                     id: 'p_' + Date.now(),
                     role: 'partner',
@@ -117,39 +113,37 @@
                     time: new Date().toLocaleString('zh-CN', { hour12: false })
                 });
 
-                // 异步保存
-                await localforage.setItem(STORAGE_KEY, messages);
+                // 保存
+                await localforage.setItem(REAL_STORAGE_KEY, messages);
 
                 if (modal && modal.style.display === 'flex') {
                     renderBoard();
                 }
             }
-        }).catch(err => console.log("留白静默跳过判定"));
+        }).catch(err => console.log("留白数据判定静默跳过"));
     }
 
-    // 5. 渲染便签墙（这里包含你定好的雾霾蓝灰与丁香淡紫高级色）
+    // 3. 渲染便签墙
     function renderBoard() {
         if (!boardWall || typeof localforage === 'undefined') return;
 
-        localforage.getItem(STORAGE_KEY).then(messages => {
+        // 🌟【动态获取键】：安全渲染
+        const REAL_STORAGE_KEY = typeof getStorageKey === 'function' ? getStorageKey('async_board_messages') : 'async_board_messages';
+
+        localforage.getItem(REAL_STORAGE_KEY).then(messages => {
             messages = messages || [];
             boardWall.innerHTML = '';
 
             if (messages.length === 0) {
-                boardWall.innerHTML = `<div style="text-align:center;color:#aaa;margin-top:60px;font-size:12px;">墙上空空如也，留下一张便签吧。</div>`;
+                boardWall.innerHTML = `<div style="text-align:center;color:#aaa;margin-top:60px;font-size:12px;font-family:sans-serif;">墙上空空如也，留下一张便签吧。</div>`;
                 return;
             }
 
             messages.forEach(msg => {
                 const isMy = msg.role === 'my';
-                
-                // 【配色】我写的用雾霾蓝灰，他写的用丁香淡紫
                 const bgColor = isMy ? '#E9EEF2' : '#F1EFF7'; 
                 const alignSelf = isMy ? 'flex-end' : 'flex-start';
-                
-                // 精致小边框
                 const borderStyle = isMy ? 'border-left: 4px solid #90A4AE' : 'border-left: 4px solid #D1C4E9';
-                // 保持手写便签的随机轻微倾斜
                 const randomRotate = (Math.random() * 2 - 1).toFixed(1); 
 
                 const card = document.createElement('div');
@@ -172,16 +166,19 @@
             });
 
             boardWall.scrollTop = boardWall.scrollHeight;
-        });
+        }).catch(err => console.log("渲染数据获取失败"));
     }
 
-    // 6. 我手写贴上去的逻辑
+    // 4. 我手写贴上去的逻辑
     function handleSend() {
         if (!inputField || typeof localforage === 'undefined') return;
         const text = inputField.value.trim();
         if (!text) return;
 
-        localforage.getItem(STORAGE_KEY).then(async (messages) => {
+        // 🌟【动态获取键】
+        const REAL_STORAGE_KEY = typeof getStorageKey === 'function' ? getStorageKey('async_board_messages') : 'async_board_messages';
+
+        localforage.getItem(REAL_STORAGE_KEY).then(async (messages) => {
             messages = messages || [];
             
             messages.push({
@@ -191,9 +188,9 @@
                 time: new Date().toLocaleString('zh-CN', { hour12: false })
             });
 
-            await localforage.setItem(STORAGE_KEY, messages);
+            await localforage.setItem(REAL_STORAGE_KEY, messages);
             inputField.value = ''; 
             renderBoard(); 
-        });
+        }).catch(err => console.log("发送保存失败"));
     }
 })();
