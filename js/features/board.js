@@ -3,7 +3,7 @@ const STORAGE_KEY = 'async_board_messages';
 const TIME_KEY = 'async_board_last_partner_time';
 
 // ⏳ 对方多长时间来贴一次长便签：默认 12 小时（测试时你可以随时改为 5000 也就是 5 秒）
-const PARTNER_LEAVE_INTERVAL = 5 * 1000; 
+const PARTNER_LEAVE_INTERVAL = 20 * 60 * 1000; 
 
 // 🌟【终极强制开启】：直接挂载到 window 全局，任何地方都能直接点开！
 window.forceOpenBoard = function() {
@@ -87,7 +87,7 @@ function checkAndGeneratePartnerMsg() {
             }
 
             const count = Math.floor(Math.random() * 3) + 3; 
-            const connectors = ['…… ', '。 ', '， ', '……还有，', '……？ ', ' 或者是 ', '。也是，', '、', '……其实，'];
+            const connectors = ['……', '。', '，',  '？', '！'];
             
             let combinedPieces = [];
             for (let i = 0; i < count; i++) {
