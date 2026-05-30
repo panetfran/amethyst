@@ -1,10 +1,10 @@
 (function() {
     // 1. 基础缓存配置
     const STORAGE_KEY = 'async_board_messages';
-    const TIME_KEY = 'async_board_last_partner_time';
+    const TIME_KEY = 'async_board_last_check_time'; // 记住上一次判定时间
     
-    // 对方多长时间来贴一次长便签：默认 12 小时
-    const PARTNER_LEAVE_INTERVAL = 5 * 1000; 
+    // 【测试专用】：先改成 5 秒钟判定一次
+    const HALF_HOUR = 5 * 1000; 
 
     // 获取 HTML 元素
     const toggleBtn = document.getElementById('board-toggle-btn');
@@ -24,7 +24,7 @@
         });
     }
 
-    // 初始化时自动在后台检查一次
+    // 网页一加载，后台自动检查一次
     checkAndGeneratePartnerMsg();
 
     // 3. 打开与关闭
@@ -32,7 +32,7 @@
         if (modal) {
             modal.style.display = 'flex';
             renderBoard();
-            checkAndGeneratePartnerMsg(); 
+            checkAndGeneratePartnerMsg(); // 打开时再次检查
         }
     }
 
@@ -40,61 +40,85 @@
         if (modal) modal.style.display = 'none';
     }
 
-    // 4. 核心：【拼接机制】把 3-5 张字卡加上随机连接符拼成一张纸条
+    // 4. 核心：对方异步拼接纸条逻辑
     function checkAndGeneratePartnerMsg() {
         let messages = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-        let lastTime = parseInt(localStorage.getItem(TIME_KEY) || '0');
+        let lastCheckTime = parseInt(localStorage.getItem(TIME_KEY) || '0');
         let now = Date.now();
 
-        if (now - lastTime > PARTNER_LEAVE_INTERVAL) {
-            // 获取你的自定义回复字卡池
-            const pool = window.customReplies || [];
-            if (pool.length === 0) return; 
+        // 如果距离上一次判定已经过了 5 秒
+        if (now - lastCheckTime > HALF_HOUR) {
+            
+            // 锁定这次判定的时间戳
+            localStorage.setItem(TIME_KEY, now.toString());
 
-            // 确定这次抽取几张字卡（3 到 5 张）
+            // 测试阶段：100% 触发概率，先不拼运气
+            const isLucky = true; 
+
+            if (!isLucky) return;
+
+            // 🔍 核心排查：多渠道尝试获取你的字卡数据
+            let pool = [];
+            
+            if (window.customReplies && window.customReplies.length > 0) {
+                pool = window.customReplies;
+            } else if (window.replyLibrary && window.replyLibrary.length > 0) {
+                pool = window.replyLibrary;
+            } else if (localStorage.getItem('customStatuses')) {
+                pool = JSON.parse(localStorage.getItem('customStatuses') || '[]');
+            } else if (localStorage.getItem('customReplies')) {
+                pool = JSON.parse(localStorage.getItem('customReplies') || '[]');
+            }
+
+            // 🚨 终极防空兜底：如果上面的全局变量系统都没抓到，我们写几个死数据测试
+            if (!pool || pool.length === 0) {
+                pool = [
+                    "今天的天气很好……",
+                    "你在听吗？",
+                    "我一直在想一件事……",
+                    "有些话想留在这里。",
+                    "起风了……"
+                ];
+            }
+
+            // 确定抽取几张字卡（3 到 5 张）
             const count = Math.floor(Math.random() * 3) + 3; 
-            
-            // 定义在字卡中间随机加入的连接符/碎碎念语气词
-            const connectors = ['……', '。', '，', '！', '……？ ', '？'];
-            
+            const connectors = ['…… ', '。 ', '， ', '……还有，', '……？ ', ' 或者是 ', '。也是，', '、', '……其实，'];
             let combinedPieces = [];
             
             for (let i = 0; i < count; i++) {
-                // 随机捞一张字卡
                 let cardText = pool[Math.floor(Math.random() * pool.length)];
                 combinedPieces.push(cardText);
             }
 
-            // 【关键核心】：把捞出来的几张字卡，中间随机塞入不同的符号拼起来
+            // 拼接字卡
             let finalSentence = "";
             for(let i = 0; i < combinedPieces.length; i++) {
                 finalSentence += combinedPieces[i];
-                // 如果不是最后一张，就在中间加个随机连接符
                 if(i < combinedPieces.length - 1) {
                     const randomConnector = connectors[Math.floor(Math.random() * connectors.length)];
                     finalSentence += randomConnector;
                 }
             }
 
-            // 最终只作为「一条」完整的长便签塞进历史记录
+            // 塞进数组
             messages.push({
                 id: 'p_' + Date.now(),
                 role: 'partner',
-                content: finalSentence, // 拼好的一长串话
+                content: finalSentence,
                 time: new Date().toLocaleString('zh-CN', { hour12: false })
             });
 
-            // 保存
             localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
-            localStorage.setItem(TIME_KEY, now.toString());
 
+            // 如果当前留言板正开着，立刻刷新视图
             if (modal && modal.style.display === 'flex') {
                 renderBoard();
             }
         }
     }
 
-    // 5. 渲染便签墙（这里包含你定好的雾霾蓝灰与丁香淡紫高级色）
+    // 5. 渲染便签墙（灰蓝 & 淡紫）
     function renderBoard() {
         if (!boardWall) return;
         let messages = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
@@ -108,13 +132,9 @@
         messages.forEach(msg => {
             const isMy = msg.role === 'my';
             
-            // 【配色】我写的用雾霾蓝灰，他写的用丁香淡紫
             const bgColor = isMy ? '#E9EEF2' : '#F1EFF7'; 
             const alignSelf = isMy ? 'flex-end' : 'flex-start';
-            
-            // 精致小边框
             const borderStyle = isMy ? 'border-left: 4px solid #90A4AE' : 'border-left: 4px solid #D1C4E9';
-            // 保持手写便签的随机轻微倾斜
             const randomRotate = (Math.random() * 2 - 1).toFixed(1); 
 
             const card = document.createElement('div');
@@ -136,11 +156,10 @@
             boardWall.appendChild(card);
         });
 
-        // 自动拉到最底下
         boardWall.scrollTop = boardWall.scrollHeight;
     }
 
-    // 6. 我手写贴上去的逻辑
+    // 6. 我写便签发送
     function handleSend() {
         if (!inputField) return;
         const text = inputField.value.trim();
