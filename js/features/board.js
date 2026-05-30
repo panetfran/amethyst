@@ -3,19 +3,36 @@
     const STORAGE_KEY = typeof getStorageKey === 'function' ? getStorageKey('async_board_messages') : 'async_board_messages';
     const TIME_KEY = typeof getStorageKey === 'function' ? getStorageKey('async_board_last_check_time') : 'async_board_last_check_time';
     
-    // 【测试专用】：保持 5 秒判定一次，测试通过后你可以随时改回 30 * 60 * 1000（30分钟）
+    // 【测试专用】：保持 5 秒判定一次，测试通过后你可以改回 30 * 60 * 1000（30分钟）
     const HALF_HOUR = 5 * 1000; 
 
     // 获取 HTML 元素
-    const toggleBtn = document.getElementById('board-toggle-btn');
     const modal = document.getElementById('board-modal');
     const closeBtn = document.getElementById('board-close-btn');
     const sendBtn = document.getElementById('board-send-btn');
     const inputField = document.getElementById('board-input');
     const boardWall = document.getElementById('board-wall');
 
-    // 2. 事件绑定
-    if (toggleBtn) toggleBtn.addEventListener('click', openBoard);
+    // 2. 强力动态全局事件监听（彻底解决因为列表异步渲染导致的点击不弹窗问题）
+    document.addEventListener('click', async function(e) {
+        // 寻找点击的目标是不是我们的“留白”菜单项
+        const targetBtn = e.target.closest('#board-toggle-btn');
+        if (targetBtn) {
+            e.preventDefault();
+            e.stopPropagation(); // 阻止事件冒泡，防止被高级功能弹窗的关闭逻辑影响
+            
+            // 自动帮你在背后把高级功能面板隐去，防止层级冲突卡死
+            const advModal = document.getElementById('advanced-modal');
+            if (advModal) {
+                advModal.style.display = 'none';
+            }
+            
+            // 呼出留白便签墙
+            await openBoard();
+        }
+    });
+
+    // 绑定内部关闭和发送按钮
     if (closeBtn) closeBtn.addEventListener('click', closeBoard);
     if (sendBtn) sendBtn.addEventListener('click', handleSend);
     if (inputField) {
@@ -24,15 +41,17 @@
         });
     }
 
-    // 网页一加载，异步后台检查一次
+    // 网页一加载，过 1 秒钟在后台偷偷运行一次判定，实现“离线堆积”
     setTimeout(checkAndGeneratePartnerMsg, 1000);
 
-    // 3. 打开与关闭
+    // 3. 打开与关闭函数
     async function openBoard() {
         if (modal) {
             modal.style.display = 'flex';
-            await renderBoard();
-            await checkAndGeneratePartnerMsg(); // 打开时再次触发判定
+            await renderBoard(); // 刷新渲染列表
+            await checkAndGeneratePartnerMsg(); // 每次打开顺便判定一下
+        } else {
+            console.error("【留白】未在网页底部找到 id 为 board-modal 的弹窗结构，请确认 HTML 贴的位置。");
         }
     }
 
@@ -40,38 +59,38 @@
         if (modal) modal.style.display = 'none';
     }
 
-    // 4. 核心：【异步对接数据库】的拼接纸条逻辑
+    // 4. 核心：【异步对接数据库】拼接纸条
     async function checkAndGeneratePartnerMsg() {
         if (typeof localforage === 'undefined') {
-            console.error("【留白】未检测到 localforage 库，无法读取字卡。");
+            console.error("【留白】当前环境未检测到 localforage 库。");
             return;
         }
 
-        // 异步读取留言板历史纪录与上一次判定时间
+        // 异步读取留言记录和上一次判定时间
         let messages = await localforage.getItem(STORAGE_KEY) || [];
         let lastCheckTime = parseInt(await localforage.getItem(TIME_KEY) || '0');
         let now = Date.now();
 
-        // 判定时间间隔（测试期间为 5 秒）
+        // 时间判定规则
         if (now - lastCheckTime > HALF_HOUR) {
             
-            // 锁定这次判定的时间戳
+            // 立刻更新锁，保证不会因为重复刷新而疯狂刷屏
             await localforage.setItem(TIME_KEY, now.toString());
 
-            // 测试阶段：100% 触发概率，不拼运气（等测试成功，把这里改成 Math.random() < 0.5 即可）
+            // 测试阶段：100% 触发概率（等5秒测试成功后，再改成 Math.random() < 0.5）
             const isLucky = true; 
             if (!isLucky) return;
 
-            // 🔍 从你系统的 localforage 中提取自定义回复库
+            // 从你系统的数据库中获取自定义回复库的数据键名
             const REPLIES_KEY = typeof getStorageKey === 'function' ? getStorageKey('customReplies') : 'customReplies';
             let pool = await localforage.getItem(REPLIES_KEY) || [];
 
-            // 🚨 如果提取出来的是对象而不是数组，进行格式兼容拆分
+            // 格式兼容：如果拿出来的是对象字典，转成数组
             if (pool && !Array.isArray(pool) && typeof pool === 'object') {
                 pool = Object.values(pool);
             }
 
-            // 终极防空兜底（如果用户还没在回复库写过任何话，用这个测试）
+            // 终极防空兜底（防止你的回复库现在没有内容）
             if (!pool || pool.length === 0) {
                 pool = ["今天的天气很好……", "你在听吗？", "我一直在想一件事……", "有些话想留在这里。", "起风了……"];
             }
@@ -83,14 +102,14 @@
             
             for (let i = 0; i < count; i++) {
                 let cardText = pool[Math.floor(Math.random() * pool.length)];
-                // 确保捞出来的是文本
+                // 数据深层提取兼容
                 if (cardText && typeof cardText === 'object' && cardText.content) cardText = cardText.content;
                 if (cardText) combinedPieces.push(cardText);
             }
 
             if (combinedPieces.length === 0) return;
 
-            // 开始将多张字卡融合成一段碎碎念
+            // 开始融合成一段带有呼吸感的碎碎念
             let finalSentence = "";
             for(let i = 0; i < combinedPieces.length; i++) {
                 finalSentence += combinedPieces[i];
@@ -100,7 +119,7 @@
                 }
             }
 
-            // 生成对方的淡紫色长便签
+            // 生成对方的淡紫色便签
             messages.push({
                 id: 'p_' + Date.now(),
                 role: 'partner',
@@ -108,17 +127,17 @@
                 time: new Date().toLocaleString('zh-CN', { hour12: false })
             });
 
-            // 异步写入数据库
+            // 存入异步数据库
             await localforage.setItem(STORAGE_KEY, messages);
 
-            // 如果当前留言板正开着，立刻刷新视图
+            // 如果当前正好开着墙，就刷新界面
             if (modal && modal.style.display === 'flex') {
                 await renderBoard();
             }
         }
     }
 
-    // 5. 渲染便签墙（高质感：灰蓝 & 淡紫）
+    // 5. 渲染墙壁面（雾霾蓝灰 & 丁香淡紫）
     async function renderBoard() {
         if (!boardWall) return;
         let messages = [];
@@ -128,17 +147,18 @@
         boardWall.innerHTML = '';
 
         if (messages.length === 0) {
-            boardWall.innerHTML = `<div style="text-align:center;color:#aaa;margin-top:60px;font-size:12px;">墙上空空如也，留下一张便签吧。</div>`;
+            boardWall.innerHTML = `<div style="text-align:center;color:#aaa;margin-top:60px;font-size:12px;font-family: sans-serif;">墙上空空如也，留下一张便签吧。</div>`;
             return;
         }
 
         messages.forEach(msg => {
             const isMy = msg.role === 'my';
             
+            // 调配的高级色彩：我写的用雾霾蓝灰，他写的用浅丁香紫
             const bgColor = isMy ? '#E9EEF2' : '#F1EFF7'; 
             const alignSelf = isMy ? 'flex-end' : 'flex-start';
             const borderStyle = isMy ? 'border-left: 4px solid #90A4AE' : 'border-left: 4px solid #D1C4E9';
-            const randomRotate = (Math.random() * 2 - 1).toFixed(1); 
+            const randomRotate = (Math.random() * 2 - 1).toFixed(1); // 随机轻微旋转产生手账贴纸感
 
             const card = document.createElement('div');
             card.style.cssText = `
@@ -159,10 +179,11 @@
             boardWall.appendChild(card);
         });
 
+        // 永远把最新的话留在视线正中央
         boardWall.scrollTop = boardWall.scrollHeight;
     }
 
-    // 6. 我手写贴便签的发送逻辑
+    // 6. 我贴便签的逻辑
     async function handleSend() {
         if (!inputField) return;
         const text = inputField.value.trim();
