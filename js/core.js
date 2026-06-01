@@ -1509,8 +1509,35 @@ if (partnerPersonas && partnerPersonas.length > 0 && Math.random() < 0.3) {
                         }
                     });
 
+                                        // ======= 🌟 【已修改：1~3张字卡随机连缀逻辑】 =======
                     const replyPool = customReplies.filter(r => !disabledItems.has(r) && !disabledGroupItems.has(r));
-                    const replyText = replyPool[Math.floor(Math.random() * replyPool.length)];
+                    
+                    // 确定本次抽取的字卡张数（随机 1 到 3 张）
+                    const count = Math.min(replyPool.length, Math.floor(Math.random() * 3) + 1);
+                    
+                    // 带有梦呓感、断续碎碎念的聊天连接符
+                    const connectors = ['……', '。', '，', '！', '？'];
+                    
+                    let combinedPieces = [];
+                    if (replyPool.length > 0 && count > 0) {
+                        for (let k = 0; k < count; k++) {
+                            combinedPieces.push(replyPool[Math.floor(Math.random() * replyPool.length)]);
+                        }
+                    } else {
+                        combinedPieces.push("……");
+                    }
+
+                    // 将多张字卡融合成一句话
+                    let replyText = "";
+                    for (let k = 0; k < combinedPieces.length; k++) {
+                        replyText += combinedPieces[k];
+                        // 如果不是最后一张，在中间塞入随机连接符
+                        if (k < combinedPieces.length - 1) {
+                            const randomConnector = connectors[Math.floor(Math.random() * connectors.length)];
+                            replyText += randomConnector;
+                        }
+                    }
+                    // ===================================================
 
                     let disabledStickerItems = new Set();
                     try {
