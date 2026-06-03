@@ -1091,6 +1091,72 @@ actionsHTML += `<button class="meta-action-btn delete-btn" title="删除"><i cla
 
             container.appendChild(fragment);
 
+// ======== 🎨 【核心拦截：把刚刚塞进页面的暗号就地画成色块图】 ========
+        try {
+            // 自动抓取界面上刚刚画出来的所有聊天气泡框
+            const bubbles = container.querySelectorAll('.message-content, .msg-content, .text-content, [class*="content"]');
+            bubbles.forEach(bubble => {
+                if (bubble.textContent && bubble.textContent.includes('[SYS_PAINTING:')) {
+                    const match = bubble.textContent.match(/\[SYS_PAINTING:(\d+)\]\s*([\s\S]*)/);
+                    if (match) {
+                        const baseHue = parseInt(match[1]);
+                        const realText = match[2];
+
+                        // 如果这幅画已经画过了，直接跳过，防止无限重复绘制
+                        if (bubble.querySelector('canvas') || bubble.querySelector('img')) return;
+
+                        // 当场在后台用 Canvas 渲染一幅色彩斑斓的抽象图
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 280;
+                        canvas.height = 180;
+                        const ctx = canvas.getContext('2d');
+
+                        // 1. 铺底色（带一点点高级灰的随机背景色）
+                        ctx.fillStyle = `hsl(${baseHue + (Math.random()*40-20)}, ${Math.floor(Math.random()*20)+30}%, ${Math.floor(Math.random()*20)+75}%)`;
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                        // 2. 随机绘制 4 到 8 个打破常规的半透明几何与光晕色块
+                        const blockCount = Math.floor(Math.random() * 5) + 4;
+                        for (let i = 0; i < blockCount; i++) {
+                            const hue = baseHue + Math.floor(Math.random() * 60) - 30;
+                            const saturation = Math.floor(Math.random() * 40) + 40;
+                            const lightness = Math.floor(Math.random() * 40) + 30;
+                            const alpha = (Math.random() * 0.4) + 0.3;
+
+                            ctx.fillStyle = `hsla(${hue}, ${saturation}%, ${lightness}%, ${alpha})`;
+
+                            if (Math.random() < 0.6) {
+                                // 柔和的圆形/椭圆光晕色块
+                                ctx.beginPath();
+                                const radius = Math.floor(Math.random() * 50) + 25;
+                                const cx = Math.floor(Math.random() * canvas.width);
+                                const cy = Math.floor(Math.random() * canvas.height);
+                                ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+                                ctx.fill();
+                            } else {
+                                // 具有艺术构体感的矩形色块
+                                const w = Math.floor(Math.random() * 100) + 40;
+                                const h = Math.floor(Math.random() * 70) + 30;
+                                const x = Math.floor(Math.random() * (canvas.width - w));
+                                const y = Math.floor(Math.random() * (canvas.height - h));
+                                ctx.fillRect(x, y, w, h);
+                            }
+                        }
+
+                        // 3. 把导出的真正图片和原本的碎碎念文字，重新填进聊天气泡里
+                        const imgUrl = canvas.toDataURL('image/png');
+                        bubble.innerHTML = `
+                            <div style="margin-bottom:6px; font-size:13.5px; line-height:1.5; text-align:left;">${realText}</div>
+                            <img src="${imgUrl}" style="width:100%; max-width:260px; border-radius:8px; display:block; box-shadow:0 4px 12px rgba(0,0,0,0.06); margin-top:4px;" />
+                        `;
+                    }
+                }
+            });
+        } catch (e) {
+            console.error("画画渲染出错了:", e);
+        }
+        // ===================================================================
+                
             if (preserveScroll) {
                 const newScrollHeight = container.scrollHeight;
                 const delta = newScrollHeight - oldScrollHeight;
@@ -1512,103 +1578,42 @@ if (partnerPersonas && partnerPersonas.length > 0 && Math.random() < 0.3) {
                                         // ======= 🌟 【已修改：1~3张字卡随机连缀逻辑】 =======
                     const replyPool = customReplies.filter(r => !disabledItems.has(r) && !disabledGroupItems.has(r));
 
-                   // ======== 🎨 【终极修复版：自带渲染的动态色块作画】 ========
-                    // 目前是 1.0 (100% 触发) 方便测试
+                        
+                    // ======== 🎨 【画画彩蛋：发送暗号】 ========
+                    // 目前是 1.0 (100% 触发) 方便测试，测试满意后可以改回 0.03
                     if (Math.random() < 1.0) {
+                        const baseHue = [30, 140, 200, 240, 280, 320][Math.floor(Math.random() * 6)];
                         const openingTexts = [
-                            "（捕捉到了转瞬即逝的光影，为你画下来了……）",
-                            "（今天的情绪，变成了画布上的这些颜色……）",
-                            "（闭上眼的时候，脑海里浮现出这样的色彩……）",
-                            "（随手涂鸦了一幅色块，想分享给你看……）"
+                            "捕捉到了转瞬即逝的光影，为你画下来了……",
+                            "今天的情绪，变成了画布上的这些颜色……",
+                            "闭上眼的时候，脑海里浮现出这样的色彩……",
+                            "随手涂鸦了一幅色块，想分享给你看……"
                         ];
                         let introText = openingTexts[Math.floor(Math.random() * openingTexts.length)];
-
-                        // 1. 创建隐形画布
-                        const canvas = document.createElement('canvas');
-                        canvas.width = 300;
-                        canvas.height = 200;
-                        const ctx = canvas.getContext('2d');
-
-                        // 2. 随机生成主色调系统
-                        const baseHue = [30, 140, 200, 240, 280, 320][Math.floor(Math.random() * 6)];
                         
-                        // 3. 铺底色
-                        ctx.fillStyle = `hsl(${baseHue + (Math.random()*40-20)}, ${Math.floor(Math.random()*20)+30}%, ${Math.floor(Math.random()*20)+75}%)`;
-                        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                        // 4. 随机绘制色块
-                        const blockCount = Math.floor(Math.random() * 5) + 4;
-                        for (let i = 0; i < blockCount; i++) {
-                            const hue = baseHue + Math.floor(Math.random() * 60) - 30;
-                            const saturation = Math.floor(Math.random() * 40) + 40;
-                            const lightness = Math.floor(Math.random() * 40) + 30;
-                            const alpha = (Math.random() * 0.4) + 0.3;
-
-                            ctx.fillStyle = `hsla(${hue}, ${saturation}%, ${lightness}%, ${alpha})`;
-
-                            if (Math.random() < 0.6) {
-                                ctx.beginPath();
-                                const radius = Math.floor(Math.random() * 60) + 30;
-                                const cx = Math.floor(Math.random() * canvas.width);
-                                const cy = Math.floor(Math.random() * canvas.height);
-                                ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-                                ctx.fill();
-                            } else {
-                                const w = Math.floor(Math.random() * 120) + 40;
-                                const h = Math.floor(Math.random() * 80) + 30;
-                                const x = Math.floor(Math.random() * (canvas.width - w));
-                                const y = Math.floor(Math.random() * (canvas.height - h));
-                                ctx.fillRect(x, y, w, h);
-                            }
-                        }
-
-                        // 5. 渲染高光层
-                        ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
-                        ctx.fillRect(Math.random()*canvas.width, 0, Math.random()*50+20, canvas.height);
-
-                        // 6. 导出图片 (Base64)
-                        const drawingImageUrl = canvas.toDataURL('image/png');
-
-                        // 7. 🌟【强制就地生成 HTML】：把文本和图片揉在一起，做成系统一定认得的常规 content 文本
-                        const inlineHtml = `
-                            <div style="margin-bottom: 8px;">${introText}</div>
-                            <img src="${drawingImageUrl}" style="width: 100%; max-width: 260px; border-radius: 8px; display: block; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-top: 4px;" />
-                        `;
-
-                        // 8. 严格按照系统格式保存消息，确保时间戳和会话完美解析
+                        // 生成纯文本暗号：绝对不会产生 Invalid Date！
+                        const replyText = `[SYS_PAINTING:${baseHue}] ${introText}`;
+                        
+                        // 严格遵守原系统的普通消息格式
                         const partnerMsg = {
                             id: 'p_' + Date.now(),
                             role: 'partner',
-                            content: inlineHtml, // 🌟 文本和图片都以纯 HTML 字符串的形式存在这里
-                            time: new Date().toLocaleString('zh-CN', { hour12: false })
+                            content: replyText,
+                            timestamp: Date.now() // 对应你系统的真实时间戳字段 msg.timestamp
                         };
 
-                        // 9. 推入历史并保存
-                        currentSession.messages.push(partnerMsg);
+                        messages.push(partnerMsg); // 对应你系统全局的 messages 数组
                         await saveSessions();
+                        renderMessages();
+                        scrollToBottom();
 
-                        // 10. 🌟【关键修复】：先用原生方法渲染，然后立刻拦截把 HTML 渲染出来
-                        renderMessages(); 
-                        
-                        // 让浏览器强制把气泡里的文本作为真实的 HTML 和图片显示出来
-                        setTimeout(() => {
-                            const chatContainers = document.querySelectorAll('.message-content, .msg-content, [class*="content"]');
-                            if (chatContainers.length > 0) {
-                                const lastBubble = chatContainers[chatContainers.length - 1];
-                                if (lastBubble && lastBubble.textContent.includes('canvas')) {
-                                    lastBubble.innerHTML = inlineHtml;
-                                }
-                            }
-                            scrollToBottom();
-                        }, 50);
-
-                        // 11. 移除打字动画并解锁
+                        // 解锁输入框和状态
                         const activeTyping = document.querySelector('.typing-indicator-wrapper');
                         if (activeTyping) activeTyping.remove();
                         isReplying = false;
                         if (messageInput) messageInput.disabled = false;
 
-                        return; // 🎨 完美截断
+                        return; 
                     }
                     // =========================================================
                         
