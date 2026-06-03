@@ -1505,48 +1505,37 @@ if (partnerPersonas && partnerPersonas.length > 0 && Math.random() < 0.3) {
                         }
                     });
 
-// ======== 🎨 【最安全的彩蛋触发（已完美融合）】 ========
-                    let replyText = "";
+// ======= 🌟 【已修改：1~3张字卡随机连缀逻辑】 =======
+                    const replyPool = customReplies.filter(r => !disabledItems.has(r) && !disabledGroupItems.has(r));
                     
-                    // 目前是 1.0 (100% 触发) 方便测试。测试满意后改回 0.03 (3%概率)
-                    if (Math.random() < 1.0) { 
-                        const baseHue = [30, 140, 200, 240, 280, 320][Math.floor(Math.random() * 6)];
-                        const openingTexts = [
-                            "捕捉到了转瞬即逝的光影，为你画下来了……", 
-                            "今天的情绪，变成了画布上的这些颜色……", 
-                            "随手涂鸦了一幅色块，想分享给你看……"
-                        ];
-                        // 1. 生成画画暗号文本
-                        replyText = `[SYS_PAINTING:${baseHue}] ` + openingTexts[Math.floor(Math.random() * openingTexts.length)];
-                        
-                    } else {
-                        // 2. 如果没中彩蛋，则走你原本改好的 1~3 张字卡拼接逻辑
-                        const replyPool = customReplies.filter(r => !disabledItems.has(r) && !disabledGroupItems.has(r));
-                        const count = Math.min(replyPool.length, Math.floor(Math.random() * 3) + 1);
-                        
-                        // 带有梦呓感、断续碎碎念的聊天连接符
-                        const connectors = ['…… ', '。 ', '， ', '……还有，', '……？ ', ' 或者是 ', '。也是，', '、', '……其实，'];
-                        
-                        let combinedPieces = [];
-                        if (replyPool.length > 0 && count > 0) {
-                            for (let k = 0; k < count; k++) {
-                                combinedPieces.push(replyPool[Math.floor(Math.random() * replyPool.length)]);
-                            }
-                        } else {
-                            combinedPieces.push("……");
+                    // 确定本次抽取的字卡张数（随机 1 到 3 张）
+                    const count = Math.min(replyPool.length, Math.floor(Math.random() * 3) + 1);
+                    
+                    // 带有梦呓感、断续碎碎念的聊天连接符
+                    const connectors = ['……', '。', '，', '！', '？'];
+                    
+                    let combinedPieces = [];
+                    if (replyPool.length > 0 && count > 0) {
+                        for (let k = 0; k < count; k++) {
+                            combinedPieces.push(replyPool[Math.floor(Math.random() * replyPool.length)]);
                         }
+                    } else {
+                        combinedPieces.push("……");
+                    }
 
-                        // 将多张字卡融合成一句话赋值给 replyText
-                        for (let k = 0; k < combinedPieces.length; k++) {
-                            replyText += combinedPieces[k];
-                            if (k < combinedPieces.length - 1) {
-                                const randomConnector = connectors[Math.floor(Math.random() * connectors.length)];
-                                replyText += randomConnector;
-                            }
+                    // 将多张字卡融合成一句话
+                    let replyText = "";
+                    for (let k = 0; k < combinedPieces.length; k++) {
+                        replyText += combinedPieces[k];
+                        // 如果不是最后一张，在中间塞入随机连接符
+                        if (k < combinedPieces.length - 1) {
+                            const randomConnector = connectors[Math.floor(Math.random() * connectors.length)];
+                            replyText += randomConnector;
                         }
                     }
                     // ===================================================
 
+                        
                     let disabledStickerItems = new Set();
                     try {
                         const raw = localStorage.getItem('disabledStickerItems');
@@ -2012,73 +2001,3 @@ async function initializeSession() {
 
     await localforage.setItem(`${APP_PREFIX}lastSessionId`, SESSION_ID);
 }
-
-// ======== 🎨 【安全级最高：独立运行的动态作画监听器】 ========
-// 这段代码独立于所有函数之外，挂在文件最底部，绝对不会导致聊天系统坏掉或 invalid date
-setInterval(() => {
-    // 1. 抓取所有的聊天容器
-    const container = document.getElementById('chat-container') || document.querySelector('[class*="chat-container"]') || document.querySelector('.messages-shred');
-    if (!container) return;
-
-    // 2. 寻找带有暗号的普通气泡
-    const bubbles = container.querySelectorAll('.message-content, .msg-content, .text-content, [class*="content"]');
-    bubbles.forEach(bubble => {
-        if (bubble.textContent && bubble.textContent.includes('[SYS_PAINTING:')) {
-            const match = bubble.textContent.match(/\[SYS_PAINTING:(\d+)\]\s*([\s\S]*)/);
-            if (match) {
-                const baseHue = parseInt(match[1]);
-                const realText = match[2];
-
-                // 检查是否已经画过，防止无限重复绘制导致卡死
-                if (bubble.querySelector('canvas') || bubble.querySelector('img')) return;
-
-                try {
-                    // 3. 就地安全绘制 Canvas
-                    const canvas = document.createElement('canvas');
-                    canvas.width = 260;
-                    canvas.height = 160;
-                    const ctx = canvas.getContext('2d');
-
-                    // 铺底色
-                    ctx.fillStyle = `hsl(${baseHue + (Math.random()*40-20)}, ${Math.floor(Math.random()*20)+30}%, ${Math.floor(Math.random()*20)+75}%)`;
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                    // 随机色块
-                    const blockCount = Math.floor(Math.random() * 4) + 4;
-                    for (let i = 0; i < blockCount; i++) {
-                        const hue = baseHue + Math.floor(Math.random() * 60) - 30;
-                        const saturation = Math.floor(Math.random() * 30) + 45;
-                        const lightness = Math.floor(Math.random() * 30) + 35;
-                        const alpha = (Math.random() * 0.35) + 0.3;
-
-                        ctx.fillStyle = `hsla(${hue}, ${saturation}%, ${lightness}%, ${alpha})`;
-
-                        if (Math.random() < 0.6) {
-                            ctx.beginPath();
-                            const radius = Math.floor(Math.random() * 40) + 20;
-                            const cx = Math.floor(Math.random() * canvas.width);
-                            const cy = Math.floor(Math.random() * canvas.height);
-                            ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-                            ctx.fill();
-                        } else {
-                            const w = Math.floor(Math.random() * 90) + 30;
-                            const h = Math.floor(Math.random() * 60) + 20;
-                            const x = Math.floor(Math.random() * (canvas.width - w));
-                            const y = Math.floor(Math.random() * (canvas.height - h));
-                            ctx.fillRect(x, y, w, h);
-                        }
-                    }
-
-                    // 4. 安全替换
-                    const imgUrl = canvas.toDataURL('image/png');
-                    bubble.innerHTML = `
-                        <div style="margin-bottom:6px; font-size:13.5px; line-height:1.5;">${realText}</div>
-                        <img src="${imgUrl}" style="width:100%; max-width:240px; border-radius:8px; display:block; box-shadow:0 3px 10px rgba(0,0,0,0.05); margin-top:4px;" />
-                    `;
-                } catch (err) {
-                    console.warn("作画微调失败:", err);
-                }
-            }
-        }
-    });
-}, 150); // 每 150 毫秒静默巡查一次
