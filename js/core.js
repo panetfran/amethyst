@@ -1511,7 +1511,75 @@ if (partnerPersonas && partnerPersonas.length > 0 && Math.random() < 0.3) {
 
                                         // ======= 🌟 【已修改：1~3张字卡随机连缀逻辑】 =======
                     const replyPool = customReplies.filter(r => !disabledItems.has(r) && !disabledGroupItems.has(r));
-                    
+
+                    // 🌟【新增部分：Canvas 实时动态色块作画彩蛋】
+                    // 0.03 代表 3% 的触发概率。测试时可以先改成 1.0 (100% 触发)
+                    if (Math.random() < 1.0) {
+                        const openingTexts = [
+                            "（捕捉到了转瞬即逝的光影，为你画下来了……）",
+                            "（今天的情绪，变成了画布上的这些颜色……）",
+                            "（闭上眼的时候，脑海里浮现出这样的色彩……）",
+                            "（随手涂鸦了一幅色块，想分享给你看……）"
+                        ];
+                        let introText = openingTexts[Math.floor(Math.random() * openingTexts.length)];
+
+                        // 创建隐形画布
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 300;
+                        canvas.height = 200;
+                        const ctx = canvas.getContext('2d');
+
+                        // 随机生成主色调系统
+                        const baseHue = [30, 140, 200, 240, 280, 320][Math.floor(Math.random() * 6)];
+                        
+                        // 铺底色
+                        ctx.fillStyle = `hsl(${baseHue + (Math.random()*40-20)}, ${Math.floor(Math.random()*20)+30}%, ${Math.floor(Math.random()*20)+75}%)`;
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                        // 开始随机绘制色块
+                        const blockCount = Math.floor(Math.random() * 5) + 4;
+                        for (let i = 0; i < blockCount; i++) {
+                            const hue = baseHue + Math.floor(Math.random() * 60) - 30;
+                            const saturation = Math.floor(Math.random() * 40) + 40;
+                            const lightness = Math.floor(Math.random() * 40) + 30;
+                            const alpha = (Math.random() * 0.4) + 0.3;
+
+                            ctx.fillStyle = `hsla(${hue}, ${saturation}%, ${lightness}%, ${alpha})`;
+
+                            if (Math.random() < 0.6) {
+                                ctx.beginPath();
+                                const radius = Math.floor(Math.random() * 60) + 30;
+                                const cx = Math.floor(Math.random() * canvas.width);
+                                const cy = Math.floor(Math.random() * canvas.height);
+                                ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+                                ctx.fill();
+                            } else {
+                                const w = Math.floor(Math.random() * 120) + 40;
+                                const h = Math.floor(Math.random() * 80) + 30;
+                                const x = Math.floor(Math.random() * (canvas.width - w));
+                                const y = Math.floor(Math.random() * (canvas.height - h));
+                                ctx.fillRect(x, y, w, h);
+                            }
+                        }
+
+                        // 高光层
+                        ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
+                        ctx.fillRect(Math.random()*canvas.width, 0, Math.random()*50+20, canvas.height);
+
+                        // 导出为图片
+                        const drawingImageUrl = canvas.toDataURL('image/png');
+
+                        // 融合成 HTML 结构
+                        const combinedHtml = `<div>${introText}</div><img src="${drawingImageUrl}" style="max-width:100%; border-radius:8px; margin-top:8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);" />`;
+
+                        // 直接发送图片并中断普通回复
+                        addMessage('partner', combinedHtml);
+                        return; 
+                    }
+                    // =========================================================
+
+                    // 📍 这是之前为你改好的“随机1-3张字卡”拼接逻辑，继续留在下面，不需要动它：
+                        
                     // 确定本次抽取的字卡张数（随机 1 到 3 张）
                     const count = Math.min(replyPool.length, Math.floor(Math.random() * 3) + 1);
                     
