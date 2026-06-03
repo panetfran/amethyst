@@ -1512,8 +1512,8 @@ if (partnerPersonas && partnerPersonas.length > 0 && Math.random() < 0.3) {
                                         // ======= 🌟 【已修改：1~3张字卡随机连缀逻辑】 =======
                     const replyPool = customReplies.filter(r => !disabledItems.has(r) && !disabledGroupItems.has(r));
 
-                   // ======== 🎨 【完美修复版：画布实时动态色块作画彩蛋】 ========
-                    // 目前是 1.0 (100% 触发) 方便测试，测试满意后可以改回 0.03
+                   // ======== 🎨 【终极修复版：自带渲染的动态色块作画】 ========
+                    // 目前是 1.0 (100% 触发) 方便测试
                     if (Math.random() < 1.0) {
                         const openingTexts = [
                             "（捕捉到了转瞬即逝的光影，为你画下来了……）",
@@ -1566,31 +1566,49 @@ if (partnerPersonas && partnerPersonas.length > 0 && Math.random() < 0.3) {
                         ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
                         ctx.fillRect(Math.random()*canvas.width, 0, Math.random()*50+20, canvas.height);
 
-                        // 6. 导出图片
+                        // 6. 导出图片 (Base64)
                         const drawingImageUrl = canvas.toDataURL('image/png');
 
-                        // 7. 🌟【核心修复点】：严格遵循原系统的消息对象格式
+                        // 7. 🌟【强制就地生成 HTML】：把文本和图片揉在一起，做成系统一定认得的常规 content 文本
+                        const inlineHtml = `
+                            <div style="margin-bottom: 8px;">${introText}</div>
+                            <img src="${drawingImageUrl}" style="width: 100%; max-width: 260px; border-radius: 8px; display: block; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-top: 4px;" />
+                        `;
+
+                        // 8. 严格按照系统格式保存消息，确保时间戳和会话完美解析
                         const partnerMsg = {
                             id: 'p_' + Date.now(),
                             role: 'partner',
-                            content: introText,      // 话语规矩地放在文本区
-                            sticker: drawingImageUrl, // 导出的画作规矩地塞进图片/贴纸槽
-                            time: new Date().toLocaleString('zh-CN', { hour12: false }) // 修复 Invalid Date 报错
+                            content: inlineHtml, // 🌟 文本和图片都以纯 HTML 字符串的形式存在这里
+                            time: new Date().toLocaleString('zh-CN', { hour12: false })
                         };
 
-                        // 8. 塞进当前的会话并保存、渲染
+                        // 9. 推入历史并保存
                         currentSession.messages.push(partnerMsg);
                         await saveSessions();
-                        renderMessages();
-                        scrollToBottom();
 
-                        // 9. 移除打字动画并解锁输入框
+                        // 10. 🌟【关键修复】：先用原生方法渲染，然后立刻拦截把 HTML 渲染出来
+                        renderMessages(); 
+                        
+                        // 让浏览器强制把气泡里的文本作为真实的 HTML 和图片显示出来
+                        setTimeout(() => {
+                            const chatContainers = document.querySelectorAll('.message-content, .msg-content, [class*="content"]');
+                            if (chatContainers.length > 0) {
+                                const lastBubble = chatContainers[chatContainers.length - 1];
+                                if (lastBubble && lastBubble.textContent.includes('canvas')) {
+                                    lastBubble.innerHTML = inlineHtml;
+                                }
+                            }
+                            scrollToBottom();
+                        }, 50);
+
+                        // 11. 移除打字动画并解锁
                         const activeTyping = document.querySelector('.typing-indicator-wrapper');
                         if (activeTyping) activeTyping.remove();
                         isReplying = false;
                         if (messageInput) messageInput.disabled = false;
 
-                        return; // 🎨 大功告成，成功截断
+                        return; // 🎨 完美截断
                     }
                     // =========================================================
                         
