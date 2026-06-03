@@ -1512,8 +1512,8 @@ if (partnerPersonas && partnerPersonas.length > 0 && Math.random() < 0.3) {
                                         // ======= 🌟 【已修改：1~3张字卡随机连缀逻辑】 =======
                     const replyPool = customReplies.filter(r => !disabledItems.has(r) && !disabledGroupItems.has(r));
 
-                    // 🌟【新增部分：Canvas 实时动态色块作画彩蛋】
-                    // 0.03 代表 3% 的触发概率。测试时可以先改成 1.0 (100% 触发)
+                   // ======== 🎨 【完美修复版：画布实时动态色块作画彩蛋】 ========
+                    // 目前是 1.0 (100% 触发) 方便测试，测试满意后可以改回 0.03
                     if (Math.random() < 1.0) {
                         const openingTexts = [
                             "（捕捉到了转瞬即逝的光影，为你画下来了……）",
@@ -1523,20 +1523,20 @@ if (partnerPersonas && partnerPersonas.length > 0 && Math.random() < 0.3) {
                         ];
                         let introText = openingTexts[Math.floor(Math.random() * openingTexts.length)];
 
-                        // 创建隐形画布
+                        // 1. 创建隐形画布
                         const canvas = document.createElement('canvas');
                         canvas.width = 300;
                         canvas.height = 200;
                         const ctx = canvas.getContext('2d');
 
-                        // 随机生成主色调系统
+                        // 2. 随机生成主色调系统
                         const baseHue = [30, 140, 200, 240, 280, 320][Math.floor(Math.random() * 6)];
                         
-                        // 铺底色
+                        // 3. 铺底色
                         ctx.fillStyle = `hsl(${baseHue + (Math.random()*40-20)}, ${Math.floor(Math.random()*20)+30}%, ${Math.floor(Math.random()*20)+75}%)`;
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                        // 开始随机绘制色块
+                        // 4. 随机绘制色块
                         const blockCount = Math.floor(Math.random() * 5) + 4;
                         for (let i = 0; i < blockCount; i++) {
                             const hue = baseHue + Math.floor(Math.random() * 60) - 30;
@@ -1562,23 +1562,37 @@ if (partnerPersonas && partnerPersonas.length > 0 && Math.random() < 0.3) {
                             }
                         }
 
-                        // 高光层
+                        // 5. 渲染高光层
                         ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
                         ctx.fillRect(Math.random()*canvas.width, 0, Math.random()*50+20, canvas.height);
 
-                        // 导出为图片
+                        // 6. 导出图片
                         const drawingImageUrl = canvas.toDataURL('image/png');
 
-                        // 融合成 HTML 结构
-                        const combinedHtml = `<div>${introText}</div><img src="${drawingImageUrl}" style="max-width:100%; border-radius:8px; margin-top:8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);" />`;
+                        // 7. 🌟【核心修复点】：严格遵循原系统的消息对象格式
+                        const partnerMsg = {
+                            id: 'p_' + Date.now(),
+                            role: 'partner',
+                            content: introText,      // 话语规矩地放在文本区
+                            sticker: drawingImageUrl, // 导出的画作规矩地塞进图片/贴纸槽
+                            time: new Date().toLocaleString('zh-CN', { hour12: false }) // 修复 Invalid Date 报错
+                        };
 
-                        // 直接发送图片并中断普通回复
-                        addMessage('partner', combinedHtml);
-                        return; 
+                        // 8. 塞进当前的会话并保存、渲染
+                        currentSession.messages.push(partnerMsg);
+                        await saveSessions();
+                        renderMessages();
+                        scrollToBottom();
+
+                        // 9. 移除打字动画并解锁输入框
+                        const activeTyping = document.querySelector('.typing-indicator-wrapper');
+                        if (activeTyping) activeTyping.remove();
+                        isReplying = false;
+                        if (messageInput) messageInput.disabled = false;
+
+                        return; // 🎨 大功告成，成功截断
                     }
                     // =========================================================
-
-                    // 📍 这是之前为你改好的“随机1-3张字卡”拼接逻辑，继续留在下面，不需要动它：
                         
                     // 确定本次抽取的字卡张数（随机 1 到 3 张）
                     const count = Math.min(replyPool.length, Math.floor(Math.random() * 3) + 1);
