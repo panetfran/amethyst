@@ -1516,7 +1516,7 @@ if (partnerPersonas && partnerPersonas.length > 0 && Math.random() < 0.3) {
                     const count = Math.min(replyPool.length, Math.floor(Math.random() * 3) + 1);
                     
                     // 带有梦呓感、断续碎碎念的聊天连接符
-                    const connectors = ['……', '。', '，', '！', '？'];
+                    const connectors = ['……', '。', '，', '？'];
                     
                     let combinedPieces = [];
                     if (replyPool.length > 0 && count > 0) {
