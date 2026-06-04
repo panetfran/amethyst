@@ -87,7 +87,7 @@ function checkAndGeneratePartnerMsg() {
             }
 
             const count = Math.floor(Math.random() * 3) + 3; 
-            const connectors = ['……', '。', '，',  '？', '！'];
+            const connectors = ['……', '。', '，',  '？'];
             
             let combinedPieces = [];
             for (let i = 0; i < count; i++) {
