@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>有限图形通信系统 · 增强压缩版</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #f3f2f0;
+      --card: #ffffff;
+      --ink: #1c1c1e;
+      --ink-soft: #6c6c70;
+      --ink-faint: #a6a6aa;
+      --line: #ececec;
+      --shadow: 0 12px 34px rgba(0, 0, 0, 0.06), 0 3px 10px rgba(0, 0, 0, 0.035);
+      --font-ui: "Outfit", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      --font-mono: "JetBrains Mono", ui-monospace, monospace;
+      --safe-b: env(safe-area-inset-bottom, 0px);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      color: var(--ink);
+      font-family: var(--font-ui);
+      -webkit-font-smoothing: antialiased;
+      background:
+        radial-gradient(1100px 700px at 50% -8%, #ffffff, transparent 70%),
+        var(--bg);
+    }
+
+    canvas {
+      display: block;
+      position: relative;
+      z-index: 1;
+      animation: rise 0.55s cubic-bezier(.2, .7, .2, 1) both;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: scale(0.99);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes floatIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes floatUp {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(14px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+
+    @keyframes fade {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .panel,
+    .readout {
+      position: fixed;
+      z-index: 3;
+      background: var(--card);
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      box-shadow: var(--shadow);
+    }
+
+    .panel {
+      left: 22px;
+      top: 22px;
+      width: 330px;
+      border-radius: 26px;
+      padding: 22px 22px 18px;
+      font-size: 13.5px;
+      line-height: 1.55;
+      animation: floatIn 0.6s cubic-bezier(.2, .7, .2, 1) both;
+    }
+
+    .phead {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .panel h3 {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+    }
+
+    .title-accent {
+      margin-top: 9px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .title-accent .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--ink);
+    }
+
+    .title-accent .bar {
+      height: 1.5px;
+      width: 46px;
+      background: var(--ink);
+      border-radius: 2px;
+    }
+
+    .tagline {
+      margin: 10px 0 2px;
+      color: var(--ink-soft);
+      font-size: 12.5px;
+      font-weight: 300;
+    }
+
+    .legend-toggle {
+      display: none;
+      flex: 0 0 auto;
+      padding: 7px 13px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fafafa;
+      color: var(--ink-soft);
+      font-family: var(--font-ui);
+      font-size: 12.5px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .legend-toggle:active {
+      background: #f0f0f0;
+    }
+
+    .legend-title {
+      margin: 18px 0 9px;
+      font-size: 10.5px;
+      font-weight: 500;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .legend-title::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--line);
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      margin: 6px 0;
+      color: var(--ink-soft);
+      font-weight: 300;
+    }
+
+    .swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.05), 0 1px 4px rgba(0,0,0,0.14);
+    }
+
+    .time-note {
+      color: var(--ink-soft);
+      font-size: 12.5px;
+      font-weight: 300;
+      line-height: 1.85;
+    }
+
+    .time-note b {
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .actions {
+      margin-top: 18px;
+    }
+
+    button.gen {
+      width: 100%;
+      padding: 13px 14px;
+      border-radius: 999px;
+      border: none;
+      background: var(--ink);
+      color: #fff;
+      cursor: pointer;
+      font-family: var(--font-ui);
+      font-size: 14.5px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    button.gen:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 26px rgba(0, 0, 0, 0.24);
+      background: #000;
+    }
+
+    button.gen:active {
+      transform: translateY(0);
+    }
+
+    .readout {
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: calc(18px + var(--safe-b));
+      width: calc(100% - 44px);
+      max-width: 980px;
+      border-radius: 24px;
+      padding: 16px 22px;
+      font-size: 15px;
+      animation: floatUp 0.6s cubic-bezier(.2, .7, .2, 1) 0.07s both;
+      cursor: pointer;
+      max-height: 24vh;
+      overflow: hidden;
+      transition: max-height 0.25s ease, padding 0.25s ease;
+    }
+
+    .readout.expanded {
+      max-height: 46vh;
+      overflow-y: auto;
+    }
+
+    .main-line {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .main-meaning {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--ink);
+      flex: 0 0 auto;
+      letter-spacing: 0.2px;
+    }
+
+    .main-emotion,
+    .main-time {
+      font-size: 13px;
+      color: var(--ink-soft);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 300;
+    }
+
+    .main-emotion {
+      max-width: 38%;
+    }
+
+    .main-time {
+      max-width: 28%;
+    }
+
+    .meta-line {
+      margin-top: 9px;
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .meta-line span {
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #f4f4f4;
+      color: var(--ink-soft);
+      font-size: 12px;
+      font-weight: 300;
+      white-space: nowrap;
+    }
+
+    .interpret-line {
+      margin-top: 9px;
+      color: var(--ink-soft);
+      font-size: 13px;
+      line-height: 1.55;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      font-weight: 300;
+    }
+
+    .readout.expanded .interpret-line {
+      display: block;
+    }
+
+    .chip {
+      display: inline-block;
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      vertical-align: -1px;
+      margin-right: 8px;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.18);
+    }
+
+    .hex {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--ink-faint);
+      margin-left: 7px;
+    }
+
+    @media (max-width: 760px) {
+      .panel {
+        left: 14px;
+        right: 14px;
+        top: 14px;
+        width: auto;
+        max-width: none;
+        padding: 16px 18px 14px;
+        border-radius: 22px;
+      }
+
+      .legend-toggle {
+        display: inline-block;
+      }
+
+      .panel.collapsed .legend {
+        display: none;
+      }
+
+      .legend {
+        animation: fade 0.3s ease both;
+      }
+
+      .actions {
+        margin-top: 14px;
+      }
+
+      .tagline {
+        display: none;
+      }
+
+      .readout {
+        bottom: calc(14px + var(--safe-b));
+        width: calc(100% - 28px);
+        padding: 13px 16px;
+        border-radius: 20px;
+        max-height: 22vh;
+      }
+
+      .readout.expanded {
+        max-height: 44vh;
+      }
+
+      .main-line {
+        gap: 8px;
+      }
+
+      .main-meaning {
+        font-size: 16px;
+      }
+
+      .main-emotion,
+      .main-time {
+        font-size: 12px;
+      }
+
+      .main-emotion {
+        max-width: 34%;
+      }
+
+      .main-time {
+        max-width: 24%;
+      }
+
+      .meta-line {
+        gap: 5px;
+        margin-top: 7px;
+      }
+
+      .meta-line span {
+        font-size: 11.5px;
+        padding: 3px 7px;
+      }
+
+      .interpret-line {
+        font-size: 12px;
+        -webkit-line-clamp: 1;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="art"></canvas>
+
+  <div class="panel collapsed" id="panel">
+    <div class="phead">
+      <div>
+        <h3>有限图形通信系统</h3>
+        <div class="title-accent">
+          <span class="dot"></span>
+          <span class="bar"></span>
+          <span class="dot"></span>
+        </div>
+        <div class="tagline">图形说「什么」，颜色说「怎么说」，线型说「什么时候」。</div>
+      </div>
+
+      <button class="legend-toggle" id="legendToggle">图例</button>
+    </div>
+
+    <div class="legend" id="legend">
+      <div class="legend-title">情绪 · 颜色</div>
+      <div class="row"><span class="swatch" style="background:#111111"></span>黑色 · 中性 / 陈述</div>
+      <div class="row"><span class="swatch" style="background:#4A90E2"></span>蓝色 · 平静 / 观察 / 等待</div>
+      <div class="row"><span class="swatch" style="background:#2E9B4D"></span>绿色 · 接受 / 安全 / 正面</div>
+      <div class="row"><span class="swatch" style="background:#D4A017"></span>黄色 · 注意 / 好奇 / 思考</div>
+      <div class="row"><span class="swatch" style="background:#E67E22"></span>橙色 · 想要 / 主动 / 靠近</div>
+      <div class="row"><span class="swatch" style="background:#D64545"></span>红色 · 强烈 / 紧急 / 拒绝</div>
+      <div class="row"><span class="swatch" style="background:#9B59B6"></span>紫色 · 喜欢 / 亲近 / 特殊情感</div>
+      <div class="row"><span class="swatch" style="background:#7F8C8D"></span>灰色 · 不确定 / 疲惫 / 模糊</div>
+
+      <div class="legend-title">时间 · 线型</div>
+      <div class="time-note">
+        <b>实线</b> 现在　<b>虚线</b> 将来 / 打算<br>
+        <b>双线</b> 过去 / 已发生　<b>断线</b> 未知 / 中断
+      </div>
+
+      <div class="legend-title">附加层</div>
+      <div class="time-note">
+        <b>粗细</b> 强度　<b>远近</b> 抵达难度<br>
+        <b>透明</b> 确定度　<b>淡影</b> 回声 / 反复<br>
+        <b>阻隔线</b> 阻力　<b>双框</b> 空间更稳定
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="gen" onclick="generate()">生成一条信息</button>
+    </div>
+  </div>
+
+  <div class="readout" id="readout" title="点击展开 / 收起解释">
+    <div class="main-line">
+      <span class="main-meaning" id="meaning">—</span>
+      <span class="main-emotion" id="emotionText">—</span>
+      <span class="main-time" id="timeText">—</span>
+    </div>
+
+    <div class="meta-line">
+      <span id="strengthText">—</span>
+      <span id="certaintyText">—</span>
+      <span id="distanceText">—</span>
+      <span id="resistanceText">—</span>
+      <span id="echoText">—</span>
+    </div>
+
+    <div class="interpret-line" id="interpretText">—</div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("art");
+    const ctx = canvas.getContext("2d");
+
+    const panel = document.getElementById("panel");
+    const legendToggle = document.getElementById("legendToggle");
+    const readout = document.getElementById("readout");
+
+    const meaningEl = document.getElementById("meaning");
+    const emotionTextEl = document.getElementById("emotionText");
+    const timeTextEl = document.getElementById("timeText");
+    const strengthTextEl = document.getElementById("strengthText");
+    const certaintyTextEl = document.getElementById("certaintyText");
+    const distanceTextEl = document.getElementById("distanceText");
+    const resistanceTextEl = document.getElementById("resistanceText");
+    const echoTextEl = document.getElementById("echoText");
+    const interpretTextEl = document.getElementById("interpretText");
+
+    const INK = "#1c1c1e";
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    function pick(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function chance(p) {
+      return Math.random() < p;
+    }
+
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function withAlpha(hex, alpha) {
+      if (hex.startsWith("rgba")) return hex;
+
+      const clean = hex.replace("#", "");
+      const r = parseInt(clean.slice(0, 2), 16);
+      const g = parseInt(clean.slice(2, 4), 16);
+      const b = parseInt(clean.slice(4, 6), 16);
+
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    const EMOTIONS = {
+      neutral: { color: "#111111", label: "中性 / 客观陈述", short: "中性" },
+      calm:    { color: "#4A90E2", label: "平静 / 观察 / 等待", short: "平静" },
+      accept:  { color: "#2E9B4D", label: "接受 / 安全 / 正面", short: "接受" },
+      curious: { color: "#D4A017", label: "注意 / 好奇 / 思考", short: "注意" },
+      desire:  { color: "#E67E22", label: "想要 / 主动 / 靠近", short: "想要" },
+      urgent:  { color: "#D64545", label: "强烈 / 紧急 / 拒绝", short: "强烈" },
+      love:    { color: "#9B59B6", label: "喜欢 / 亲近 / 特别在意", short: "喜欢" },
+      unsure:  { color: "#7F8C8D", label: "不确定 / 疲惫 / 模糊", short: "不确定" }
+    };
+
+    const TIMES = {
+      present: { label: "现在 / 正在发生", short: "现在", style: "solid" },
+      future:  { label: "将来 / 打算 / 尚未发生", short: "将来", style: "dashed" },
+      past:    { label: "过去 / 已经发生", short: "过去", style: "double" },
+      unknown: { label: "未知 / 中断 / 不确定", short: "未知", style: "broken" }
+    };
+
+    const STRENGTHS = {
+      soft:   { label: "轻", full: "轻微 / 试探", value: 0.62 },
+      normal: { label: "稳", full: "稳定 / 正常", value: 0.86 },
+      strong: { label: "强", full: "强烈 / 很在意", value: 1.18 }
+    };
+
+    const CERTAINTIES = {
+      low:    { label: "低", full: "不确定 / 没说死", alpha: 0.46 },
+      mid:    { label: "中", full: "大致确定", alpha: 0.72 },
+      high:   { label: "高", full: "很确定 / 很清楚", alpha: 1 }
+    };
+
+    const DISTANCES = {
+      near: { label: "近", full: "很近 / 容易靠近", value: 0.62 },
+      mid:  { label: "中", full: "中等距离", value: 0.82 },
+      far:  { label: "远", full: "较远 / 需要过程", value: 1.05 }
+    };
+
+    const RESISTANCES = {
+      none:   { label: "无", full: "无明显阻力", value: 0 },
+      mild:   { label: "轻", full: "有一点阻力", value: 1 },
+      strong: { label: "强", full: "阻力明显", value: 2 }
+    };
+
+    const ECHOES = {
+      none: { label: "无", full: "无回声 / 一次性", value: 0 },
+      low:  { label: "轻", full: "轻微回声 / 有反复", value: 1 },
+      high: { label: "强", full: "明显回声 / 反复出现", value: 2 }
+    };
+
+    const SPACES = {
+      open:   { label: "开放空间", frame: 1 },
+      stable: { label: "稳定空间", frame: 2 },
+      sealed: { label: "封闭 / 保护空间", frame: 3 }
+    };
+
+    function circle(x, y, r, color, lineWidth) {
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = lineWidth;
+      ctx.stroke();
+    }
+
+    function square(x, y, size, color, lineWidth, filled, frame = 1) {
+      const drawOne = (sizeNow, alpha = 1) => {
+        const c = color.startsWith("#") ? withAlpha(color, alpha) : color;
+        const r = Math.min(16, sizeNow * 0.16);
+        const x0 = x - sizeNow / 2;
+        const y0 = y - sizeNow / 2;
+
+        ctx.beginPath();
+        ctx.moveTo(x0 + r, y0);
+        ctx.arcTo(x0 + sizeNow, y0, x0 + sizeNow, y0 + sizeNow, r);
+        ctx.arcTo(x0 + sizeNow, y0 + sizeNow, x0, y0 + sizeNow, r);
+        ctx.arcTo(x0, y0 + sizeNow, x0, y0, r);
+        ctx.arcTo(x0, y0, x0 + sizeNow, y0, r);
+        ctx.closePath();
+
+        if (filled) {
+          ctx.fillStyle = c;
+          ctx.fill();
+        } else {
+          ctx.strokeStyle = c;
+          ctx.lineWidth = lineWidth;
+          ctx.stroke();
+        }
+      };
+
+      drawOne(size, 1);
+
+      if (!filled && frame >= 2) drawOne(size + 18, 0.38);
+      if (!filled && frame >= 3) drawOne(size + 36, 0.20);
+    }
+
+    function cross(x, y, size, color, lineWidth) {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = lineWidth;
+      ctx.lineCap = "round";
+
+      ctx.beginPath();
+      ctx.moveTo(x - size / 2, y - size / 2);
+      ctx.lineTo(x + size / 2, y + size / 2);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(x + size / 2, y - size / 2);
+      ctx.lineTo(x - size / 2, y + size / 2);
+      ctx.stroke();
+    }
+
+    function drawSingleLine(x1, y1, x2, y2, color, width, dashed, arrow, broken) {
+      ctx.save();
+
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = width;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+
+      if (dashed) ctx.setLineDash([13, 11]);
+
+      if (broken) {
+        const mx = (x1 + x2) / 2;
+        const my = (y1 + y2) / 2;
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(mx - 24, my);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(mx + 24, my);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+      } else {
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+      }
+
+      ctx.setLineDash([]);
+
+      if (arrow) {
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+        const head = 13 + width;
+
+        ctx.beginPath();
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(
+          x2 - head * Math.cos(angle - Math.PI / 6),
+          y2 - head * Math.sin(angle - Math.PI / 6)
+        );
+        ctx.lineTo(
+          x2 - head * Math.cos(angle + Math.PI / 6),
+          y2 - head * Math.sin(angle + Math.PI / 6)
+        );
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      ctx.restore();
+    }
+
+    function line(x1, y1, x2, y2, options) {
+      const {
+        color = INK,
+        width = 5,
+        style = "solid",
+        arrow = false
+      } = options || {};
+
+      if (style === "solid") {
+        drawSingleLine(x1, y1, x2, y2, color, width, false, arrow, false);
+      } else if (style === "dashed") {
+        drawSingleLine(x1, y1, x2, y2, color, width, true, arrow, false);
+      } else if (style === "broken") {
+        drawSingleLine(x1, y1, x2, y2, color, width, false, arrow, true);
+      } else if (style === "double") {
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const len = Math.hypot(dx, dy) || 1;
+        const ox = -dy / len * 5;
+        const oy = dx / len * 5;
+
+        drawSingleLine(x1 + ox, y1 + oy, x2 + ox, y2 + oy, color, width - 1, false, false, false);
+        drawSingleLine(x1 - ox, y1 - oy, x2 - ox, y2 - oy, color, width - 1, false, arrow, false);
+      }
+    }
+
+    function drawResistance(x, y, height, level, color) {
+      if (!level) return;
+
+      const count = level === 1 ? 1 : 3;
+      const gap = 13;
+
+      ctx.save();
+      ctx.strokeStyle = withAlpha(color, level === 1 ? 0.45 : 0.72);
+      ctx.lineWidth = level === 1 ? 3 : 4;
+      ctx.lineCap = "round";
+
+      for (let i = 0; i < count; i++) {
+        const xx = x + (i - (count - 1) / 2) * gap;
+        ctx.beginPath();
+        ctx.moveTo(xx, y - height / 2);
+        ctx.lineTo(xx, y + height / 2);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    function echoShape(drawFn, echoLevel) {
+      if (!echoLevel) {
+        drawFn(0, 1);
+        return;
+      }
+
+      const rounds = echoLevel === 1 ? 2 : 3;
+
+      for (let i = rounds; i >= 1; i--) {
+        drawFn(i * 8, 0.10 + i * 0.04);
+      }
+
+      drawFn(0, 1);
+    }
+
+    function concentricCircles(x, y, color, s, width) {
+      [28, 50, 72, 94].forEach((r, i) => {
+        circle(x, y, r * s, color, i === 0 ? width : Math.max(2, width - 1));
+      });
+    }
+
+    function smallGroup(x, y, color, s) {
+      circle(x - 34 * s, y, 20 * s, color, 4);
+      circle(x + 34 * s, y, 20 * s, color, 4);
+      circle(x, y - 34 * s, 20 * s, color, 4);
+    }
+
+    const TEMPLATES = [
+      {
+        id: "at_place",
+        meaning: "我现在在这里",
+        interpretation: "主体进入一个地点或关系空间。方框越稳定，越像已经形成的空间；颜色说明在场时的态度。",
+        recommendedTimes: ["present", "past"],
+        allowResistance: false,
+        draw(g, em, style, meta) {
+          const frame = meta.space.frame;
+          square(g.cx, g.cy, 170 * g.s, INK, 4, false, frame);
+
+          echoShape((offset, alpha) => {
+            circle(
+              g.cx,
+              g.cy,
+              (34 + offset) * g.s,
+              withAlpha(em.colorRaw, alpha * meta.certainty.alpha),
+              g.lw(5)
+            );
+          }, meta.echo.value);
+        }
+      },
+
+      {
+        id: "go_place",
+        meaning: "我打算去那里",
+        interpretation: "主体指向某个目标。距离代表过程长短；阻力代表中间有无卡点；颜色说明行动动机。",
+        recommendedTimes: ["future", "present", "unknown"],
+        allowResistance: true,
+        draw(g, em, style, meta) {
+          const x1 = g.cx - g.hx;
+          const x2 = g.cx + g.hx;
+
+          circle(x1, g.cy, 30 * g.s, em.color, g.lw(5));
+          square(x2, g.cy, 90 * g.s, INK, 4, false, meta.space.frame === 3 ? 2 : 1);
+
+          line(x1 + 42 * g.s, g.cy, x2 - 52 * g.s, g.cy, {
+            color: em.color,
+            width: g.lw(7),
+            style,
+            arrow: true
+          });
+
+          drawResistance(g.cx, g.cy, 96 * g.s, meta.resistance.value, em.colorRaw);
+        }
+      },
+
+      {
+        id: "need_object",
+        meaning: "我需要这个东西",
+        interpretation: "这不是单纯评价，而是在表达需求。线越粗、距离越近，需求越贴身；若有阻力，说明还没顺利得到。",
+        recommendedTimes: ["present", "future", "unknown"],
+        allowResistance: true,
+        draw(g, em, style, meta) {
+          const x1 = g.cx - g.hx;
+          const x2 = g.cx + g.hx;
+
+          circle(x1, g.cy, 30 * g.s, em.color, g.lw(5));
+          square(x2, g.cy, 72 * g.s, INK, 3, true);
+
+          line(x1 + 42 * g.s, g.cy, x2 - 42 * g.s, g.cy, {
+            color: em.color,
+            width: g.lw(10),
+            style,
+            arrow: false
+          });
+
+          drawResistance(g.cx, g.cy, 86 * g.s, meta.resistance.value, em.colorRaw);
+        }
+      },
+
+      {
+        id: "deny",
+        meaning: "否 / 不可以 / 不是",
+        interpretation: "明确否定。若颜色偏红，否定更强；若颜色偏灰，可能是无法确认而不是强烈拒绝。",
+        recommendedTimes: ["present"],
+        allowResistance: false,
+        draw(g, em, style, meta) {
+          echoShape((offset, alpha) => {
+            circle(
+              g.cx,
+              g.cy,
+              (50 + offset) * g.s,
+              withAlpha(em.colorRaw, alpha * meta.certainty.alpha),
+              g.lw(5)
+            );
+          }, meta.echo.value);
+
+          cross(g.cx, g.cy, 120 * g.s, em.color, g.lw(5));
+        }
+      },
+
+      {
+        id: "wait",
+        meaning: "我在等待 / 停留中",
+        interpretation: "主体没有离开，但也没有继续推进。颜色决定这是安心等待、焦急等待，还是模糊停留。",
+        recommendedTimes: ["present", "future"],
+        allowResistance: false,
+        draw(g, em, style, meta) {
+          concentricCircles(g.cx, g.cy, em.color, g.s, g.lw(4));
+
+          if (meta.echo.value > 0) {
+            concentricCircles(g.cx, g.cy, withAlpha(em.colorRaw, 0.18), g.s * 1.12, g.lw(3));
+          }
+        }
+      },
+
+      {
+        id: "unknown",
+        meaning: "我不知道 / 无法确认",
+        interpretation: "连接没有闭合，信息暂时断开。透明度越低，越像没有说死；距离越远，越难确认。",
+        recommendedTimes: ["unknown"],
+        allowResistance: false,
+        draw(g, em, style, meta) {
+          const x1 = g.cx - g.hx;
+          const x2 = g.cx + g.hx;
+
+          circle(x1, g.cy, 30 * g.s, em.color, g.lw(5));
+          square(x2, g.cy, 86 * g.s, INK, 4, false);
+
+          line(x1 + 42 * g.s, g.cy, x2 - 52 * g.s, g.cy, {
+            color: em.color,
+            width: g.lw(7),
+            style: "broken",
+            arrow: false
+          });
+        }
+      },
+
+      {
+        id: "connection",
+        meaning: "我和你有连接",
+        interpretation: "两端之间不是孤立的。线越粗代表连接越强；颜色越偏亲近，关系意味越明显。",
+        recommendedTimes: ["present", "future", "past"],
+        allowResistance: false,
+        draw(g, em, style, meta) {
+          const x1 = g.cx - g.hx * 0.72;
+          const x2 = g.cx + g.hx * 0.72;
+
+          circle(x1, g.cy, 30 * g.s, em.color, g.lw(5));
+          circle(x2, g.cy, 30 * g.s, INK, 4);
+
+          line(x1 + 40 * g.s, g.cy, x2 - 40 * g.s, g.cy, {
+            color: em.color,
+            width: g.lw(8),
+            style,
+            arrow: false
+          });
+        }
+      },
+
+      {
+        id: "approach",
+        meaning: "我正在靠近你",
+        interpretation: "主体不是停在原地，而是在向另一端靠近。距离代表还差多远；时间线型说明靠近是已发生、正在发生，还是打算。",
+        recommendedTimes: ["present", "future", "past"],
+        allowResistance: true,
+        draw(g, em, style, meta) {
+          const x1 = g.cx - g.hx;
+          const x2 = g.cx + g.hx * 0.6;
+
+          circle(x1, g.cy, 30 * g.s, em.color, g.lw(5));
+          circle(x2, g.cy, 30 * g.s, INK, 4);
+
+          line(x1 + 42 * g.s, g.cy, x2 - 42 * g.s, g.cy, {
+            color: em.color,
+            width: g.lw(7),
+            style,
+            arrow: true
+          });
+
+          drawResistance((x1 + x2) / 2, g.cy, 82 * g.s, meta.resistance.value, em.colorRaw);
+        }
+      },
+
+      {
+        id: "leave",
+        meaning: "我正在离开这里",
+        interpretation: "主体从某个空间向外移动。它不一定是拒绝，也可能只是暂时离场、转移位置或脱离某个状态。",
+        recommendedTimes: ["present", "future", "past"],
+        allowResistance: false,
+        draw(g, em, style, meta) {
+          const x1 = g.cx - g.hx * 0.55;
+          const x2 = g.cx + g.hx;
+
+          square(x1, g.cy, 120 * g.s, INK, 4, false, meta.space.frame);
+          circle(x1, g.cy, 28 * g.s, em.color, g.lw(5));
+
+          line(x1 + 68 * g.s, g.cy, x2 - 20 * g.s, g.cy, {
+            color: em.color,
+            width: g.lw(7),
+            style,
+            arrow: true
+          });
+        }
+      },
+
+      {
+        id: "blocked",
+        meaning: "我被挡住了",
+        interpretation: "意图存在，但中间有明显阻隔。它通常表示不是不想，而是暂时过不去、做不到或条件不够。",
+        recommendedTimes: ["present", "future", "unknown"],
+        allowResistance: true,
+        forceResistance: "strong",
+        draw(g, em, style, meta) {
+          const x1 = g.cx - g.hx;
+          const x2 = g.cx + g.hx;
+
+          circle(x1, g.cy, 30 * g.s, em.color, g.lw(5));
+          square(x2, g.cy, 88 * g.s, INK, 4, false);
+
+          line(x1 + 42 * g.s, g.cy, g.cx - 36 * g.s, g.cy, {
+            color: em.color,
+            width: g.lw(7),
+            style,
+            arrow: false
+          });
+
+          line(g.cx + 36 * g.s, g.cy, x2 - 52 * g.s, g.cy, {
+            color: em.color,
+            width: g.lw(7),
+            style,
+            arrow: true
+          });
+
+          drawResistance(g.cx, g.cy, 112 * g.s, 2, em.colorRaw);
+        }
+      },
+
+      {
+        id: "choice",
+        meaning: "我在两个方向之间选择",
+        interpretation: "主体面前有两个目标。若一边距离更近或线更强，代表那个方向更占注意力。",
+        recommendedTimes: ["present", "future", "unknown"],
+        allowResistance: false,
+        draw(g, em, style, meta) {
+          const x1 = g.cx - g.hx * 0.85;
+          const x2 = g.cx + g.hx * 0.85;
+          const yA = g.cy - 58 * g.s;
+          const yB = g.cy + 58 * g.s;
+
+          circle(x1, g.cy, 30 * g.s, em.color, g.lw(5));
+          square(x2, yA, 70 * g.s, INK, 4, false);
+          square(x2, yB, 70 * g.s, INK, 4, false);
+
+          line(x1 + 42 * g.s, g.cy, x2 - 46 * g.s, yA, {
+            color: em.color,
+            width: g.lw(chance(0.5) ? 8 : 5),
+            style,
+            arrow: true
+          });
+
+          line(x1 + 42 * g.s, g.cy, x2 - 46 * g.s, yB, {
+            color: withAlpha(em.colorRaw, 0.45),
+            width: g.lw(5),
+            style: "dashed",
+            arrow: true
+          });
+        }
+      },
+
+      {
+        id: "group",
+        meaning: "这里不止一个人",
+        interpretation: "多个圆同时出现，代表群体、人际环境或不止一个主体。颜色落在群体上时，说明对这群人的态度。",
+        recommendedTimes: ["present", "past"],
+        allowResistance: false,
+        draw(g, em, style, meta) {
+          square(g.cx, g.cy, 210 * g.s, INK, 4, false, meta.space.frame);
+          smallGroup(g.cx, g.cy, em.color, g.s);
+        }
+      },
+
+      {
+        id: "protected",
+        meaning: "这是一个被保护的空间",
+        interpretation: "双层或三层方框包住主体，表示空间更稳定、更私密，也可能代表边界感更强。",
+        recommendedTimes: ["present", "past", "future"],
+        allowResistance: false,
+        draw(g, em, style, meta) {
+          square(g.cx, g.cy, 175 * g.s, INK, 4, false, 3);
+          circle(g.cx, g.cy, 32 * g.s, em.color, g.lw(5));
+
+          if (meta.echo.value > 0) {
+            circle(g.cx, g.cy, 52 * g.s, withAlpha(em.colorRaw, 0.22), g.lw(3));
+          }
+        }
+      }
+    ];
+
+    function getStage() {
+      const W = canvas.width;
+      const H = canvas.height;
+      const mobile = window.matchMedia("(max-width: 760px)").matches;
+
+      const margin = 18;
+      const panelRect = panel.getBoundingClientRect();
+      const readoutRect = readout.getBoundingClientRect();
+
+      let left = margin;
+      let right = W - margin;
+      let top = margin;
+      let bottom = readoutRect.top - margin;
+
+      if (mobile) {
+        top = panelRect.bottom + margin;
+      } else {
+        left = panelRect.right + 30;
+      }
+
+      if (bottom - top < 260) {
+        const mid = (top + bottom) / 2;
+        top = Math.max(margin, mid - 130);
+        bottom = Math.min(H - margin, mid + 130);
+      }
+
+      const cx = (left + right) / 2;
+      const cy = (top + bottom) / 2;
+      const stageW = right - left;
+      const stageH = bottom - top;
+
+      let s = Math.min(stageW / 500, stageH / 350, 1.16);
+      s = Math.max(0.48, s);
+
+      let hx = Math.min(stageW * 0.31, 180 * s);
+
+      if (current?.distance) {
+        hx *= current.distance.value;
+      }
+
+      hx = Math.min(hx, stageW / 2 - 60 * s);
+      hx = Math.max(hx, 62 * s);
+
+      return {
+        cx,
+        cy,
+        hx,
+        s,
+        mobile,
+        lw: (w) => {
+          const base = Math.max(2.4, w * Math.min(1, s));
+          const strength = current?.strength?.value ?? 0.86;
+          return base * strength;
+        }
+      };
+    }
+
+    function watermark(g) {
+      ctx.save();
+      ctx.shadowColor = "transparent";
+      ctx.fillStyle = "rgba(28, 28, 30, 0.18)";
+      ctx.font = '400 19px "Outfit", "PingFang SC", sans-serif';
+      ctx.textAlign = "center";
+      ctx.fillText("有限图形通信系统", g.cx, 52);
+      ctx.restore();
+    }
+
+    function buildInterpretation(template, meta) {
+      const parts = [];
+
+      parts.push(template.interpretation);
+
+      if (meta.strength.value > 1) {
+        parts.push("这条信息的力度偏强，不像轻轻带过。");
+      } else if (meta.strength.value < 0.7) {
+        parts.push("这条信息比较轻，像试探或低声表达。");
+      }
+
+      if (meta.certainty.alpha < 0.55) {
+        parts.push("它没有完全说死，仍然保留模糊空间。");
+      } else if (meta.certainty.alpha > 0.9) {
+        parts.push("它的确定度较高，表达比较清楚。");
+      }
+
+      if (meta.distance.value > 1) {
+        parts.push("目标距离偏远，通常意味着还需要过程。");
+      } else if (meta.distance.value < 0.7) {
+        parts.push("两端距离较近，靠近或完成的难度较低。");
+      }
+
+      if (meta.resistance.value > 0) {
+        parts.push(meta.resistance.value === 1 ? "中间有轻微阻力。" : "中间有明显阻力。");
+      }
+
+      if (meta.echo.value > 0) {
+        parts.push(meta.echo.value === 1 ? "这条信息有轻微回声，像是重复出现过。" : "这条信息有明显回声，像是反复强调。");
+      }
+
+      return parts.join(" ");
+    }
+
+    let current = null;
+
+    function render() {
+      if (!current) return;
+
+      clearCanvas();
+
+      const g = getStage();
+
+      if (!g.mobile) {
+        watermark(g);
+      }
+
+      const drawEmotion = {
+        ...current.emotion,
+        colorRaw: current.emotion.color,
+        color: withAlpha(current.emotion.color, current.certainty.alpha)
+      };
+
+      ctx.shadowColor = "rgba(0, 0, 0, 0.12)";
+      ctx.shadowBlur = 16;
+      ctx.shadowOffsetY = 6;
+
+      current.template.draw(g, drawEmotion, current.style, current);
+
+      ctx.shadowColor = "transparent";
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetY = 0;
+    }
+
+    function generate() {
+      const emotion = EMOTIONS[pick(Object.keys(EMOTIONS))];
+      const template = pick(TEMPLATES);
+      const timeKey = pick(template.recommendedTimes);
+      const time = TIMES[timeKey];
+
+      let resistance = RESISTANCES[pick(Object.keys(RESISTANCES))];
+
+      if (!template.allowResistance) {
+        resistance = RESISTANCES.none;
+      }
+
+      if (template.forceResistance) {
+        resistance = RESISTANCES[template.forceResistance];
+      }
+
+      const strength = STRENGTHS[pick(Object.keys(STRENGTHS))];
+      const certainty = CERTAINTIES[pick(Object.keys(CERTAINTIES))];
+      const distance = DISTANCES[pick(Object.keys(DISTANCES))];
+      const echo = ECHOES[pick(Object.keys(ECHOES))];
+      const space = SPACES[pick(Object.keys(SPACES))];
+
+      current = {
+        emotion,
+        template,
+        timeKey,
+        style: time.style,
+        strength,
+        certainty,
+        distance,
+        resistance,
+        echo,
+        space
+      };
+
+      meaningEl.textContent = template.meaning;
+
+      emotionTextEl.innerHTML =
+        `<span class="chip" style="background:${emotion.color}"></span>${emotion.short}<span class="hex">${emotion.color}</span>`;
+
+      timeTextEl.textContent = time.short;
+
+      strengthTextEl.textContent = `强度:${strength.label}`;
+      certaintyTextEl.textContent = `确定:${certainty.label}`;
+      distanceTextEl.textContent = `距离:${distance.label}`;
+      resistanceTextEl.textContent = `阻力:${resistance.label}`;
+      echoTextEl.textContent = `回声:${echo.label}`;
+
+      interpretTextEl.textContent = buildInterpretation(template, current);
+
+      render();
+
+      canvas.style.animation = "none";
+      void canvas.offsetWidth;
+      canvas.style.animation = "rise 0.5s cubic-bezier(.2,.7,.2,1) both";
+    }
+
+    legendToggle.addEventListener("click", () => {
+      const collapsed = panel.classList.toggle("collapsed");
+      legendToggle.textContent = collapsed ? "图例" : "收起";
+      requestAnimationFrame(() => requestAnimationFrame(render));
+    });
+
+    readout.addEventListener("click", () => {
+      readout.classList.toggle("expanded");
+      requestAnimationFrame(() => requestAnimationFrame(render));
+    });
+
+    window.addEventListener("resize", () => {
+      resize();
+      render();
+    });
+
+    resize();
+    generate();
+
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(render);
+    }
+  </script>
+</body>
+</html>
