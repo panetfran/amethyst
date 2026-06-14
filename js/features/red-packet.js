@@ -820,12 +820,11 @@
 (function () {
     'use strict';
 
+    // 等待 DOM 加载完成
     window.addEventListener('DOMContentLoaded', () => {
-        // 等待一小会儿确保主界面渲染完毕
+        // 使用 setTimeout 确保页面其他元素（如 header-actions）已渲染
         setTimeout(() => {
             const headerActions = document.querySelector('.header-actions');
-            const settingsBtn = document.getElementById('settings-btn');
-
             if (headerActions) {
                 // 创建红包入口按钮
                 const rpBtn = document.createElement('button');
@@ -833,16 +832,13 @@
                 rpBtn.title = '红包系统';
                 rpBtn.innerHTML = '<i class="fas fa-gift"></i>'; // 使用 FontAwesome 图标
                 rpBtn.style.cursor = 'pointer';
+                rpBtn.style.marginLeft = '10px';
                 
                 // 点击触发你已有的红包弹窗
                 rpBtn.onclick = () => window.showRedPacketSendModal();
                 
-                // 将按钮插入到设置按钮的前面
-                if (settingsBtn) {
-                    headerActions.insertBefore(rpBtn, settingsBtn);
-                } else {
-                    headerActions.appendChild(rpBtn);
-                }
+                // 插入到 header-actions 中，放在最后或者特定位置
+                headerActions.appendChild(rpBtn);
             }
         }, 500);
     });
