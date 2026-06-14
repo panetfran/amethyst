@@ -1321,13 +1321,24 @@
                     </div>
 
                     <div class="settings-item" id="red-packet-function" onclick="(function(){
-                        // 点击后先自动关闭“高级功能”弹窗，再弹出红包主菜单
+                        // 1. 强制隐藏高级功能弹窗
                         var advModal = document.getElementById('advanced-modal');
                         if(advModal) advModal.style.display = 'none';
                         
-                        window.showRedPacketSendModal(); 
+                        // 2. 尝试寻找并隐藏你网页原本的弹窗遮罩层（如果有的话）
+                        var modalOverlay = document.getElementById('modal-overlay') || document.querySelector('.modal-overlay');
+                        if(modalOverlay) modalOverlay.style.display = 'none';
+                        
+                        // 3. 延迟 50 毫秒后，再唤起红包主弹窗
+                        setTimeout(function() {
+                            if (typeof window.showRedPacketSendModal === 'function') {
+                                window.showRedPacketSendModal();
+                            } else {
+                                alert('红包脚本未正确加载，请检查底部是否引入了 red-packet.js');
+                            }
+                        }, 50);
                     })();">
-                        <i class="fas fa-wallet" style="color: #c4453c;"></i><span>红包</span>
+                        <i class="fas fa-wallet" style="color: #c4453c;"></i><span>钱包 · 红包</span>
                     </div>
                     
                 </div>
