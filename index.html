@@ -1320,33 +1320,39 @@
                    <i class="fas fa-sticky-note"></i><span>留白</span>
                     </div>
 
-                   <div class="settings-item" id="red-packet-function" onclick="(function(){
-                        // 1. 强行把高级功能弹窗给隐藏掉
+               <div class="settings-item" id="red-packet-function" onclick="(function(){
                         var advModal = document.getElementById('advanced-modal');
-                        if(advModal) advModal.style.display = 'none';
-                        
-                        // 2. 【核心修复】强行寻找你网页上所有可能存在的原版全局黑色遮罩层，并统统关掉
-                        var globalOverlays = [
-                            document.getElementById('modal-overlay'),
-                            document.querySelector('.modal-overlay'),
-                            document.getElementById('advanced-modal-overlay'),
-                            document.querySelector('.modal-backdrop')
-                        ];
-                        globalOverlays.forEach(function(overlay) {
-                            if (overlay) overlay.style.display = 'none';
-                        });
-                        
-                        // 3. 稍微等待 30 毫秒，让原本网页的弹窗动画和阴影退场，再干干净净地把红包钱包唤醒
+                        if (advModal) {
+                            // 用最基础的类名和图标去识别关闭按钮，避开复杂的选择器引号
+                            var closeBtn = advModal.querySelector('.close-btn') || 
+                                           advModal.querySelector('.fa-times') || 
+                                           advModal.querySelector('button');
+                            
+                            if (closeBtn) {
+                                closeBtn.click();
+                            } else {
+                                advModal.style.display = 'none';
+                            }
+                        }
+
+                        // 清理可能堆积的旧红包图层
+                        var existingRpOverlay = document.getElementById('rp-modal-overlay');
+                        if (existingRpOverlay) {
+                            existingRpOverlay.remove();
+                        }
+
+                        // 唤起红包主弹窗
                         setTimeout(function() {
                             if (typeof window.showRedPacketSendModal === 'function') {
                                 window.showRedPacketSendModal();
                             } else {
                                 alert('红包主程序未正确加载，请检查 index.html 底部是否引入了 red-packet.js');
                             }
-                        }, 30);
+                        }, 80);
                     })();">
                         <i class="fas fa-wallet" style="color: #c4453c;"></i><span>钱包 · 红包</span>
                     </div>
+                    
                     
                 </div>
             </div>
