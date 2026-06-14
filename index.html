@@ -1317,6 +1317,15 @@
                    <div class="settings-item" id="board-toggle-btn" onclick="forceOpenBoard()">
                    <i class="fas fa-sticky-note"></i><span>留白</span>
                     </div>
+
+<div class="settings-item" id="accounting-function" onclick="if(typeof window.openAccountingModal === 'function') { window.openAccountingModal(); }">
+            <i class="fas fa-wallet" style="color: #4ecdc4;"></i><span>同心记账</span>
+        </div>
+
+        <div class="settings-item" id="red-packet-function" onclick="if(typeof window.showRedPacketSendModal === 'function') { window.showRedPacketSendModal(); }">
+            <i class="fas fa-envelope-open-text" style="color: #c4453c;"></i><span>红包</span>
+        </div>
+
                     
                 </div>
             </div>
