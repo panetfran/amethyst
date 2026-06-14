@@ -1320,23 +1320,30 @@
                    <i class="fas fa-sticky-note"></i><span>留白</span>
                     </div>
 
-                    <div class="settings-item" id="red-packet-function" onclick="(function(){
-                        // 1. 强制隐藏高级功能弹窗
+                   <div class="settings-item" id="red-packet-function" onclick="(function(){
+                        // 1. 强行把高级功能弹窗给隐藏掉
                         var advModal = document.getElementById('advanced-modal');
                         if(advModal) advModal.style.display = 'none';
                         
-                        // 2. 尝试寻找并隐藏你网页原本的弹窗遮罩层（如果有的话）
-                        var modalOverlay = document.getElementById('modal-overlay') || document.querySelector('.modal-overlay');
-                        if(modalOverlay) modalOverlay.style.display = 'none';
+                        // 2. 【核心修复】强行寻找你网页上所有可能存在的原版全局黑色遮罩层，并统统关掉
+                        var globalOverlays = [
+                            document.getElementById('modal-overlay'),
+                            document.querySelector('.modal-overlay'),
+                            document.getElementById('advanced-modal-overlay'),
+                            document.querySelector('.modal-backdrop')
+                        ];
+                        globalOverlays.forEach(function(overlay) {
+                            if (overlay) overlay.style.display = 'none';
+                        });
                         
-                        // 3. 延迟 50 毫秒后，再唤起红包主弹窗
+                        // 3. 稍微等待 30 毫秒，让原本网页的弹窗动画和阴影退场，再干干净净地把红包钱包唤醒
                         setTimeout(function() {
                             if (typeof window.showRedPacketSendModal === 'function') {
                                 window.showRedPacketSendModal();
                             } else {
-                                alert('红包脚本未正确加载，请检查底部是否引入了 red-packet.js');
+                                alert('红包主程序未正确加载，请检查 index.html 底部是否引入了 red-packet.js');
                             }
-                        }, 50);
+                        }, 30);
                     })();">
                         <i class="fas fa-wallet" style="color: #c4453c;"></i><span>钱包 · 红包</span>
                     </div>
