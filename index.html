@@ -1320,36 +1320,7 @@
                    <i class="fas fa-sticky-note"></i><span>留白</span>
                     </div>
 
-               <div class="settings-item" id="red-packet-function" onclick="(function(){
-                        var advModal = document.getElementById('advanced-modal');
-                        if (advModal) {
-                            // 用最基础的类名和图标去识别关闭按钮，避开复杂的选择器引号
-                            var closeBtn = advModal.querySelector('.close-btn') || 
-                                           advModal.querySelector('.fa-times') || 
-                                           advModal.querySelector('button');
-                            
-                            if (closeBtn) {
-                                closeBtn.click();
-                            } else {
-                                advModal.style.display = 'none';
-                            }
-                        }
-
-                        // 清理可能堆积的旧红包图层
-                        var existingRpOverlay = document.getElementById('rp-modal-overlay');
-                        if (existingRpOverlay) {
-                            existingRpOverlay.remove();
-                        }
-
-                        // 唤起红包主弹窗
-                        setTimeout(function() {
-                            if (typeof window.showRedPacketSendModal === 'function') {
-                                window.showRedPacketSendModal();
-                            } else {
-                                alert('红包主程序未正确加载，请检查 index.html 底部是否引入了 red-packet.js');
-                            }
-                        }, 80);
-                    })();">
+               <div class="settings-item" id="red-packet-function" onclick="window.showRedPacketSendModal();">
                         <i class="fas fa-wallet" style="color: #c4453c;"></i><span>钱包 · 红包</span>
                     </div>
                     
