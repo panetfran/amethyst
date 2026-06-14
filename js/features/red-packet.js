@@ -813,3 +813,37 @@
     };
 
 })();
+
+
+// ========== 自动集成到顶部动作栏 ==========
+
+(function () {
+    'use strict';
+
+    window.addEventListener('DOMContentLoaded', () => {
+        // 等待一小会儿确保主界面渲染完毕
+        setTimeout(() => {
+            const headerActions = document.querySelector('.header-actions');
+            const settingsBtn = document.getElementById('settings-btn');
+
+            if (headerActions) {
+                // 创建红包入口按钮
+                const rpBtn = document.createElement('button');
+                rpBtn.className = 'action-btn'; // 使用和你页面其他按钮一致的 class
+                rpBtn.title = '红包系统';
+                rpBtn.innerHTML = '<i class="fas fa-gift"></i>'; // 使用 FontAwesome 图标
+                rpBtn.style.cursor = 'pointer';
+                
+                // 点击触发你已有的红包弹窗
+                rpBtn.onclick = () => window.showRedPacketSendModal();
+                
+                // 将按钮插入到设置按钮的前面
+                if (settingsBtn) {
+                    headerActions.insertBefore(rpBtn, settingsBtn);
+                } else {
+                    headerActions.appendChild(rpBtn);
+                }
+            }
+        }, 500);
+    });
+})();
