@@ -1316,6 +1316,15 @@
                    <div class="settings-item" id="board-toggle-btn" onclick="forceOpenBoard()">
                    <i class="fas fa-sticky-note"></i><span>留白</span>
                     </div>
+
+                   <div class="settings-item" id="accounting-toggle-btn" onclick="if(window.openAccountingModal) window.openAccountingModal()">
+                        <i class="fas fa-coins" style="color: #ecc94b;"></i><span>同心记账</span>
+                    </div>
+
+                    <div class="settings-item" id="red-packet-toggle-btn" onclick="if(window.showRedPacketSendModal) window.showRedPacketSendModal()">
+                        <i class="fas fa-envelope-open-text" style="color: #c4453c;"></i><span>同心红包</span>
+                    </div>
+                    
                 </div>
             </div>
             
@@ -2175,6 +2184,19 @@
         <iframe src="painter.html" style="flex: 1; border: none; width: 100%; height: 100%;"></iframe>
     </div>
 </div>
+
+<script src="js/accounting.js"></script>
+
+    <script>
+        window.transferData = window.accountingRecords;
+        
+        // 挂载昵称兜底，防止红包功能因找不到名字报错
+        if (typeof window.settings === 'undefined') {
+            window.settings = { myName: '我', partnerName: '对方' };
+        }
+    </script>
+
+    <script src="js/features/red-packet.js"></script>
         
 </body>
 </html>
