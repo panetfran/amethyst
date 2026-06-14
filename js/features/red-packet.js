@@ -1,5 +1,5 @@
 /**
- * red-packet.js - 红包功能模块（传讯网站直装完美版）
+ * red-packet.js - 红包功能模块（节日检测 + 一小时低频触发终极版）
  */
 
 (function () {
@@ -19,17 +19,13 @@
         return pName ? pName.textContent.trim() : '对方';
     }
 
-    function getMyName() {
-        return '我';
-    }
-
     var RP_SVG = '<svg width="36" height="44" viewBox="0 0 20 28" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="16" height="18" rx="2"/><path d="M2 8l8 6 8-6"/><circle cx="10" cy="14" r="2.5" fill="#fff" stroke="none"/></svg>';
 
     // 全局状态变量
     var defaultData = {
-        myBalance: 100000,       // 我的余额：1000.00 元（单位：分）
-        systemBalance: 500000,   // 对方余额：5000.00 元
-        records: []              // 历史记录
+        myBalance: 100000,       
+        systemBalance: 500000,   
+        records: []              
     };
     window.transferData = Object.assign({}, defaultData);
 
@@ -48,13 +44,12 @@
     }
     loadTransferData();
 
-    // ========== 2. 核心遮罩层控制（彻底修好黑屏的密码） ==========
+    // ========== 2. 核心遮罩层控制 ==========
     function getOrCreateOverlay() {
         var overlay = document.getElementById('rp-modal-overlay');
         if (!overlay) {
             overlay = document.createElement('div');
             overlay.id = 'rp-modal-overlay';
-            // 【核心修复】：这里的 z-index 设为 99999，彻底覆盖所有原网页遮罩；背景加入了点击事件，点空白处自动退场
             overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:99999;display:none;justify-content:center;align-items:center;font-family:sans-serif;';
             document.body.appendChild(overlay);
         }
@@ -71,7 +66,6 @@
 
     // ========== 3. 弹出“发红包/钱包”主弹窗 ==========
     window.showRedPacketSendModal = function() {
-        // 先强行关掉高级功能弹窗
         var advModal = document.getElementById('advanced-modal');
         if (advModal) advModal.style.display = 'none';
         var modalOverlay = document.getElementById('modal-overlay') || document.querySelector('.modal-overlay');
@@ -86,7 +80,7 @@
                     <span style="font-size:16px;font-weight:600;">给 ${getPartnerName()} 发红包</span>
                     <button id="rp-close-btn" style="position:absolute;right:16px;top:16px;background:none;border:none;color:#fff;font-size:22px;cursor:pointer;opacity:0.8;line-height:1;">&times;</button>
                 </div>
-                <div style="padding:20px;display:flex;flex-direction:column;gap:16px;">
+                <div style="padding:20px;display:flex;flex-direction:column;gap:14px;">
                     <div style="background:#fff;border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border:1px solid #eee;">
                         <span style="font-size:14px;color:#333;">金额 (元)</span>
                         <input id="rp-amount-input" type="number" step="0.01" placeholder="0.00" style="width:120px;text-align:right;border:none;outline:none;font-size:18px;font-weight:600;color:#c4453c;">
@@ -94,19 +88,52 @@
                     <div style="background:#fff;border-radius:10px;padding:12px 16px;border:1px solid #eee;">
                         <textarea id="rp-message-input" rows="2" style="width:100%;border:none;outline:none;resize:none;font-size:13px;color:#444;padding:0;font-family:inherit;" placeholder="恭喜发财，大吉大利！">恭喜发财，大吉大利！</textarea>
                     </div>
-                    <div style="text-align:center;color:#999;font-size:12px;margin-top:-4px;">
-                        当前钱包余额: ¥${fmt(window.transferData.myBalance)}
+                    
+                    <div style="display:flex; gap:8px; margin-top:-2px;">
+                        <div id="rp-change-my-btn" style="flex:1; text-align:center; color:#555; font-size:11px; cursor:pointer; background:rgba(0,0,0,0.03); padding:8px 4px; border-radius:8px; border:1px dashed rgba(0,0,0,0.08); transition:all 0.2s;">
+                            我的余额<br>
+                            <span style="color:#c4453c;font-weight:600;">¥${fmt(window.transferData.myBalance)}</span> <i class="fas fa-edit" style="font-size:9px;color:#bbb;"></i>
+                        </div>
+                        <div id="rp-change-system-btn" style="flex:1; text-align:center; color:#555; font-size:11px; cursor:pointer; background:rgba(0,0,0,0.03); padding:8px 4px; border-radius:8px; border:1px dashed rgba(0,0,0,0.08); transition:all 0.2s;">
+                            ${getPartnerName()}的余额<br>
+                            <span style="color:#2b9348;font-weight:600;">¥${fmt(window.transferData.systemBalance)}</span> <i class="fas fa-edit" style="font-size:9px;color:#bbb;"></i>
+                        </div>
                     </div>
-                    <button id="rp-submit-btn" style="background:#c4453c;color:#fff;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;transition:background 0.2s;box-shadow:0 4px 10px rgba(196,69,60,0.2);">塞钱进红包</button>
+
+                    <button id="rp-submit-btn" style="background:#c4453c;color:#fff;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;transition:background 0.2s;box-shadow:0 4px 10px rgba(196,69,60,0.2);margin-top:4px;">塞钱进红包</button>
                 </div>
             </div>
             <style>
                 @keyframes rpScaleIn { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
                 #rp-submit-btn:hover { background: #b03a32; }
+                #rp-change-my-btn:hover, #rp-change-system-btn:hover { background: rgba(0,0,0,0.07); border-color: rgba(0,0,0,0.2); }
             </style>
         `;
 
         document.getElementById('rp-close-btn').onclick = closeModal;
+        
+        document.getElementById('rp-change-my-btn').onclick = function() {
+            var currentYuan = (window.transferData.myBalance / 100).toFixed(2);
+            var newUserInput = prompt("请输入你想自定义的【我的钱包余额】(元)：", currentYuan);
+            if (newUserInput !== null) {
+                var targetMoney = parseFloat(newUserInput);
+                if (isNaN(targetMoney) || targetMoney < 0) { alert("请输入有效的数字金额！"); } else {
+                    window.transferData.myBalance = Math.round(targetMoney * 100); saveTransferData(); window.showRedPacketSendModal();
+                }
+            }
+        };
+
+        document.getElementById('rp-change-system-btn').onclick = function() {
+            var currentYuan = (window.transferData.systemBalance / 100).toFixed(2);
+            var newUserInput = prompt(`请输入你想自定义的【${getPartnerName()}的钱包余额】(元)：`, currentYuan);
+            if (newUserInput !== null) {
+                var targetMoney = parseFloat(newUserInput);
+                if (isNaN(targetMoney) || targetMoney < 0) { alert("请输入有效的数字金额！"); } else {
+                    window.transferData.systemBalance = Math.round(targetMoney * 100); saveTransferData(); window.showRedPacketSendModal();
+                }
+            }
+        };
+
         document.getElementById('rp-submit-btn').onclick = function() {
             var amtInput = document.getElementById('rp-amount-input').value;
             var msgInput = document.getElementById('rp-message-input').value || "恭喜发财，大吉大利！";
@@ -117,20 +144,10 @@
 
             window.transferData.myBalance -= amountFen;
             var rpId = genId();
-            var newRecord = {
-                id: rpId,
-                type: 'send',
-                sender: 'user',
-                amount: amountFen,
-                message: msgInput,
-                time: new Date().toISOString(),
-                isOpened: false
-            };
+            var newRecord = { id: rpId, type: 'send', sender: 'user', amount: amountFen, message: msgInput, time: new Date().toISOString(), isOpened: false };
             window.transferData.records.push(newRecord);
             saveTransferData();
             closeModal();
-
-            // 渲染至聊天框
             appendRedPacketCard(newRecord);
         };
     };
@@ -167,15 +184,11 @@
         chatContainer.appendChild(msgWrap);
         chatContainer.scrollTop = chatContainer.scrollHeight;
 
-        // 绑定卡片点击事件：弹出“拆红包”窗口
         msgWrap.querySelector('.red-packet-card').onclick = function() {
             window.showRedPacketReceiveModal(record.id);
         };
 
-        // 如果是我发出的红包，触发对方定时拆红包的模拟
-        if (isMe) {
-            simulatePartnerAction(record);
-        }
+        if (isMe) { simulatePartnerAction(record); }
     }
 
     // ========== 5. 弹出“拆红包/查看详情”弹窗 ==========
@@ -186,7 +199,6 @@
         var overlay = getOrCreateOverlay();
         overlay.style.display = 'flex';
 
-        // 如果是未领取的红包
         if (!record.isOpened) {
             var isFromMe = record.sender === 'user';
             
@@ -211,19 +223,15 @@
             var openBtn = document.getElementById('rp-open-btn');
             if (openBtn) {
                 openBtn.onclick = function() {
-                    // 点击开红包：加钱、改变状态
                     record.isOpened = true;
                     window.transferData.myBalance += record.amount;
                     saveTransferData();
-                    
-                    // 局部刷新聊天框内对应的红包卡片外观
                     updateCardUI(record);
                     closeModal();
                     alert("成功领取红包，已存入您的钱包余额！");
                 };
             }
         } else {
-            // 如果红包已经被领过了，直接显示明细
             overlay.innerHTML = `
                 <div style="background:#fff; width:280px; border-radius:16px; padding:24px; box-shadow:0 12px 30px rgba(0,0,0,0.15); text-align:center; position:relative; font-family:sans-serif; animation: rpScaleIn 0.2s;">
                     <button id="rp-close-btn" style="position:absolute; right:14px; top:14px; background:none; border:none; color:#999; font-size:20px; cursor:pointer;">&times;</button>
@@ -247,7 +255,7 @@
         }
     }
 
-    // ========== 6. 自动化闭环互动（梦角领包、对方给你发红包） ==========
+    // ========== 6. 自动化闭环互动 ==========
     function simulatePartnerAction(record) {
         var indicator = document.getElementById('typing-indicator');
         setTimeout(function() { if (indicator) indicator.style.display = 'block'; }, 2000);
@@ -266,8 +274,8 @@
                 replyWrap.style.cssText = 'display:flex;justify-content:flex-start;margin-bottom:14px;';
                 replyWrap.innerHTML = `
                     <div style="background:#fff; padding:10px 14px; border-radius:12px; max-width:75%; box-shadow:0 2px 6px rgba(0,0,0,0.05); font-size:14px; color:#333; line-height:1.5;">
-                        ✨ <b>${getPartnerName()}</b> 拆开了你的红包，满心欢喜地对你说：<br>
-                        “谢谢你发给我的专属红包。有你在的每一天，都像在过最甜的节日，这笔心意我好好收下啦 🤍”
+                        ✨ <b>${getPartnerName()}</b> 拆开了你的红包：<br>
+                        “谢谢你发给我的专属红包。我收下了”
                     </div>
                 `;
                 chatContainer.appendChild(replyWrap);
@@ -276,31 +284,57 @@
         }, 4500);
     }
 
-    // 对方有概率主动给你发红包系统
+    // ========== 7. 【核心调整】特殊节日适配与一小时低频触发系统 ==========
     setInterval(function() {
-        // 每 40 秒有 10% 的几率对方会突然想塞钱给你（制造互动惊喜）
-        if (Math.random() < 0.1) {
-            var randomAmounts = [520, 1314, 666, 888, 999]; // 随机分单位
-            var chosenAmount = randomAmounts[Math.floor(Math.random() * randomAmounts.length)];
-            
-            if (window.transferData.systemBalance < chosenAmount) return;
-            
-            window.transferData.systemBalance -= chosenAmount;
-            var rpId = genId();
-            var newRecord = {
-                id: rpId,
-                type: 'receive',
-                sender: 'partner',
-                amount: chosenAmount,
-                message: "给你准备的一点小惊喜，快拿去买你喜欢的毛绒玩具吧 🐟",
-                time: new Date().toISOString(),
-                isOpened: false
-            };
-            window.transferData.records.push(newRecord);
-            saveTransferData();
+        // 降低触发概率：每个小时有 25% 的概率扔骰子成功（这样既有惊喜，又不会泛滥）
+        if (Math.random() > 0.25) return;
 
-            appendRedPacketCard(newRecord);
+        var now = new Date();
+        var month = now.getMonth() + 1;
+        var date = now.getDate();
+
+        // 初始化基础变量
+        var chosenAmount = 0;
+        var festivalMsg = "给你一点小惊喜";
+
+        // 判断是否为特殊节日
+        if (month === 2 && date === 14) { 
+            // 1. 情人节
+            var fAmounts = [52000, 131400]; // 520.00元 或 1314.00元
+            chosenAmount = fAmounts[Math.floor(Math.random() * fAmounts.length)];
+            festivalMsg = `情人节快乐，只想把最好的都给你，希望你每天都开心`;
+        } else if ((month === 12 && date === 31) || (month === 1 && date === 1)) {
+            // 2. 跨年 / 元旦
+            var fAmounts = [100000]; // 1000元
+            chosenAmount = fAmounts[Math.floor(Math.random() * fAmounts.length)];
+            festivalMsg = `新年快乐`;
+        } else {
+            // 3. 其他非节日时候（日常随机/特殊双池）
+            var normalAmounts = [520, 1314, 999]; // 5.20, 13.14, 9.99
+            chosenAmount = normalAmounts[Math.floor(Math.random() * normalAmounts.length)];
         }
-    }, 40000);
+
+        // 检查对方是否有足够的余额扣除
+        if (window.transferData.systemBalance < chosenAmount) return;
+
+        // 执行发红包逻辑
+        window.transferData.systemBalance -= chosenAmount;
+        var rpId = genId();
+        var newRecord = {
+            id: rpId,
+            type: 'receive',
+            sender: 'partner',
+            amount: chosenAmount,
+            message: festivalMsg,
+            time: now.toISOString(),
+            isOpened: false
+        };
+        window.transferData.records.push(newRecord);
+        saveTransferData();
+
+        // 渲染卡片
+        appendRedPacketCard(newRecord);
+
+    }, 600000); // 彻底改为 600000 毫秒（=10分钟）检测一次
 
 })();
