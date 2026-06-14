@@ -21,7 +21,6 @@
 
     <link rel="stylesheet" href="css/styles.css">
 
-    <link rel="stylesheet" href="css/diary.css">
 
     <style id="css-live-preview-style"></style>
 </head>
@@ -1318,14 +1317,6 @@
                    <div class="settings-item" id="board-toggle-btn" onclick="forceOpenBoard()">
                    <i class="fas fa-sticky-note"></i><span>留白</span>
                     </div>
-
-                   <div class="settings-item" id="accounting-toggle-btn" onclick="if(window.openAccountingModal) window.openAccountingModal()">
-                        <i class="fas fa-coins" style="color: #ecc94b;"></i><span>同心记账</span>
-                    </div>
-
-                    <div class="settings-item" id="red-packet-toggle-btn" onclick="if(window.showRedPacketSendModal) window.showRedPacketSendModal()">
-                        <i class="fas fa-envelope-open-text" style="color: #c4453c;"></i><span>同心红包</span>
-                    </div>
                     
                 </div>
             </div>
@@ -2189,33 +2180,6 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
 
-    <script>
-        // 将红包的数据口袋直接指向记账的数组
-        window.transferData = window.accountingRecords;
-
-        // 挂载昵称配置（防止红包脚本找不到名字报错）
-        if (typeof window.settings === 'undefined') {
-            window.settings = { myName: '我', partnerName: '对方' };
-        }
-
-        // 弹窗基础控制器适配
-        window.showModal = window.showModal || function(id) {
-            const el = document.getElementById(id);
-            if (el) el.style.display = 'flex';
-        };
-        window.hideModal = window.hideModal || function(id) {
-            const el = document.getElementById(id);
-            if (el) el.style.display = 'none';
-        };
-        window.showNotification = window.showNotification || function(msg) {
-            alert(msg);
-        };
-        window.getStorageKey = window.getStorageKey || function(key) {
-            return 'partner_' + key;
-        };
-    </script>
-
-    <script src="js/accounting.js"></script>
 
     <script src="js/features/red-packet.js"></script>
         
