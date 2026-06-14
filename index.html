@@ -21,6 +21,8 @@
 
     <link rel="stylesheet" href="css/styles.css">
 
+    <link rel="stylesheet" href="css/diary.css">
+
     <style id="css-live-preview-style"></style>
 </head>
 <body>
@@ -2185,16 +2187,35 @@
     </div>
 </div>
 
-<script src="js/accounting.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
 
     <script>
+        // 将红包的数据口袋直接指向记账的数组
         window.transferData = window.accountingRecords;
-        
-        // 挂载昵称兜底，防止红包功能因找不到名字报错
+
+        // 挂载昵称配置（防止红包脚本找不到名字报错）
         if (typeof window.settings === 'undefined') {
             window.settings = { myName: '我', partnerName: '对方' };
         }
+
+        // 弹窗基础控制器适配
+        window.showModal = window.showModal || function(id) {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'flex';
+        };
+        window.hideModal = window.hideModal || function(id) {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        };
+        window.showNotification = window.showNotification || function(msg) {
+            alert(msg);
+        };
+        window.getStorageKey = window.getStorageKey || function(key) {
+            return 'partner_' + key;
+        };
     </script>
+
+    <script src="js/accounting.js"></script>
 
     <script src="js/features/red-packet.js"></script>
         
