@@ -17,26 +17,35 @@
     };
     window.RP_Module.load();
 
-    // 渲染到信息流
-    function renderRedPacketToChat(amount) {
-        // !!! 请确保你的页面里有一个 <div id="board-list">...</div>
-        const list = document.getElementById('board-list') || document.querySelector('.board-list');
-        if (!list) return console.error("未找到消息容器，请检查 ID");
+    // 渲染到信息流 (修正定位逻辑)
+function renderRedPacketToChat(amount) {
+    // 找到发送按钮
+    const sendBtn = document.getElementById('board-send-btn');
+    if (!sendBtn) return console.error("未找到发送按钮，请检查页面结构");
 
-        const packet = document.createElement('div');
-        packet.style.cssText = 'margin:10px 0; padding:10px; border:1px solid #e64a3b; border-radius:8px; cursor:pointer;';
-        packet.innerHTML = `🧧 对方发来红包：¥${(amount/100).toFixed(2)} (点击领取)`;
-        
-        packet.onclick = function() {
-            window.RP_Module.myBalance += amount;
-            window.RP_Module.save();
-            this.innerHTML = '🧧 已领取 ¥' + (amount/100).toFixed(2);
-            this.style.opacity = '0.5';
-            this.onclick = null;
-        };
-        list.appendChild(packet);
-        list.scrollTop = list.scrollHeight;
-    }
+    // 获取聊天列表容器：根据你的结构，它通常是发送按钮所在行的上方那个容器
+    // 我们可以通过 sendBtn 向上查找它的父级元素，也就是包含所有消息的那个列表区
+    const chatContainer = sendBtn.parentElement.parentElement; 
+
+    const packet = document.createElement('div');
+    packet.style.cssText = 'margin:10px; padding:12px; background:#e64a3b; color:#fff; border-radius:8px; cursor:pointer; text-align:center; font-weight:bold;';
+    packet.innerHTML = `🧧 对方发来红包：¥${(amount/100).toFixed(2)} (点击领取)`;
+    
+    packet.onclick = function() {
+        window.RP_Module.myBalance += amount;
+        window.RP_Module.save();
+        this.innerHTML = '🧧 已领取 ¥' + (amount/100).toFixed(2);
+        this.style.opacity = '0.5';
+        this.onclick = null;
+        alert("领取成功！");
+    };
+    
+    // 把红包插入到发送框的上面
+    chatContainer.insertBefore(packet, sendBtn.parentElement);
+    
+    // 自动滚动到底部
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
 
     // 悬浮球 (位置调整到右下角，离发送键不远的地方)
     const btn = document.createElement('div');
