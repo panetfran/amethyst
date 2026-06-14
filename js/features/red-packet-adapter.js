@@ -2,6 +2,8 @@
  * 红包功能适配层 - 负责将你原汁原味的 red-packet.js 与传讯网站连接起来
  */
 (function() {
+    'use strict';
+
     // 1. 初始化余额数据
     if (typeof window.initTransferData === 'function') {
         window.initTransferData();
@@ -65,9 +67,9 @@
         }
     };
 
-    // 4. 全局重新渲染：原文件更新状态后会调用此方法刷新卡片UI
+    // 4. 全局重新渲染：【这里已为你修复完毕】
     window.renderMessages = function() {
-        // 遍历聊天框中现有的红包，根据最新数据更新它们的状态（如：待领取 -> 已领取）
+        // 遍历聊天框中现有的红包，根据最新数据更新它们的状态
         document.querySelectorAll('.red-packet-card').forEach(function(card) {
             var rpId = card.dataset.rpId;
             if (window.transferData && window.transferData.records) {
@@ -81,19 +83,28 @@
                         redPacket: record
                     };
                     var newCardHtml = window.renderRedPacketMessage(mockMsg);
-                    // 局部替换HTML，保持最新状态
+                    
+                    // 安全地进行整块 HTML 替换
                     var tempDiv = document.createElement('div');
                     tempDiv.innerHTML = newCardHtml;
-                    card.innerHTML = tempDiv.firstChild.innerHTML;
-                    card.className = tempDiv.firstChild.className;
+                    var newCardElement = tempDiv.querySelector('.red-packet-card');
+                    
+                    if (newCardElement && card.parentNode) {
+                        // 重新绑定点击事件，防止事件丢失
+                        newCardElement.onclick = function() {
+                            window.showRedPacketReceiveModal(rpId);
+                        };
+                        // 用新节点替换掉老节点
+                        card.parentNode.replaceChild(newCardElement, card);
+                    }
                 }
             }
         });
     };
 
-    // 5. 桥接声音与通知提示（防止原文件报错）
+    // 5. 桥接声音与通知提示
     window.playSound = function(type) { console.log('播放提示音:', type); };
-    window.showNotification = function(text, type) { alert(text); };
+    window.showNotification = function(text, type) { console.log('全局通知:', text, type); };
 
     // 6. 核心自动化触发器：定时检测“对方给你发红包”与“红包过期”
     // 每 20 秒检查一次对方要不要给你发红包，以及有没有包过期
@@ -106,7 +117,7 @@
         }
     }, 20000);
 
-    // 每 15 秒检查一次，对方有没有把你发过去的pending红包给收了
+    // 每 1.5 秒检查一次，对方有没有把你发过去的pending红包给收了
     setInterval(function() {
         if (typeof window.tryCollectPendingRedPacket === 'function') {
             window.tryCollectPendingRedPacket();
