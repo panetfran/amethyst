@@ -160,7 +160,7 @@ function generateEnvelopeReplyText() {
     let replyContent = "";
     for (let i = 0; i < sentenceCount; i++) {
         const randomSentence = sourcePool[Math.floor(Math.random() * sourcePool.length)];
-        const punctuation = Math.random() < 0.2 ? "！" : (Math.random() < 0.2 ? "..." : "。");
+        const punctuation = Math.random() < 0.2 ? "..." : (Math.random() < 0.2 ? "，" : "。");
         replyContent += randomSentence + punctuation;
         if (Math.random() < 0.25 && i < sentenceCount - 1) {
             replyContent += "\n\n";
