@@ -648,7 +648,7 @@
 
         var festivals = getFestivals();
         var festival = festivals.length > 0 ? festivals[0] : null;
-        var chance = festival ? 0.8 : 0.05;
+        var chance = festival ? 0.85 : 0.25;
         if (Math.random() > chance) return false;
 
         var amount;
