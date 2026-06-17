@@ -815,4 +815,13 @@
 
     console.log('[RedPacket] 模块加载完成 ✦');
 
+// 每隔 5 分钟自动检查一次有没有过期的红包
+    setInterval(function() {
+        if (typeof window.checkRedPacketExpiry === 'function') {
+            window.checkRedPacketExpiry();
+        }
+    }, 5 * 60 * 1000);
+
+    
+
 })();
