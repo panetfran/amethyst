@@ -656,7 +656,7 @@
         if (Math.random() < (festival ? 0.9 : 0.4)) {
             amount = Math.round(SPECIAL_AMOUNTS[Math.floor(Math.random() * SPECIAL_AMOUNTS.length)] * 100);
         } else {
-            var maxYuan = Math.min(200, Math.floor(window.transferData.systemBalance / 100));
+            var maxYuan = Math.floor(window.transferData.systemBalance / 100);
             if (maxYuan <= 0) return false;
             amount = Math.floor(Math.random() * maxYuan * 100) + 1;
         }
