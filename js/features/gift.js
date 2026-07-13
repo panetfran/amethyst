@@ -263,43 +263,26 @@
         }, firstDelay);
     }
 
-    // ---------- 数据管理面板：重置计数 / 立即发送 ----------
-    function initGiftManagement() {
-        const resetBtn = document.getElementById('reset-gift-count-btn');
-        if (resetBtn) {
-            resetBtn.addEventListener('click', function() {
-                if (confirm('确定要重置今日礼物计数吗？\n\n重置后，今日可以继续收到新的随机礼物。')) {
-                    resetGiftCountToday();
-                    showNotification('✅ 今日礼物计数已重置', 'success', 3000);
-                }
-            });
-        }
-        const forceBtn = document.getElementById('force-send-gift-btn');
-        if (forceBtn) {
-            forceBtn.addEventListener('click', function() {
-                if (confirm('确定要立即发送一份礼物吗？')) {
-                    // 管理面板强制发送不受每日上限约束
-                    const randomImage = getRandomItem(GIFT_IMAGES);
-                    const randomText = getRandomItem(GIFT_TEXTS);
-                    if (!randomImage || !randomText) return;
-                    addMessage({
-                        id: Date.now() + Math.random(),
-                        type: 'gift',
-                        image: randomImage,
-                        text: randomText,
-                        opened: false,
-                        timestamp: new Date(),
-                        sender: settings.partnerName || '对方'
-                    });
-                    showNotification('💝 礼物已送出，快去聊天区看看吧~', 'success', 3000);
-                }
-            });
-        }
+    // ---------- 管理面板：不受每日上限约束的强制发送（由 data.js 的按钮调用） ----------
+    function forceSendGiftNow() {
+        const randomImage = getRandomItem(GIFT_IMAGES);
+        const randomText = getRandomItem(GIFT_TEXTS);
+        if (!randomImage || !randomText) return;
+        addMessage({
+            id: Date.now() + Math.random(),
+            type: 'gift',
+            image: randomImage,
+            text: randomText,
+            opened: false,
+            timestamp: new Date(),
+            sender: settings.partnerName || '对方'
+        });
+        showNotification('💝 礼物已送出，快去聊天区看看吧~', 'success', 3000);
     }
+    window.forceSendGiftNow = forceSendGiftNow;
 
     // getStorageKey 依赖 SESSION_ID，必须等会话初始化完成后再启动
     document.addEventListener('DOMContentLoaded', function() {
-        initGiftManagement();
         const waitReady = setInterval(function() {
             if (typeof SESSION_ID !== 'undefined' && SESSION_ID) {
                 clearInterval(waitReady);
