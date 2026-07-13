@@ -22,6 +22,9 @@
     <link rel="stylesheet" href="css/styles.css">
 
     <style id="css-live-preview-style"></style>
+
+<link rel="stylesheet" href="css/gift.css">
+    
 </head>
 <body>
 <div id="splash-declaration">
@@ -2066,7 +2069,18 @@
         </div>
     </div>
 
+<div id="gift-modal" onclick="closeGiftModal(event)">
+  <div class="gift-modal-content" onclick="event.stopPropagation()">
+    <img class="gift-modal-image" src="" alt="神秘礼物" />
+    <div class="gift-modal-text"></div>
+    <button class="gift-close-btn" onclick="closeGiftModal()">收下心意 ❤️</button>
+  </div>
+</div>
 
+
+
+
+        
 <div id="daily-greeting-modal" class="hidden">
     <div class="daily-greeting-card" id="daily-greeting-card">
         <div class="dg-card-bg-layer" id="dg-card-bg-layer"></div>
@@ -2143,6 +2157,9 @@
     <script src="js/config.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/state.js"></script>
+
+<script src="js/features/gift.js"></script>
+        
     <script src="js/core.js"></script>
 
     <!-- == 功能模块 == -->
