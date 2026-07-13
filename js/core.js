@@ -903,6 +903,29 @@ function manageAutoSendTimer() {
                     return;
                 }
 
+                if (msg.type === 'gift') {
+                    const giftWrapper = document.createElement('div');
+                    giftWrapper.className = 'gift-message-wrapper';
+                    giftWrapper.setAttribute('data-gift-id', msg.id);
+                    const giftCard = document.createElement('div');
+                    giftCard.className = 'gift-card' + (msg.opened ? ' opened' : '');
+                    giftCard.setAttribute('data-id', msg.id);
+                    giftCard.addEventListener('click', (function(id) {
+                        return function() { handleGiftCardClick(id); };
+                    })(msg.id));
+                    const iconDiv = document.createElement('div');
+                    iconDiv.className = 'gift-icon';
+                    iconDiv.innerHTML = `<i class="fas ${msg.opened ? 'fa-box-open' : 'fa-gift'}"></i>`;
+                    const label = document.createElement('span');
+                    label.className = 'gift-label';
+                    label.textContent = ' 一份神秘礼物 ';
+                    giftCard.appendChild(iconDiv);
+                    giftCard.appendChild(label);
+                    giftWrapper.appendChild(giftCard);
+                    fragment.appendChild(giftWrapper);
+                    lastSender = 'gift';
+                    return;
+                }
 
                     if (msg.type === 'gift') {
     const giftWrapper = document.createElement('div');
@@ -2027,4 +2050,3 @@ async function initializeSession() {
 
     await localforage.setItem(`${APP_PREFIX}lastSessionId`, SESSION_ID);
 }
-
