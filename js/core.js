@@ -903,6 +903,29 @@ function manageAutoSendTimer() {
                     return;
                 }
 
+
+                    if (msg.type === 'gift') {
+    const giftWrapper = document.createElement('div');
+    giftWrapper.className = 'gift-message-wrapper';
+    const giftCard = document.createElement('div');
+    giftCard.className = 'gift-card' + (msg.opened ? ' opened' : '');
+    giftCard.addEventListener('click', (function(id){ return function(){ handleGiftCardClick(id); }; })(msg.id));
+    const iconDiv = document.createElement('div');
+    iconDiv.className = 'gift-icon';
+    iconDiv.innerHTML = `<i class="fas ${msg.opened ? 'fa-box-open' : 'fa-gift'}"></i>`;
+    const label = document.createElement('span');
+    label.className = 'gift-label';
+    label.textContent = ' 一份神秘礼物 ';
+    giftCard.appendChild(iconDiv);
+    giftCard.appendChild(label);
+    giftWrapper.appendChild(giftCard);
+    fragment.appendChild(giftWrapper);
+    lastSender = 'gift';
+    return;
+}
+
+
+                    
                 let showTimestamp = true;
                 if (settings.timeFormat === 'off') {
                     showTimestamp = false;
