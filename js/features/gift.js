@@ -151,7 +151,7 @@
         '多依赖我一点吧。'
     ];
 
-    const MAX_DAILY_GIFTS = 3;                    // 每天最多几个礼物
+    const MAX_DAILY_GIFTS = 5;                    // 每天最多几个礼物
     const GIFT_MIN_INTERVAL = 30 * 60 * 1000;      // 两个礼物之间最小间隔
     const GIFT_MAX_INTERVAL = 120 * 60 * 1000;     // 最大间隔
 
