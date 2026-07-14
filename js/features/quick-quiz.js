@@ -90,7 +90,7 @@
         { id: 71, type: 'fill', question: '你喜欢什么体位姿势？' }
     ];
 
-    const DAILY_QUIZ_LIMIT = 2; // 每天最多弹出几次
+    const DAILY_QUIZ_LIMIT = 5; // 每天最多弹出几次
 
     // ─── 状态 ──────────────────────────────
     let currentQuiz = null;
