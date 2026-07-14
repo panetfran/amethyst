@@ -90,16 +90,6 @@
         +     '</button>'
         +   '</div>'
 
-        +   '<div class="dm-section-label"><i class="fas fa-clipboard-question"></i> 快问快答</div>'
-        +   '<div class="dm-danger-cards dm-danger-cards-row">'
-        +     '<button class="dm-danger-card" id="force-trigger-quiz-btn">'
-        +       '<div class="dm-danger-card-icon"><i class="fas fa-bolt"></i></div>'
-        +       '<div class="dm-danger-card-body">'
-        +         '<div class="dm-danger-card-title">立即出题</div>'
-        +         '<div class="dm-danger-card-desc">测试用，不占用每日额度</div>'
-        +       '</div>'
-        +     '</button>'
-        +   '</div>'
 
         +   '<div class="dm-section-label"><i class="fas fa-comment-dots"></i> 快问快答</div>'
         +   '<div class="dm-danger-cards dm-danger-cards-row">'
