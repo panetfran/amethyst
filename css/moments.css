@@ -1,0 +1,731 @@
+/* 朋友圈模态框 */
+#moments-modal .modal-content {
+    max-width: 550px;
+    max-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    padding: 0 !important;
+    overflow: hidden;
+    border-radius: 16px;
+}
+.moments-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--secondary-bg);
+    flex-shrink: 0;
+}
+.moments-header-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.moments-tabs {
+    display: flex;
+    background: var(--secondary-bg);
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+.moments-tab {
+    flex: 1;
+    padding: 11px 0;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    border-bottom: 2px solid transparent;
+}
+.moments-tab.active {
+    color: var(--accent-color);
+    border-bottom-color: var(--accent-color);
+    font-weight: 600;
+}
+.moments-content {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--primary-bg);
+    padding: 0;
+}
+/* 封面区域 */
+.moments-cover-wrap {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    margin-bottom: 22px; 
+    background: linear-gradient(135deg, #2c3e50, #34495e, #4a6fa5);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.moments-cover-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.moments-cover-change-btn {
+    position: absolute;
+    bottom: 10px;
+    left: 12px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.5);
+    background: rgba(0,0,0,0.35);
+    color: #fff;
+    font-size: 11px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    backdrop-filter: blur(4px);
+    transition: all 0.2s;
+}
+.moments-cover-change-btn:hover {
+    background: rgba(0,0,0,0.55);
+}
+.moments-avatar-inline {
+    position: absolute;
+    bottom: 0px;
+    right: 16px;
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    border: 3px solid var(--secondary-bg);
+    background: var(--accent-color);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.18);
+}
+.moments-avatar-inline img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.moments-avatar-inline i {
+    font-size: 22px;
+    color: #fff;
+}
+/* 朋友圈帖子 */
+.moment-post {
+    background: var(--secondary-bg);
+    margin: 0 0 10px 0;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.moment-post-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.moment-post-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: var(--accent-color);
+    flex-shrink: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.moment-post-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.moment-post-avatar i {
+    font-size: 18px;
+    color: #fff;
+}
+.moment-post-user {
+    flex: 1;
+    min-width: 0;
+}
+.moment-post-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent-color);
+    margin-bottom: 2px;
+}
+.moment-post-time {
+    font-size: 11px;
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+.moment-post-delete {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.4;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+.moment-post-delete:hover {
+    opacity: 1;
+    color: #ff4757;
+    background: rgba(255,71,87,0.1);
+}
+.moment-post-text {
+    font-size: 14px;
+    color: var(--text-primary);
+    line-height: 1.6;
+    margin-bottom: 10px;
+    word-break: break-word;
+}
+.moment-post-images {
+    display: grid;
+    gap: 4px;
+    margin-bottom: 10px;
+}
+.moment-post-images.grid-1 { grid-template-columns: 1fr; }
+.moment-post-images.grid-2 { grid-template-columns: 1fr 1fr; }
+.moment-post-images.grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+.moment-post-images.grid-4 { grid-template-columns: 1fr 1fr; }
+.moment-post-images.grid-5,
+.moment-post-images.grid-6 { grid-template-columns: 1fr 1fr 1fr; }
+.moment-post-images.grid-7,
+.moment-post-images.grid-8,
+.moment-post-images.grid-9 { grid-template-columns: 1fr 1fr 1fr; }
+.moment-post-img-wrap {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    padding-bottom: 100%;
+    height: 0;
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--border-color);
+}
+.moment-post-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: pointer;
+    display: block;
+}
+.moment-post-actions {
+    display: flex;
+    gap: 20px;
+    padding: 8px 0;
+    border-top: 1px solid var(--border-color);
+    margin-top: 8px;
+}
+.moment-action-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+.moment-action-btn:hover {
+    color: var(--accent-color);
+    background: rgba(var(--accent-color-rgb), 0.06);
+}
+.moment-action-btn.liked {
+    color: #e74c3c;
+}
+/* 评论区域 */
+.moment-comments {
+    background: var(--primary-bg);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-top: 6px;
+}
+.moment-comment {
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(var(--accent-color-rgb), 0.06);
+}
+.moment-comment:last-child {
+    border-bottom: none;
+}
+.moment-comment-author {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent-color);
+    margin-bottom: 3px;
+}
+.moment-comment-text {
+    font-size: 13px;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+.moment-comment-expand {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--accent-color);
+    cursor: pointer;
+    margin-top: 4px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(var(--accent-color-rgb), 0.2);
+    background: rgba(var(--accent-color-rgb), 0.04);
+    transition: all 0.2s;
+}
+.moment-comment-expand:hover {
+    background: rgba(var(--accent-color-rgb), 0.1);
+}
+.moment-comment-expanded {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    padding: 8px 10px;
+    margin-top: 6px;
+    background: rgba(var(--accent-color-rgb), 0.04);
+    border-radius: 8px;
+    border-left: 2px solid var(--accent-color);
+}
+.moment-comment-reply {
+    font-size: 11px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    margin-top: 4px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    transition: all 0.2s;
+}
+.moment-comment-reply:hover {
+    color: var(--accent-color);
+    background: rgba(var(--accent-color-rgb), 0.06);
+}
+/* 发布朋友圈 */
+.moments-publish-bar {
+    padding: 10px 16px;
+    border-top: 1px solid var(--border-color);
+    background: var(--secondary-bg);
+    flex-shrink: 0;
+    display: flex;
+    gap: 10px;
+}
+.moments-publish-btn {
+    flex: 1;
+    padding: 11px;
+    border-radius: 22px;
+    border: 1.5px dashed var(--accent-color);
+    background: rgba(var(--accent-color-rgb), 0.05);
+    color: var(--accent-color);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font-family);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+.moments-publish-btn:hover {
+    background: rgba(var(--accent-color-rgb), 0.12);
+    transform: translateY(-1px);
+}
+/* 发布编辑器 */
+.moments-editor-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99990;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.25s ease;
+}
+.moments-editor-overlay.active {
+    display: flex;
+}
+.moments-editor {
+    background: var(--secondary-bg);
+    border-radius: 20px;
+    width: 92%;
+    max-width: 480px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.4);
+    animation: modalContentSlideIn 0.3s ease forwards;
+    overflow: hidden;
+}
+.moments-editor-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+.moments-editor-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.moments-editor-close {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background: var(--primary-bg);
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+.moments-editor-close:hover {
+    background: var(--border-color);
+    color: var(--text-primary);
+}
+.moments-editor-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.moments-editor-textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 12px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--primary-bg);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-family: var(--font-family);
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+    line-height: 1.6;
+    box-sizing: border-box;
+}
+.moments-editor-textarea:focus {
+    border-color: var(--accent-color);
+}
+.moments-editor-images-preview {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 1fr;
+    gap: 8px;
+}
+.moments-editor-img-item {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    padding-bottom: 100%;
+    height: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid var(--border-color);
+    background: var(--primary-bg);
+}
+.moments-editor-img-item img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.moments-editor-img-remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+}
+.moments-editor-img-desc {
+    width: 100%;
+    padding: 4px 6px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 10px;
+    background: rgba(0,0,0,0.5);
+    color: #fff;
+    outline: none;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    box-sizing: border-box;
+}
+.moments-editor-add-img {
+    aspect-ratio: 1;
+    border-radius: 10px;
+    border: 2px dashed var(--border-color);
+    background: var(--primary-bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 11px;
+    gap: 4px;
+    transition: all 0.2s;
+}
+.moments-editor-add-img:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+.moments-editor-footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border-color);
+    flex-shrink: 0;
+    display: flex;
+    gap: 10px;
+}
+.moments-editor-submit {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    background: var(--accent-color);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font-family);
+    transition: all 0.2s;
+}
+.moments-editor-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.moments-editor-submit:hover:not(:disabled) {
+    opacity: 0.88;
+}
+/* 梦角封面管理 */
+.moments-cover-manager {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.moments-cover-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 1fr;
+    gap: 10px;
+}
+.moments-cover-option {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    padding-bottom: 62.5%;
+    height: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid var(--border-color);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.moments-cover-option.active {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(var(--accent-color-rgb), 0.3);
+}
+.moments-cover-option img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.moments-cover-option .cover-option-delete {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.5);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+.moments-cover-option:hover .cover-option-delete {
+    opacity: 1;
+}
+.moments-cover-add {
+    aspect-ratio: 16/10;
+    border-radius: 10px;
+    border: 2px dashed var(--border-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 11px;
+    gap: 4px;
+    transition: all 0.2s;
+}
+.moments-cover-add:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+/* 梦角图片池管理 */
+.moments-image-pool {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 1fr;
+    gap: 10px;
+    padding: 16px;
+}
+.moments-pool-item {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    padding-bottom: 100%;
+    height: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid var(--border-color);
+}
+.moments-pool-item img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+}
+.moments-pool-item-desc {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    font-size: 9px;
+    padding: 3px 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.moments-pool-item-delete {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.5);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+.moments-pool-item:hover .moments-pool-item-delete {
+    opacity: 1;
+}
+/* 空状态 */
+.moments-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+.moments-empty i {
+    font-size: 48px;
+    opacity: 0.25;
+    margin-bottom: 12px;
+}
+.moments-empty p {
+    font-size: 14px;
+    font-weight: 500;
+}
+.moments-empty span {
+    font-size: 12px;
+    opacity: 0.6;
+    margin-top: 4px;
+}
+.moments-partner-actions {
+    padding: 12px 16px;
+    display: flex;
+    gap: 8px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--secondary-bg);
+    flex-shrink: 0;
+}
+.moments-partner-action-btn {
+    flex: 1;
+    padding: 8px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: var(--primary-bg);
+    color: var(--text-primary);
+    font-size: 11px;
+    cursor: pointer;
+    font-family: var(--font-family);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: all 0.2s;
+}
+.moments-partner-action-btn:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
