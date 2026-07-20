@@ -20,7 +20,7 @@
         { id: 2, type: 'choice', question: '拥抱时，你喜欢从背后抱还是面对面紧抱？', options: ['从背后抱', '面对面紧抱', '不喜欢拥抱'] },
         { id: 3, type: 'choice', question: '亲吻时，你喜欢轻吻还是深吻？', options: ['轻吻', '深吻', '不喜欢亲吻'] },
         { id: 4, type: 'choice', question: '对视时，你会先笑还是先移开目光？', options: ['先笑', '先移开目光', '不会对视'] },
-        { id: 5, type: 'choice', question: '睡觉时，你喜欢枕我手臂还是自己枕枕头？', options: ['枕你手臂', '自己枕枕头', '喜欢自己一个人睡一张床'] },
+        { id: 5, type: 'choice', question: '睡觉时，你喜欢抱着我还是自己枕枕头？', options: ['抱着你', '自己枕枕头', '喜欢自己一个人睡一张床'] },
         { id: 6, type: 'choice', question: '我靠近时，你本能是迎上来还是向后退？', options: ['迎上来', '向后退', '站着不动等你'] },
         { id: 7, type: 'choice', question: '吵架时，你想先抱我还是先讲道理？', options: ['先抱你', '先讲道理', '不理你'] },
         { id: 8, type: 'choice', question: '难过时，你需要我说话还是安静陪着？', options: ['需要你安慰我', '需要你安静陪着我', '需要我自己一个人安静呆着'] },
@@ -28,17 +28,17 @@
         { id: 10, type: 'choice', question: '约会时，你更希望我精心计划还是随性而为？', options: ['精心计划', '随性而为'] },
         { id: 11, type: 'choice', question: '表达爱时，你希望我更常说"我爱你"还是多用行动？', options: ['"我爱你"', '行动', '"我爱你"，以及行动'] },
         { id: 12, type: 'choice', question: '想念时，你会立刻联系我还是先忍着？', options: ['立刻联系', '先忍着'] },
-        { id: 13, type: 'choice', question: '额头吻 vs 鼻尖吻', options: ['额头吻', '鼻尖吻'] },
-        { id: 14, type: 'choice', question: '早起共进早餐 vs 深夜一起吃宵夜', options: ['早起共进早餐', '深夜一起吃宵夜', '我全都要'] },
+        { id: 13, type: 'choice', question: '喜欢额头吻还是鼻尖吻？', options: ['额头吻', '鼻尖吻'] },
+        { id: 14, type: 'choice', question: '想要我们早起共进早餐还是深夜一起吃宵夜？', options: ['早起共进早餐', '深夜一起吃宵夜', '我全都要'] },
         { id: 15, type: 'choice', question: '我为你做饭 vs 你为我做饭', options: ['我为你做饭', '你为我做饭'] },
-        { id: 16, type: 'choice', question: '你希望我：公开晒恩爱 vs 私下默默甜', options: ['公开晒恩爱', '私下默默甜'] },
-        { id: 17, type: 'choice', question: '纪念日大惊喜 vs 日常小浪漫', options: ['纪念日大惊喜', '日常小浪漫'] },
-        { id: 18, type: 'choice', question: '长途旅行冒险 vs 宅家温馨周末', options: ['长途旅行冒险', '宅家温馨周末'] },
-        { id: 19, type: 'choice', question: '你更希望我：聪明幽默 vs 温柔体贴', options: ['聪明幽默', '温柔体贴', '我全都要', '你现在这样就很好'] },
-        { id: 20, type: 'choice', question: '你希望我们：相似互补 vs 志趣相投', options: ['相似互补', '志趣相投'] },
-        { id: 21, type: 'choice', question: '我们的关系中，你更想要：被我需要的感觉 vs 被我崇拜的感觉', options: ['被你需要的感觉', '被你崇拜的感觉', '我全都要', '这两种感觉我都不需要'] },
-        { id: 22, type: 'choice', question: '热烈的初恋感 vs 默契的老夫老妻感', options: ['热烈的初恋感', '默契的老夫老妻感'] },
-        { id: 23, type: 'choice', question: '我为你改变缺点 vs 接纳我的全部', options: ['你为我改变缺点', '接纳你的全部'] },
+        { id: 16, type: 'choice', question: '你希望我公开关系还是我们知道就好', options: ['公开', '不公开'] },
+        { id: 17, type: 'choice', question: '想要纪念日大惊喜还是日常小浪漫？', options: ['纪念日大惊喜', '日常小浪漫'] },
+        { id: 18, type: 'choice', question: '想要长途旅行冒险还是宅家温馨周末？', options: ['长途旅行冒险', '宅家温馨周末'] },
+        { id: 19, type: 'choice', question: '你更希望我更幽默还是温柔体贴', options: ['幽默', '温柔体贴', '我全都要', '你现在这样就很好'] },
+        { id: 20, type: 'choice', question: '你希望我们相似互补还是志趣相投？', options: ['相似互补', '志趣相投'] },
+        { id: 21, type: 'choice', question: '我们的关系中，你更想要被我需要的感觉还是被我崇拜的感觉？', options: ['被你需要的感觉', '被你崇拜的感觉', '我全都要', '这两种感觉我都不需要'] },
+        { id: 22, type: 'choice', question: '想要热烈的初恋感还是默契感', options: ['热烈的初恋感', '默契感'] },
+        { id: 23, type: 'choice', question: '想要我为你改变缺点还是接纳我的全部？', options: ['你为我改变缺点', '接纳你的全部'] },
         { id: 24, type: 'choice', question: '我吃醋时，你觉得可爱还是麻烦？', options: ['可爱', '麻烦'] },
         { id: 25, type: 'choice', question: '我粘人时，你享受还是觉得烦？', options: ['享受', '烦'] },
         // 填空题
@@ -86,7 +86,7 @@
         { id: 67, type: 'fill', question: '你还喜欢我这张脸吗？' },
         { id: 68, type: 'fill', question: '你喜欢我现在的身材吗？' },
         { id: 69, type: 'fill', question: '有坏东西欺负我，你会帮我吗？' },
-        { id: 70, type: 'fill', question: '我为我们求了姻缘，是上上签，你会觉得我迷信吗？' },
+        { id: 70, type: 'fill', question: '我为我们求了姻缘，是上上签哦。' },
         { id: 71, type: 'fill', question: '你喜欢什么体位姿势？' },
         // ↓↓↓ 新增题目 ↓↓↓
         { id: 72, type: 'choice', question: '早上被吵醒，你会生气还是笑着起床？', options: ['生气', '笑着起床', '装睡赖床'] },
@@ -127,13 +127,13 @@
         // ↓↓↓ 第二批新增：日常习惯 ↓↓↓
         { id: 106, type: 'choice', question: '周末你更想宅家还是出门？', options: ['宅家', '出门', '看心情'] },
         { id: 107, type: 'choice', question: '洗澡你更喜欢泡澡还是淋浴？', options: ['泡澡', '淋浴', '看时间'] },
-        { id: 108, type: 'choice', question: '你是晨型人还是夜猫子？', options: ['晨型人', '夜猫子', '两头都不占'] },
+        { id: 108, type: 'choice', question: '今天要早睡还是熬夜', options: ['早点休息', '熬夜', '还没想好'] },
         { id: 109, type: 'choice', question: '做家务，你更愿意做饭还是打扫？', options: ['做饭', '打扫', '都不太想做'] },
         { id: 110, type: 'choice', question: '出门旅行，你更喜欢做攻略还是随性走？', options: ['做详细攻略', '随性走', '大致方向就好'] },
         { id: 111, type: 'choice', question: '花钱风格，你更偏向存钱还是及时享乐？', options: ['存钱', '及时享乐', '看情况平衡'] },
         { id: 112, type: 'choice', question: '养宠物的话，你更想养猫还是狗？', options: ['猫', '狗', '什么都不想养'] },
         { id: 113, type: 'choice', question: '你更喜欢安静的小房子还是热闹的大城市？', options: ['安静小房子', '热闹大城市', '两者之间都行'] },
-        { id: 114, type: 'choice', question: '你觉得自己更像"社牛"还是"社恐"？', options: ['社牛', '社恐', '看跟谁在一起'] },
+        { id: 114, type: 'choice', question: '今天想吃什么口味？', options: ['清淡的', '重一点的', '还没想好'] },
         { id: 115, type: 'choice', question: '睡前你更喜欢刷手机还是看书？', options: ['刷手机', '看书', '直接睡'] },
         { id: 116, type: 'fill', question: '你今天几点起床的？' },
         { id: 117, type: 'fill', question: '你今天有没有喝够水？' },
@@ -142,7 +142,7 @@
         { id: 120, type: 'fill', question: '你最近的作息规律吗？' },
 
         // ↓↓↓ 第三批新增：互动撒娇（双向）↓↓↓
-        { id: 121, type: 'fill', question: '撒个娇给我听听？' },
+        { id: 121, type: 'fill', question: '撒个娇嘛。' },
         { id: 122, type: 'fill', question: '喊我一声"宝贝"或者你喜欢的称呼吧？' },
         { id: 123, type: 'fill', question: '我不理你了，你会怎么哄我？' },
         { id: 124, type: 'fill', question: '如果我突然抱住你不撒手，你会怎么反应？' },
@@ -164,7 +164,7 @@
         { id: 140, type: 'fill', question: '如果我突然emo了，你会说什么哄我？' },
 
         // ↓↓↓ 第四批新增：严肃谈未来 ↓↓↓
-        { id: 141, type: 'choice', question: '你觉得婚姻对你们的关系重要吗？', options: ['很重要，一定要', '不是必须，看情况', '不需要，感情最重要'] },
+        { id: 141, type: 'choice', question: '你觉得婚姻对我们的关系重要吗？', options: ['很重要，一定要', '不是必须，看情况', '不需要，感情最重要'] },
         { id: 142, type: 'choice', question: '未来想不想要小孩？', options: ['想要', '不想要', '还没想好'] },
         { id: 143, type: 'choice', question: '事业和感情，你会优先哪一个？', options: ['事业优先', '感情优先', '想办法平衡'] },
         { id: 144, type: 'choice', question: '如果要为了我换城市生活，你愿意吗？', options: ['愿意', '需要认真考虑', '很难做到'] },
@@ -190,7 +190,7 @@
         { id: 162, type: 'choice', question: '被冷落时，你会直接说出来还是自己憋着？', options: ['直接说出来', '自己憋着', '用行动暗示'] },
         { id: 163, type: 'choice', question: '你更害怕被讨厌，还是害怕被忽视？', options: ['被讨厌', '被忽视', '都很怕'] },
         { id: 164, type: 'fill', question: '你对我有没有什么隐藏的不安？可以说出来。' },
-        { id: 165, type: 'fill', question: '什么样的举动会让你瞬间没有安全感？' },
+        { id: 165, type: 'fill', question: '什么样的举动会让你没有安全感？' },
         { id: 166, type: 'fill', question: '你觉得自己在感情里是付出更多，还是索取更多？' },
         { id: 167, type: 'fill', question: '有没有什么话，你怕说出来会破坏气氛，但其实很想说？' },
         { id: 168, type: 'fill', question: '你希望被爱的方式是什么样的？' },
@@ -207,7 +207,7 @@
         { id: 177, type: 'choice', question: '如果只能保留一种感官，你选？', options: ['视觉', '听觉', '触觉'] },
         { id: 178, type: 'choice', question: '穿越到古代还是未来，你选哪个？', options: ['古代', '未来', '哪都不去，待在现在'] },
         { id: 179, type: 'choice', question: '如果变成一种动物一天，你想变成什么？', options: ['猫', '鸟', '别的什么'] },
-        { id: 180, type: 'choice', question: '中了一笔小奖金，你会先干嘛？', options: ['存起来', '买东西犒劳自己', '带你一起花掉'] },
+        { id: 180, type: 'choice', question: '中了一笔小奖金，你会先干什么？', options: ['存起来', '买东西犒劳自己', '带你一起花掉'] },
         { id: 181, type: 'fill', question: '如果有超能力，你想要什么能力？' },
         { id: 182, type: 'fill', question: '如果我们能合体开一家店，你想开什么店？' },
         { id: 183, type: 'fill', question: '用三个词形容今天的自己。' },
@@ -215,8 +215,8 @@
         { id: 185, type: 'fill', question: '如果能跟任何一个虚构角色交换身份一天，你想换谁？' },
         { id: 186, type: 'fill', question: '如果我们要去无人岛只能带三样东西，你会带什么？' },
         { id: 187, type: 'fill', question: '编一个只属于我们两个人的"接头暗号"。' },
-        { id: 188, type: 'fill', question: '如果给彼此取一个中二的称号，你会取什么？' },
-        { id: 189, type: 'fill', question: '随便说一句冷笑话逗我开心。' },
+        { id: 188, type: 'fill', question: '如果给彼此取一个绰号，你会给我取什么？' },
+        { id: 189, type: 'fill', question: '给我分享一下最近有感悟的一句话吧。' },
         { id: 190, type: 'fill', question: '如果我们要合作写一本书，书名会是什么？' },
 
         // ↓↓↓ 收尾补充：混合类型 ↓↓↓
@@ -232,7 +232,7 @@
         { id: 200, type: 'fill', question: '此刻，想跟我说的最后一句话是什么？' }
     ];
 
-    const DAILY_QUIZ_LIMIT = 2; // 每天最多弹出几次
+    const DAILY_QUIZ_LIMIT = 6; // 每天最多弹出几次
 
     // ─── 状态 ──────────────────────────────
     let currentQuiz = null;
@@ -348,7 +348,7 @@
             }
         }
 
-        totalTime = question.type === 'choice' ? 7 : 60;
+        totalTime = question.type === 'choice' ? 30 : 90;
         timeLeft = totalTime;
         updateTimerBar();
 
