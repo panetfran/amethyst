@@ -1,0 +1,131 @@
+/* ==================== 壁纸页样式 ==================== */
+
+#app-swipe-root { width: 400vw; } /* 覆盖 app-nav.css 里原本的 300vw：现在是 壁纸+占位+互动+工具 四屏 */
+
+.app-page-wallpaper-wrap {
+    width: 100vw;
+    height: 100%;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    background: #fff;
+}
+
+#wallpaper-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transition: background-image 0.4s ease;
+}
+
+#wallpaper-clock-wrap {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    pointer-events: none;
+}
+#wallpaper-time {
+    font-size: 64px;
+    font-weight: 200;
+    color: #222;
+    letter-spacing: 2px;
+    font-variant-numeric: tabular-nums;
+}
+#wallpaper-date {
+    font-size: 14px;
+    color: #888;
+    letter-spacing: 1px;
+}
+
+/* 管理入口：壁纸页右上角一个小小的齿轮/照片按钮，不上传图片时也能点 */
+#wallpaper-manage-btn {
+    position: absolute;
+    top: env(safe-area-inset-top, 16px);
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.06);
+    color: #555;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    cursor: pointer;
+    z-index: 5;
+    backdrop-filter: blur(6px);
+}
+#wallpaper-manage-btn.on-image {
+    background: rgba(255,255,255,0.25);
+    color: #fff;
+}
+
+/* 壁纸管理弹窗 */
+#wallpaper-mgr-overlay {
+    position: fixed; inset: 0; z-index: 99999;
+    background: rgba(0,0,0,0.55); backdrop-filter: blur(10px);
+    display: none; align-items: center; justify-content: center;
+}
+#wallpaper-mgr-overlay.active { display: flex; }
+.wallpaper-mgr-box {
+    background: var(--secondary-bg);
+    border-radius: 24px;
+    padding: 22px;
+    width: 88%;
+    max-width: 380px;
+    max-height: 78vh;
+    display: flex;
+    flex-direction: column;
+}
+.wallpaper-mgr-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+}
+.wallpaper-mgr-title { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+.wallpaper-mgr-header button {
+    width: 28px; height: 28px; border-radius: 50%; border: none;
+    background: var(--primary-bg); color: var(--text-secondary); cursor: pointer;
+}
+#wallpaper-mgr-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    overflow-y: auto;
+    margin-bottom: 14px;
+    padding: 2px;
+}
+.wallpaper-mgr-item {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    padding-bottom: 100%;
+    height: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+.wallpaper-mgr-item img {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    object-fit: cover; display: block;
+}
+.wallpaper-mgr-del {
+    position: absolute; top: 3px; right: 3px;
+    width: 18px; height: 18px; border-radius: 50%; border: none;
+    background: rgba(0,0,0,0.55); color: #fff; font-size: 9px;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.wallpaper-mgr-actions { display: flex; gap: 8px; }
+.wallpaper-mgr-actions button {
+    flex: 1; padding: 10px; border-radius: 12px; border: 1px solid var(--border-color);
+    background: var(--primary-bg); color: var(--text-primary); font-size: 12.5px;
+    cursor: pointer; font-family: var(--font-family);
+}
+.wallpaper-mgr-actions button:hover { border-color: var(--accent-color); color: var(--accent-color); }
