@@ -1,0 +1,112 @@
+/* ==================== 主界面滑动导航样式 ==================== */
+
+#app-swipe-root {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 300vw;
+    height: 100%;
+    display: flex;
+    z-index: 500; /* 盖在聊天页上面，但要低于弹窗/modal的z-index */
+    will-change: transform;
+}
+
+#app-page-spacer {
+    width: 100vw;
+    height: 100%;
+    flex-shrink: 0;
+    background: transparent;
+}
+
+.app-page {
+    width: 100vw;
+    height: 100%;
+    flex-shrink: 0;
+    background: var(--primary-bg);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    box-sizing: border-box;
+    padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
+}
+
+.app-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px 12px;
+    flex-shrink: 0;
+}
+.app-page-title {
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.app-page-title i { color: var(--accent-color); font-size: 17px; }
+
+.app-page-dots {
+    display: flex;
+    gap: 6px;
+}
+.app-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--border-color);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.app-dot.active {
+    width: 18px;
+    border-radius: 4px;
+    background: var(--accent-color);
+}
+
+.app-page-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    padding: 8px 20px 30px;
+    align-content: start;
+}
+
+/* 复用原本 .settings-item 的基础外观，但按图标应用格摆放调整一下比例 */
+.app-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--secondary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 16px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.app-tile:active { transform: scale(0.95); }
+.app-tile i {
+    font-size: 22px;
+    color: var(--accent-color);
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(var(--accent-color-rgb), 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.app-tile span {
+    font-size: 12px;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+@media (max-width: 380px) {
+    .app-page-grid { grid-template-columns: repeat(2, 1fr); }
+}
