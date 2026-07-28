@@ -1,0 +1,86 @@
+/* ==================== 绘世样式 ==================== */
+
+#art-gallery-modal .modal-content { max-width: 480px; max-height: 85vh; display: flex; flex-direction: column; }
+#art-gallery-list {
+    flex: 1;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    padding: 6px 2px;
+}
+
+.art-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--text-secondary);
+}
+.art-empty i { font-size: 34px; opacity: 0.35; margin-bottom: 10px; display: block; }
+.art-empty p { font-size: 14px; font-weight: 600; margin-bottom: 4px; color: var(--text-primary); }
+.art-empty span { font-size: 12px; opacity: 0.75; }
+
+.art-card {
+    background: var(--secondary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.art-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+
+.art-thumb {
+    width: 100%;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-bg);
+    padding: 10px;
+    box-sizing: border-box;
+}
+.art-thumb svg { max-width: 100%; max-height: 100%; }
+/* 画布本身的形状（圆形/椭圆）已经在SVG内部用clip-path处理了，
+   缩略图容器统一用方形格子摆放，保持画廊整齐 */
+
+.art-card-meta { padding: 8px 12px 12px; }
+.art-card-time { font-size: 10.5px; color: var(--text-secondary); margin-bottom: 4px; }
+.art-card-comment {
+    font-size: 12px;
+    color: var(--text-primary);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* 查看大图弹窗 */
+#art-view-modal .modal-content { max-width: 400px; text-align: center; }
+.art-view-canvas {
+    width: 100%;
+    max-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-bg);
+    border-radius: 16px;
+    padding: 14px;
+    box-sizing: border-box;
+    margin-bottom: 14px;
+}
+.art-view-canvas svg { max-width: 100%; max-height: 55vh; }
+
+#art-view-time { font-size: 11px; color: var(--text-secondary); margin-bottom: 8px; }
+#art-view-comment {
+    font-size: 14px;
+    color: var(--text-primary);
+    line-height: 1.7;
+    padding: 0 6px;
+    margin-bottom: 16px;
+}
+
+@media (max-width: 380px) {
+    #art-gallery-list { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+}
