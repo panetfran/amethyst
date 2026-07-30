@@ -630,10 +630,18 @@
         }
         ctx.restore();
 
+        // 如果这个位置正好跟某个地点重合（比如"移动我的位置"移到了具体地点上），
+        // 地点自己的名字标签画在 y+32，这里就往下多让开一截，不然两行字会叠在一起
+        var labelOffset = 34;
+        try {
+            var nearby = (curMap().locations || []).some(function (loc) { return dist(loc.x, loc.y, x, y) < 6; });
+            if (nearby) labelOffset = 50;
+        } catch (e) {}
+
         ctx.fillStyle = '#1a1a1a';
         ctx.font = '600 11px "Noto Serif SC", serif';
         ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-        ctx.fillText(label, x, y + 34);
+        ctx.fillText(label, x, y + labelOffset);
     }
 
     // ==================== 跳转 ====================
