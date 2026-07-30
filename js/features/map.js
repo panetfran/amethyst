@@ -2238,7 +2238,7 @@
         scheduleNextTaCheck();
     }
 
-    var TA_MOVE_CHANCE = 0.35; // 每次检查，真的挪动一次的概率
+    var TA_MOVE_CHANCE = 0.5; // 每次检查，真的挪动一次的概率
 
     function getNextCheckKey() {
         return (typeof getStorageKey === 'function') ? getStorageKey('mapTaNextCheckTime') : 'mapTaNextCheckTime';
