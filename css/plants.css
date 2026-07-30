@@ -50,3 +50,37 @@
 .pl-empty { text-align: center; color: var(--text-secondary); font-size: 12px; padding: 16px 0; }
 
 .pl-log-actor { color: var(--accent-color); font-weight: 700; margin-right: 2px; }
+
+/* 开花提示 */
+.pl-flower-badge {
+    text-align: center; font-size: 12px; color: #d16b93;
+    background: rgba(244,166,193,0.15); border-radius: 10px;
+    padding: 6px 10px; margin-bottom: 10px;
+}
+
+/* 成就徽章 */
+.pl-milestones {
+    display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;
+    margin-bottom: 14px;
+}
+.pl-milestone-badge {
+    font-size: 10.5px; color: var(--accent-color);
+    background: rgba(var(--accent-color-rgb), 0.1);
+    border-radius: 10px; padding: 4px 9px;
+    display: flex; align-items: center; gap: 4px;
+}
+.pl-milestone-badge i { font-size: 10px; }
+
+/* 分株按钮 */
+.pl-list-btn {
+    width: 100%; display: flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: 11px; margin-bottom: 14px;
+    border: 1px dashed var(--accent-color); border-radius: 12px;
+    background: rgba(var(--accent-color-rgb), 0.06); color: var(--accent-color);
+    font-size: 13px; font-weight: 600; cursor: pointer; font-family: var(--font-family);
+}
+.pl-list-btn.disabled {
+    border-color: var(--border-color); color: var(--text-secondary);
+    background: var(--primary-bg); cursor: not-allowed;
+}
+.pl-list-btn small { font-size: 10px; font-weight: 400; opacity: 0.8; }
