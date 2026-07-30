@@ -218,7 +218,7 @@
 
     // ─── 随机后台触发 ──────────────────────
     function scheduleNextPainting() {
-        const delay = (2 + Math.random() * 5) * 60 * 60 * 1000; // 2~7小时检查一次
+        const delay = (1 + Math.random() * 4) * 60 * 60 * 1000; // 1～5小时检查一次
         setTimeout(() => {
             if (Math.random() < 0.5) paintNewOne(false); // 50%概率真的画
             scheduleNextPainting();
