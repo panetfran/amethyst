@@ -70,10 +70,12 @@
             plants: [
                 { id: 'p1', species: 'dracaena', nickname: '巴西木', plantedAt: now,
                   moisture: 70, nutrients: 60, sunlight: 60, soil: 70, health: 70, stage: 1,
-                  lastWater: 0, lastFertilize: 0, lastLoosen: 0, lastSun: 0, log: [] },
+                  lastWater: 0, lastFertilize: 0, lastLoosen: 0, lastSun: 0, lastDivide: 0,
+                  careCount: 0, flowering: null, milestones: [], log: [] },
                 { id: 'p2', species: 'sansevieria', nickname: '虎尾兰', plantedAt: now,
                   moisture: 70, nutrients: 60, sunlight: 60, soil: 70, health: 70, stage: 1,
-                  lastWater: 0, lastFertilize: 0, lastLoosen: 0, lastSun: 0, log: [] }
+                  lastWater: 0, lastFertilize: 0, lastLoosen: 0, lastSun: 0, lastDivide: 0,
+                  careCount: 0, flowering: null, milestones: [], log: [] }
             ],
             lastTick: now
         };
@@ -84,9 +86,19 @@
             if (typeof localforage === 'undefined') { state = freshState(); resolve(); return; }
             localforage.getItem(storageKey()).then(function (saved) {
                 state = (saved && saved.plants) ? saved : freshState();
+                normalizeState();
                 applyDecay();
                 resolve();
             }).catch(function () { state = freshState(); resolve(); });
+        });
+    }
+    function normalizeState() {
+        // 兼容旧存档：老数据里没有这几个新字段，缺了就补上默认值，不然后面代码会报错
+        state.plants.forEach(function (p) {
+            if (typeof p.careCount !== 'number') p.careCount = 0;
+            if (!p.milestones) p.milestones = [];
+            if (typeof p.lastDivide !== 'number') p.lastDivide = 0;
+            if (p.flowering === undefined) p.flowering = null;
         });
     }
     function saveState() {
@@ -123,9 +135,59 @@
                 addLog(p, pick(GROWTH_LOG_LINES.levelUp));
             } else if (p.health < 30 && oldHealth >= 30) {
                 addLog(p, pick(GROWTH_LOG_LINES.wilting));
+                // 健康度掉下去了，花期也提前结束
+                if (p.flowering) { p.flowering = null; }
             }
+
+            // 开花：只有茂盛阶段(4)、健康度足够高才可能开花；花期持续几天后自动谢
+            if (p.flowering) {
+                var floweringDays = (now - p.flowering.startedAt) / (1000 * 60 * 60 * 24);
+                if (floweringDays >= p.flowering.durationDays) {
+                    p.flowering = null;
+                    addLog(p, '花谢了，又变回了熟悉的绿色模样。');
+                }
+            } else if (p.stage === 4 && p.health >= 80 && hoursPassed > 0) {
+                // 按小时累积开花概率，不用等到下次固定周期检查才有机会
+                var flowerChancePerHour = 0.0015; // 大约平均一两周会开一次
+                if (Math.random() < flowerChancePerHour * hoursPassed) {
+                    p.flowering = { startedAt: now, durationDays: 3 + Math.floor(Math.random() * 4) };
+                    addLog(p, '悄悄开出了几朵小花！', 'system');
+                    checkMilestone(p, 'flowered');
+                }
+            }
+
+            checkMilestones(p, now);
         });
         state.lastTick = now;
+    }
+
+    var MILESTONES = {
+        care10: { label: '悉心照料', icon: 'fa-hand-holding-heart', desc: '累计照顾满10次' },
+        care50: { label: '养护达人', icon: 'fa-medal', desc: '累计照顾满50次' },
+        planted7: { label: '陪伴一周', icon: 'fa-calendar-week', desc: '养了满7天' },
+        planted30: { label: '陪伴一月', icon: 'fa-calendar-days', desc: '养了满30天' },
+        planted100: { label: '陪伴百日', icon: 'fa-calendar-check', desc: '养了满100天' },
+        stage4: { label: '茁壮成长', icon: 'fa-seedling', desc: '长到了茂盛阶段' },
+        flowered: { label: '初次绽放', icon: 'fa-fan', desc: '第一次开花' },
+        divided: { label: '开枝散叶', icon: 'fa-code-branch', desc: '成功分株一次' }
+    };
+
+    function grantMilestone(p, key) {
+        if (p.milestones.indexOf(key) !== -1) return;
+        p.milestones.push(key);
+        var m = MILESTONES[key];
+        if (m) addLog(p, '🏅 达成"' + m.label + '"');
+    }
+    function checkMilestone(p, key) { grantMilestone(p, key); }
+
+    function checkMilestones(p, now) {
+        if (p.careCount >= 10) grantMilestone(p, 'care10');
+        if (p.careCount >= 50) grantMilestone(p, 'care50');
+        var days = (now - p.plantedAt) / (1000 * 60 * 60 * 24);
+        if (days >= 7) grantMilestone(p, 'planted7');
+        if (days >= 30) grantMilestone(p, 'planted30');
+        if (days >= 100) grantMilestone(p, 'planted100');
+        if (p.stage >= 4) grantMilestone(p, 'stage4');
     }
 
     function addLog(p, text, actor) {
@@ -155,11 +217,44 @@
         return hoursSince(last) >= cooldownHrs;
     }
 
+    var DIVIDE_COOLDOWN_HRS = 24 * 45; // 45天才能再分一次株
+    var MAX_PLANTS = 6; // 植株数量上限，防止分株无限繁殖把列表撑爆
+    var DIVIDE_NICKNAMES = ['新苗', '小苗苗', '分身'];
+
+    function divideePlant(parent) {
+        if (state.plants.length >= MAX_PLANTS) {
+            if (typeof showNotification === 'function') showNotification('植株数量已经到上限啦', 'warning');
+            return;
+        }
+        var now = Date.now();
+        var sp = SPECIES[parent.species];
+        var childNickname = parent.nickname + '·' + pick(DIVIDE_NICKNAMES);
+        var child = {
+            id: 'p_' + now + '_' + Math.floor(Math.random() * 10000),
+            species: parent.species,
+            nickname: childNickname,
+            plantedAt: now,
+            moisture: 60, nutrients: 50, sunlight: 50, soil: 60, health: 55, stage: 1,
+            lastWater: 0, lastFertilize: 0, lastLoosen: 0, lastSun: 0, lastDivide: 0,
+            careCount: 0, flowering: null, milestones: [], log: []
+        };
+        addLog(child, '从' + parent.nickname + '身上分出来的一株新苗，开始独自生长。');
+        state.plants.push(child);
+
+        parent.lastDivide = now;
+        addLog(parent, '分出了一株新苗，' + sp.name + '就是这样慢慢"开枝散叶"的。');
+        grantMilestone(parent, 'divided');
+
+        saveState();
+        if (typeof showNotification === 'function') showNotification('分株成功！多了一株"' + childNickname + '"', 'success', 3500);
+    }
+
     function doAction(p, actionKey, actor) {
         var a = ACTIONS[actionKey];
         if (!canDo(p, actionKey)) return false;
         p[a.field] = clamp(p[a.field] + a.gain, 0, 100);
         p[a.lastField] = Date.now();
+        p.careCount = (p.careCount || 0) + 1;
         addLog(p, pick(GROWTH_LOG_LINES[actionKey]), actor || 'me');
         applyDecay();
         saveState();
@@ -167,7 +262,7 @@
     }
 
     // ==================== SVG 植株形态 ====================
-    function plantSvg(species, stage, health) {
+    function plantSvg(species, stage, health, flowering) {
         var sp = SPECIES[species];
         var color = sp.color;
         var wilted = health < 30;
@@ -175,6 +270,7 @@
         var potColor = '#c98a5e';
 
         var leaves = '';
+        var flowers = '';
         var leafCount = stage; // 1~4
         var baseY = 150;
         for (var i = 0; i < leafCount + 2; i++) {
@@ -184,6 +280,10 @@
             var ly = baseY - Math.cos(angle) * len;
             leaves += '<path d="M100,' + baseY + ' Q' + (100 + Math.sin(angle) * len * 0.3) + ',' + (baseY - len * 0.6) + ' ' + lx + ',' + ly + '" '
                 + 'stroke="' + leafColor + '" stroke-width="' + (6 - stage * 0.5) + '" fill="none" stroke-linecap="round" opacity="' + (wilted ? 0.55 : 0.9) + '"/>';
+            if (flowering && !wilted && i % 2 === 0) {
+                flowers += '<circle cx="' + lx + '" cy="' + ly + '" r="5" fill="#f4a6c1"/>'
+                    + '<circle cx="' + lx + '" cy="' + ly + '" r="2" fill="#fff2a8"/>';
+            }
         }
 
         return '<svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">'
@@ -191,6 +291,7 @@
             + '<path d="M65,150 L75,205 L125,205 L135,150 Z" fill="' + potColor + '"/>'
             + '<rect x="60" y="140" width="80" height="14" rx="4" fill="' + potColor + '"/>'
             + leaves
+            + flowers
             + '</svg>';
     }
 
@@ -258,7 +359,7 @@
         wrap.innerHTML = state.plants.map(function (p) {
             var sp = SPECIES[p.species];
             return '<div class="pl-card" data-id="' + p.id + '">'
-                + '<div class="pl-card-svg">' + plantSvg(p.species, p.stage, p.health) + '</div>'
+                + '<div class="pl-card-svg">' + plantSvg(p.species, p.stage, p.health, !!p.flowering) + '</div>'
                 + '<div class="pl-card-name">' + escapeHtml(p.nickname) + '</div>'
                 + '<div class="pl-card-species">' + escapeHtml(sp.name) + ' · 阶段 ' + p.stage + '/4</div>'
                 + '<div class="pl-bar-mini"><div class="pl-bar-fill" style="width:' + Math.round(p.health) + '%;background:' + (p.health < 30 ? '#e74c3c' : sp.color) + ';"></div></div>'
@@ -284,6 +385,24 @@
         if (!p) return;
         var sp = SPECIES[p.species];
 
+        var flowerBadge = p.flowering ? '<div class="pl-flower-badge"><i class="fas fa-fan"></i> 正在开花～</div>' : '';
+
+        var milestonesHtml = (p.milestones || []).length
+            ? '<div class="pl-milestones">' + p.milestones.map(function (key) {
+                var m = MILESTONES[key];
+                if (!m) return '';
+                return '<div class="pl-milestone-badge" title="' + escapeHtml(m.desc) + '"><i class="fas ' + m.icon + '"></i> ' + escapeHtml(m.label) + '</div>';
+            }).join('') + '</div>'
+            : '';
+
+        var canDivide = p.stage === 4 && hoursSince(p.lastDivide) >= DIVIDE_COOLDOWN_HRS && state.plants.length < MAX_PLANTS;
+        var divideBtn = p.stage === 4
+            ? ('<button class="pl-list-btn ' + (canDivide ? '' : 'disabled') + '" id="pl-divide-btn">'
+                + '<i class="fas fa-code-branch"></i> 分株，养一株新的'
+                + (canDivide ? '' : ('<small>' + (state.plants.length >= MAX_PLANTS ? '（植株数量已达上限）' : ('还需 ' + fmtHours(DIVIDE_COOLDOWN_HRS - hoursSince(p.lastDivide)))) + '</small>'))
+                + '</button>')
+            : '';
+
         var actionsHtml = Object.keys(ACTIONS).map(function (key) {
             var a = ACTIONS[key];
             var ok = canDo(p, key);
@@ -304,8 +423,10 @@
         }).join('') || '<div class="pl-empty">还没有记录</div>';
 
         var html = ''
-            + '<div class="pl-detail-svg">' + plantSvg(p.species, p.stage, p.health) + '</div>'
+            + '<div class="pl-detail-svg">' + plantSvg(p.species, p.stage, p.health, !!p.flowering) + '</div>'
+            + flowerBadge
             + '<div class="pl-detail-title">' + escapeHtml(p.nickname) + ' <span class="pl-detail-species">· ' + escapeHtml(sp.name) + '</span></div>'
+            + milestonesHtml
             + '<div class="pl-stats">'
             +   statBar('水分', 'fa-tint', p.moisture)
             +   statBar('养分', 'fa-flask', p.nutrients)
@@ -313,12 +434,21 @@
             +   statBar('疏松度', 'fa-hand-sparkles', p.soil)
             + '</div>'
             + '<div class="pl-actions">' + actionsHtml + '</div>'
+            + divideBtn
             + '<div class="pl-log-title">成长记录</div>'
             + '<div class="pl-log-list">' + logHtml + '</div>';
 
         document.getElementById('plants-detail-body').innerHTML = html;
         if (typeof showModal === 'function') showModal(document.getElementById('plants-detail-modal'));
         else document.getElementById('plants-detail-modal').classList.add('active');
+
+        if (canDivide) {
+            document.getElementById('pl-divide-btn').addEventListener('click', function () {
+                divideePlant(p);
+                openDetail(id);
+                renderList();
+            });
+        }
 
         document.querySelectorAll('.pl-action-btn').forEach(function (btn) {
             if (btn.classList.contains('disabled')) return;
