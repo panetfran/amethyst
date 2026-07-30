@@ -1,0 +1,52 @@
+/* ==================== 养植物样式 ==================== */
+
+#plants-modal .modal-content { max-width: 460px; max-height: 85vh; }
+#plants-list {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;
+    padding: 6px 2px;
+}
+.pl-card {
+    background: var(--secondary-bg); border: 1px solid var(--border-color);
+    border-radius: 16px; padding: 14px 12px; text-align: center; cursor: pointer;
+    transition: transform 0.15s;
+}
+.pl-card:hover { transform: translateY(-2px); }
+.pl-card-svg { width: 100%; height: 110px; display: flex; align-items: flex-end; justify-content: center; }
+.pl-card-name { font-size: 13px; font-weight: 700; color: var(--text-primary); margin-top: 6px; }
+.pl-card-species { font-size: 10.5px; color: var(--text-secondary); margin-bottom: 8px; }
+.pl-bar-mini { width: 100%; height: 5px; background: var(--primary-bg); border-radius: 3px; overflow: hidden; }
+.pl-bar-fill { height: 100%; transition: width 0.3s; }
+
+/* 详情弹窗 */
+#plants-detail-modal .modal-content { max-width: 420px; max-height: 85vh; overflow-y: auto; }
+.pl-detail-svg { width: 100%; height: 180px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 6px; }
+.pl-detail-title { font-size: 17px; font-weight: 700; color: var(--text-primary); text-align: center; margin-bottom: 14px; }
+.pl-detail-species { font-size: 12px; font-weight: 400; color: var(--text-secondary); }
+
+.pl-stats { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.pl-stat-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); }
+.pl-stat-row i { width: 14px; color: var(--accent-color); }
+.pl-stat-label { width: 42px; flex-shrink: 0; }
+.pl-stat-bar { flex: 1; height: 7px; background: var(--primary-bg); border-radius: 4px; overflow: hidden; }
+.pl-stat-fill { height: 100%; transition: width 0.3s; }
+.pl-stat-num { width: 26px; text-align: right; font-size: 11px; color: var(--text-primary); }
+
+.pl-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 18px; }
+.pl-action-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 10px 4px; border: 1px solid var(--border-color); border-radius: 12px;
+    background: var(--primary-bg); color: var(--text-primary); cursor: pointer;
+    font-size: 11px; font-family: var(--font-family);
+}
+.pl-action-btn i { font-size: 15px; color: var(--accent-color); }
+.pl-action-btn.disabled { opacity: 0.4; cursor: not-allowed; }
+.pl-action-btn small { font-size: 8.5px; color: var(--text-secondary); }
+.pl-action-btn:not(.disabled):active { background: rgba(var(--accent-color-rgb), 0.12); }
+
+.pl-log-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
+.pl-log-list { display: flex; flex-direction: column; gap: 6px; }
+.pl-log-item { font-size: 12px; color: var(--text-primary); line-height: 1.5; }
+.pl-log-time { color: var(--text-secondary); font-size: 10.5px; margin-right: 6px; }
+.pl-empty { text-align: center; color: var(--text-secondary); font-size: 12px; padding: 16px 0; }
+
+.pl-log-actor { color: var(--accent-color); font-weight: 700; margin-right: 2px; }
