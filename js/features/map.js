@@ -591,7 +591,7 @@
         roundRect(ctx, x - 15, y - 15, 30, 30, 8); ctx.fill();
 
         ctx.fillStyle = '#fff';
-        ctx.font = '15px "Font Awesome 6 Free"';
+        ctx.font = '900 15px "Font Awesome 6 Free"';
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillText(iconGlyph(icon), x, y);
 
@@ -599,7 +599,7 @@
             ctx.fillStyle = 'rgba(255,255,255,0.95)';
             ctx.beginPath(); ctx.arc(x + 12, y - 12, 6, 0, Math.PI * 2); ctx.fill();
             ctx.fillStyle = color || '#7FA6CD';
-            ctx.font = '7px "Font Awesome 6 Free"';
+            ctx.font = '900 7px "Font Awesome 6 Free"';
             ctx.fillText('\uf061', x + 12, y - 12);
         }
 
@@ -624,7 +624,7 @@
             ctx.fillStyle = fallbackColor;
             ctx.beginPath(); ctx.arc(x, y, 16, 0, Math.PI * 2); ctx.fill();
             ctx.fillStyle = '#fff';
-            ctx.font = '14px "Font Awesome 6 Free"';
+            ctx.font = '900 14px "Font Awesome 6 Free"';
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             ctx.fillText(iconGlyph(fallbackIcon), x, y);
         }
@@ -789,6 +789,11 @@
             render();
             refreshBadge();
             if (!_taCheckTimer) scheduleTaCheck();
+
+            // 兜底：万一图标字体这时候还没真正下载完，等它加载好了再补画一次
+            if (typeof document !== 'undefined' && document.fonts && document.fonts.ready) {
+                document.fonts.ready.then(function () { render(); }).catch(function () {});
+            }
         });
     }
     function hide() {
