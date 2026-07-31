@@ -2928,6 +2928,17 @@ document.addEventListener('DOMContentLoaded', function() {
             <button id="wallpaper-mgr-upload-btn"><i class="fas fa-upload"></i> 本地上传</button>
             <button id="wallpaper-mgr-url-btn"><i class="fas fa-link"></i> 图片链接</button>
         </div>
+        <div class="wallpaper-mgr-divider"></div>
+        <div class="wallpaper-mgr-ta-title"><i class="fas fa-user-astronaut"></i> 手动设置对方天气和时间</div>
+        <div class="wallpaper-mgr-ta-row">
+            <label>天气</label>
+            <select id="wallpaper-ta-weather-select"></select>
+        </div>
+        <div class="wallpaper-mgr-ta-row">
+            <label>时差（小时）</label>
+            <input type="number" id="wallpaper-ta-offset-input" step="0.5" min="-12" max="12" placeholder="-12 ~ 12">
+        </div>
+        <button id="wallpaper-ta-save-btn" class="wallpaper-mgr-ta-save">保存</button>
     </div>
 </div>
 
@@ -3112,6 +3123,23 @@ document.addEventListener('DOMContentLoaded', function() {
         <div id="wallpaper-clock-wrap">
             <div id="wallpaper-time">00:00</div>
             <div id="wallpaper-date">1月1日 星期一</div>
+        </div>
+        <div id="wallpaper-widgets">
+            <div class="wp-weather-row">
+                <div class="wp-weather-card">
+                    <div class="wp-weather-who">我</div>
+                    <i id="wp-my-weather-icon" class="fas fa-sun"></i>
+                    <div class="wp-weather-time" id="wp-my-time">00:00</div>
+                    <div class="wp-weather-label" id="wp-my-weather-label">晴</div>
+                </div>
+                <div class="wp-weather-card">
+                    <div class="wp-weather-who wp-ta-name">TA</div>
+                    <i id="wp-ta-weather-icon" class="fas fa-sun"></i>
+                    <div class="wp-weather-time" id="wp-ta-time">00:00</div>
+                    <div class="wp-weather-label" id="wp-ta-weather-label">晴</div>
+                </div>
+            </div>
+            <div id="wallpaper-quote"></div>
         </div>
         <button id="wallpaper-manage-btn" title="管理壁纸"><i class="fas fa-image"></i></button>
     </div>
