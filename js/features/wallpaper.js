@@ -13,11 +13,37 @@
     let images = [];          // [{id, url}]
     let dailyPick = null;     // { date: 'YYYY-MM-DD', url: '...' }
     let clockTimer = null;
+    let extras = null;        // { dailyQuote, myWeather, taWeather, taOffset }
+    let taRerollTimer = null;
+
+    function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+    function getPartnerName() {
+        return (typeof settings !== 'undefined' && settings && settings.partnerName) ? settings.partnerName : '梦角';
+    }
 
     function todayStr() {
         const d = new Date();
         return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
     }
+
+    // ==================== 天气池子 ====================
+    const MY_WEATHER = [
+        { type: 'sunny', icon: 'fa-sun', label: '晴' },
+        { type: 'partly', icon: 'fa-cloud-sun', label: '多云' },
+        { type: 'cloudy', icon: 'fa-cloud', label: '阴' },
+        { type: 'rain', icon: 'fa-cloud-rain', label: '小雨' },
+        { type: 'storm', icon: 'fa-cloud-bolt', label: '雷雨' },
+        { type: 'snow', icon: 'fa-snowflake', label: '雪' },
+        { type: 'fog', icon: 'fa-smog', label: '雾' }
+    ];
+    const TA_WEATHER = MY_WEATHER.concat([
+        { type: 'meteor', icon: 'fa-meteor', label: '陨石雨' },
+        { type: 'aurora', icon: 'fa-wand-magic-sparkles', label: '极光闪烁' },
+        { type: 'nebula', icon: 'fa-atom', label: '星云缭绕' },
+        { type: 'vacuum', icon: 'fa-circle-notch', label: '静谧真空' },
+        { type: 'stardust', icon: 'fa-star', label: '星尘飘落' }
+    ]);
+
 
     async function loadData() {
         try {
@@ -25,9 +51,17 @@
             images = Array.isArray(saved) ? saved : [];
         } catch (e) { images = []; }
         try {
-            const pick = await localforage.getItem(getStorageKey('wallpaperDailyPick'));
-            dailyPick = pick || null;
+            const savedPick = await localforage.getItem(getStorageKey('wallpaperDailyPick'));
+            dailyPick = savedPick || null;
         } catch (e) { dailyPick = null; }
+        try {
+            const savedExtras = await localforage.getItem(getStorageKey('wallpaperExtras'));
+            extras = savedExtras || {};
+        } catch (e) { extras = {}; }
+    }
+
+    function saveExtras() {
+        localforage.setItem(getStorageKey('wallpaperExtras'), extras).catch(() => {});
     }
 
     function saveImages() {
@@ -67,18 +101,106 @@
         }
         clockWrap.style.display = 'flex';
         updateClock();
+        ensureDailyQuote();
+        ensureMyWeather();
+        ensureTaWeatherAndOffset();
+        renderQuoteAndWeather();
+    }
+
+    // ==================== 每日一言（每天固定一条，第二天换新）====================
+    function ensureDailyQuote() {
+        const today = todayStr();
+        if (extras.dailyQuote && extras.dailyQuote.date === today) return;
+        const pool = (typeof customReplies !== 'undefined' && customReplies.length > 0) ? customReplies : ['今天也是平静的一天。'];
+        extras.dailyQuote = { date: today, text: pick(pool) };
+        saveExtras();
+    }
+
+    // ==================== 我的天气（每天固定一个，第二天换新）====================
+    function ensureMyWeather() {
+        const today = todayStr();
+        if (extras.myWeather && extras.myWeather.date === today) return;
+        extras.myWeather = { date: today, type: pick(MY_WEATHER).type };
+        saveExtras();
+    }
+
+    // ==================== 梦角的天气 + 时差（后台每隔几小时自动重新抽）====================
+    function ensureTaWeatherAndOffset() {
+        const now = Date.now();
+        const REROLL_MS = (4 + Math.random() * 4) * 60 * 60 * 1000; // 4~8小时重新抽一次
+        if (!extras.taWeather || (now - (extras.taWeather.changedAt || 0)) > REROLL_MS) {
+            extras.taWeather = { type: pick(TA_WEATHER).type, changedAt: now };
+        }
+        if (!extras.taOffset || (now - (extras.taOffset.changedAt || 0)) > REROLL_MS) {
+            // 时差故意不用整数小时，营造"不是地球标准时区"的感觉
+            const hours = Math.round((Math.random() * 24 - 12) * 2) / 2; // -12 ~ +12，步进0.5小时
+            extras.taOffset = { hours: hours, changedAt: now };
+        }
+        saveExtras();
+    }
+
+    function scheduleTaReroll() {
+        if (taRerollTimer) clearTimeout(taRerollTimer);
+        taRerollTimer = setTimeout(() => {
+            if (extras) {
+                ensureTaWeatherAndOffset();
+                renderQuoteAndWeather();
+                updateClock();
+            }
+            scheduleTaReroll();
+        }, 20 * 60 * 1000); // 每20分钟检查一次是不是到了该重新抽的时间
+    }
+
+    function findWeather(pool, type) {
+        return pool.find(w => w.type === type) || pool[0];
+    }
+
+    function renderQuoteAndWeather() {
+        const quoteEl = document.getElementById('wallpaper-quote');
+        if (quoteEl && extras.dailyQuote) quoteEl.textContent = extras.dailyQuote.text;
+
+        const myW = findWeather(MY_WEATHER, extras.myWeather && extras.myWeather.type);
+        const taW = findWeather(TA_WEATHER, extras.taWeather && extras.taWeather.type);
+
+        const myIconEl = document.getElementById('wp-my-weather-icon');
+        const myLabelEl = document.getElementById('wp-my-weather-label');
+        if (myIconEl && myW) myIconEl.className = 'fas ' + myW.icon;
+        if (myLabelEl && myW) myLabelEl.textContent = myW.label;
+
+        const taIconEl = document.getElementById('wp-ta-weather-icon');
+        const taLabelEl = document.getElementById('wp-ta-weather-label');
+        if (taIconEl && taW) taIconEl.className = 'fas ' + taW.icon;
+        if (taLabelEl && taW) taLabelEl.textContent = taW.label;
+
+        const taNameEls = document.querySelectorAll('.wp-ta-name');
+        taNameEls.forEach(el => { el.textContent = getPartnerName(); });
     }
 
     function updateClock() {
         const timeEl = document.getElementById('wallpaper-time');
         const dateEl = document.getElementById('wallpaper-date');
-        if (!timeEl || !dateEl) return;
-        const now = new Date();
-        const hh = String(now.getHours()).padStart(2, '0');
-        const mm = String(now.getMinutes()).padStart(2, '0');
-        timeEl.textContent = `${hh}:${mm}`;
-        const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-        dateEl.textContent = `${now.getMonth() + 1}月${now.getDate()}日 ${weekdays[now.getDay()]}`;
+        if (timeEl && dateEl) {
+            const now = new Date();
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mm = String(now.getMinutes()).padStart(2, '0');
+            timeEl.textContent = `${hh}:${mm}`;
+            const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            dateEl.textContent = `${now.getMonth() + 1}月${now.getDate()}日 ${weekdays[now.getDay()]}`;
+        }
+
+        // 我的时间（小卡片里的那份，跟设备真实时间一致）
+        const myTimeEl = document.getElementById('wp-my-time');
+        if (myTimeEl) {
+            const now = new Date();
+            myTimeEl.textContent = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+        }
+
+        // 梦角的时间（用时差换算出来的，不是真实时区）
+        const taTimeEl = document.getElementById('wp-ta-time');
+        if (taTimeEl && extras && extras.taOffset) {
+            const taDate = new Date(Date.now() + extras.taOffset.hours * 60 * 60 * 1000);
+            taTimeEl.textContent = String(taDate.getUTCHours()).padStart(2, '0') + ':' + String(taDate.getUTCMinutes()).padStart(2, '0');
+        }
     }
 
     function startClockTicker() {
@@ -110,10 +232,44 @@
         const overlay = document.getElementById('wallpaper-mgr-overlay');
         if (!overlay) return;
         renderManagerList();
+        renderTaEditor();
         overlay.classList.add('active');
     };
     window.wallpaperCloseManager = function () {
         document.getElementById('wallpaper-mgr-overlay')?.classList.remove('active');
+    };
+
+    // ==================== 手动编辑梦角的天气 / 时差 ====================
+    function renderTaEditor() {
+        const weatherSel = document.getElementById('wallpaper-ta-weather-select');
+        const offsetInput = document.getElementById('wallpaper-ta-offset-input');
+        if (!weatherSel || !offsetInput) return;
+
+        if (!weatherSel.dataset.filled) {
+            weatherSel.innerHTML = TA_WEATHER.map(w => `<option value="${w.type}">${w.label}</option>`).join('');
+            weatherSel.dataset.filled = '1';
+        }
+        const curType = extras.taWeather ? extras.taWeather.type : TA_WEATHER[0].type;
+        weatherSel.value = curType;
+        offsetInput.value = extras.taOffset ? extras.taOffset.hours : 0;
+    }
+
+    window.wallpaperSaveTaEdit = function () {
+        const weatherSel = document.getElementById('wallpaper-ta-weather-select');
+        const offsetInput = document.getElementById('wallpaper-ta-offset-input');
+        if (!weatherSel || !offsetInput) return;
+
+        let hours = parseFloat(offsetInput.value);
+        if (isNaN(hours)) hours = 0;
+        hours = Math.max(-12, Math.min(12, Math.round(hours * 2) / 2)); // 限制在±12小时，0.5小时为步进
+
+        const now = Date.now();
+        extras.taWeather = { type: weatherSel.value, changedAt: now };
+        extras.taOffset = { hours: hours, changedAt: now };
+        saveExtras();
+        renderQuoteAndWeather();
+        updateClock();
+        if (typeof showNotification === 'function') showNotification('已更新' + getPartnerName() + '的天气和时间', 'success');
     };
 
     window.wallpaperDeleteImage = function (id) {
@@ -162,10 +318,12 @@
             window.wallpaperAddViaUpload(this);
         });
         document.getElementById('wallpaper-mgr-url-btn')?.addEventListener('click', window.wallpaperAddViaUrl);
+        document.getElementById('wallpaper-ta-save-btn')?.addEventListener('click', window.wallpaperSaveTaEdit);
         document.getElementById('wallpaper-mgr-overlay')?.addEventListener('click', function (e) {
             if (e.target === this) window.wallpaperCloseManager();
         });
         startClockTicker();
+        scheduleTaReroll();
     }
 
     document.addEventListener('DOMContentLoaded', function () {
