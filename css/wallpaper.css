@@ -140,3 +140,95 @@
     cursor: pointer; font-family: var(--font-family);
 }
 .wallpaper-mgr-actions button:hover { border-color: var(--accent-color); color: var(--accent-color); }
+
+/* ==================== 每日一言 / 天气 / 时差小组件 ==================== */
+#wallpaper-widgets {
+    position: absolute;
+    left: 0; right: 0;
+    bottom: 70px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 0 24px;
+    z-index: 4;
+    pointer-events: none;
+}
+
+.wp-weather-row {
+    display: flex;
+    gap: 14px;
+}
+.wp-weather-card {
+    background: rgba(255,255,255,0.22);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 10px 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    min-width: 74px;
+}
+.wp-weather-who {
+    font-size: 10px;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    opacity: 0.9;
+}
+.wp-weather-card i {
+    font-size: 18px;
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.35);
+    margin: 2px 0;
+}
+.wp-weather-time {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    font-variant-numeric: tabular-nums;
+}
+.wp-weather-label {
+    font-size: 10.5px;
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    opacity: 0.9;
+}
+
+#wallpaper-quote {
+    font-size: 12.5px;
+    color: #fff;
+    text-align: center;
+    line-height: 1.6;
+    max-width: 300px;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.45);
+    padding: 0 10px;
+}
+
+/* 梦角天气/时差手动编辑区 */
+.wallpaper-mgr-divider { height: 1px; background: var(--border-color); margin: 14px 0 12px; }
+.wallpaper-mgr-ta-title {
+    font-size: 12px; font-weight: 600; color: var(--text-secondary);
+    margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+}
+.wallpaper-mgr-ta-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px; gap: 10px;
+}
+.wallpaper-mgr-ta-row label { font-size: 12.5px; color: var(--text-primary); flex-shrink: 0; }
+.wallpaper-mgr-ta-row select,
+.wallpaper-mgr-ta-row input {
+    flex: 1; max-width: 150px; padding: 7px 10px;
+    border: 1px solid var(--border-color); border-radius: 8px;
+    background: var(--primary-bg); color: var(--text-primary);
+    font-size: 12.5px; font-family: var(--font-family);
+}
+.wallpaper-mgr-ta-save {
+    width: 100%; padding: 10px; margin-top: 4px;
+    border: none; border-radius: 12px;
+    background: var(--accent-color); color: #fff;
+    font-size: 12.5px; font-weight: 600; cursor: pointer;
+    font-family: var(--font-family);
+}
