@@ -4,17 +4,16 @@
 #art-gallery-list {
     flex: 1;
     overflow-y: auto;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
+    columns: 2;
+    column-gap: 14px;
     padding: 6px 2px;
 }
 
 .art-empty {
-    grid-column: 1 / -1;
     text-align: center;
     padding: 50px 20px;
     color: var(--text-secondary);
+    break-inside: avoid;
 }
 .art-empty i { font-size: 34px; opacity: 0.35; margin-bottom: 10px; display: block; }
 .art-empty p { font-size: 14px; font-weight: 600; margin-bottom: 4px; color: var(--text-primary); }
@@ -27,22 +26,23 @@
     overflow: hidden;
     cursor: pointer;
     transition: transform 0.15s, box-shadow 0.15s;
+    break-inside: avoid; /* 瀑布流布局下，防止一张卡片被从中间切断分到两栏 */
+    margin-bottom: 14px;
+    display: inline-block;
+    width: 100%;
 }
 .art-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
 
 .art-thumb {
     width: 100%;
-    aspect-ratio: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: block;
     background: var(--primary-bg);
     padding: 10px;
     box-sizing: border-box;
 }
-.art-thumb svg { max-width: 100%; max-height: 100%; }
-/* 画布本身的形状（圆形/椭圆）已经在SVG内部用clip-path处理了，
-   缩略图容器统一用方形格子摆放，保持画廊整齐 */
+.art-thumb svg { width: 100%; height: auto; display: block; }
+/* 缩略图现在跟着每幅画自己的画布比例走（正方形/横长方形/竖长方形/圆形都保留原比例），
+   不再统一塞进正方形框里，横长方形的画不会因为被压扁而显得特别小 */
 
 .art-card-meta { padding: 8px 12px 12px; }
 .art-card-time { font-size: 10.5px; color: var(--text-secondary); margin-bottom: 4px; }
@@ -82,5 +82,5 @@
 }
 
 @media (max-width: 380px) {
-    #art-gallery-list { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    #art-gallery-list { column-gap: 10px; }
 }
