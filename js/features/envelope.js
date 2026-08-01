@@ -65,7 +65,7 @@ async function checkEnvelopeStatus() {
     // 逻辑 B：系统主动找你
     if (!isBusy) {
         const lastActiveTime = localStorage.getItem('last_system_mail_time') || 0;
-        const cooldown = 1 * 60 * 60 * 1000; // 缩短到 1 小时
+        const cooldown = 3 * 60 * 60 * 1000; // 缩短到 3 小时
         if (now - lastActiveTime > cooldown && Math.random() < 0.5) { // 50% 概率
             const activeContent = generateEnvelopeReplyText();
             const systemLetter = {
