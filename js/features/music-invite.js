@@ -15,8 +15,8 @@
 (function () {
     'use strict';
 
-    const CHECK_MIN_MS = 20 * 60 * 1000;   // 最短间隔 20 分钟检查一次
-    const CHECK_MAX_MS = 50 * 60 * 1000;   // 最长间隔 50 分钟检查一次
+    const CHECK_MIN_MS = 1 * 60 * 60 * 1000;   // 最短间隔 一小时 检查一次
+    const CHECK_MAX_MS = 3 * 60 * 60 * 1000;   // 最长间隔 三小时 检查一次
     const TRIGGER_CHANCE = 0.2;            // 每次检查 20% 概率真正弹出邀请
 
     function getPartnerName() {
