@@ -35,20 +35,20 @@
         dracaena: {
             name: '巴西木',
             color: '#6b9e5e',
-            waterCooldownHrs: 48,      // 2天浇一次
-            fertilizeCooldownHrs: 24 * 14, // 半个月施一次肥
-            loosenCooldownHrs: 24 * 7,
-            sunCooldownHrs: 20,
-            decayPerHour: { moisture: 1.2, nutrients: 0.4, sunlight: 1.8, soil: 0.5 }
+            waterCooldownHrs: 12,       // 半天就能再浇一次
+            fertilizeCooldownHrs: 24 * 7,  // 一周施一次肥
+            loosenCooldownHrs: 24 * 3,
+            sunCooldownHrs: 8,
+            decayPerHour: { moisture: 0.4, nutrients: 0.15, sunlight: 0.6, soil: 0.2 }
         },
         sansevieria: {
             name: '虎尾兰',
             color: '#4a7c59',
-            waterCooldownHrs: 24 * 10,  // 特别耐旱，10天才浇一次
-            fertilizeCooldownHrs: 24 * 21,
-            loosenCooldownHrs: 24 * 10,
-            sunCooldownHrs: 30,
-            decayPerHour: { moisture: 0.5, nutrients: 0.3, sunlight: 1.2, soil: 0.35 }
+            waterCooldownHrs: 24,       // 耐旱，但也不用等太久
+            fertilizeCooldownHrs: 24 * 10,
+            loosenCooldownHrs: 24 * 5,
+            sunCooldownHrs: 10,
+            decayPerHour: { moisture: 0.2, nutrients: 0.12, sunlight: 0.5, soil: 0.15 }
         }
     };
 
@@ -203,10 +203,10 @@
     }
 
     var ACTIONS = {
-        water: { label: '浇水', icon: 'fa-tint', field: 'moisture', gain: 40, cooldownField: 'waterCooldownHrs', lastField: 'lastWater' },
-        fertilize: { label: '施肥', icon: 'fa-flask', field: 'nutrients', gain: 45, cooldownField: 'fertilizeCooldownHrs', lastField: 'lastFertilize' },
-        loosen: { label: '松土', icon: 'fa-hand-sparkles', field: 'soil', gain: 50, cooldownField: 'loosenCooldownHrs', lastField: 'lastLoosen' },
-        sun: { label: '晒太阳', icon: 'fa-sun', field: 'sunlight', gain: 40, cooldownField: 'sunCooldownHrs', lastField: 'lastSun' }
+        water: { label: '浇水', icon: 'fa-tint', field: 'moisture', cooldownField: 'waterCooldownHrs', lastField: 'lastWater' },
+        fertilize: { label: '施肥', icon: 'fa-flask', field: 'nutrients', cooldownField: 'fertilizeCooldownHrs', lastField: 'lastFertilize' },
+        loosen: { label: '松土', icon: 'fa-hand-sparkles', field: 'soil', cooldownField: 'loosenCooldownHrs', lastField: 'lastLoosen' },
+        sun: { label: '晒太阳', icon: 'fa-sun', field: 'sunlight', cooldownField: 'sunCooldownHrs', lastField: 'lastSun' }
     };
 
     function canDo(p, actionKey) {
@@ -252,7 +252,7 @@
     function doAction(p, actionKey, actor) {
         var a = ACTIONS[actionKey];
         if (!canDo(p, actionKey)) return false;
-        p[a.field] = clamp(p[a.field] + a.gain, 0, 100);
+        p[a.field] = 100; // 直接补满，不再是"加固定值"——避免衰减速度稍快就导致长期净亏损
         p[a.lastField] = Date.now();
         p.careCount = (p.careCount || 0) + 1;
         addLog(p, pick(GROWTH_LOG_LINES[actionKey]), actor || 'me');
