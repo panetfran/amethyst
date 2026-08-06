@@ -315,9 +315,14 @@
     // ==================== 陪伴联动 ====================
     window.mapSyncCompanionTogether = function () {
         if (!state) return;
+        // 不是每次陪伴都非要"传送"到同一个房间——40%概率是真的凑到一起，
+        // 剩下60%就当是那种"各自在各自的地方，但陪伴照常进行"的远程感觉，
+        // 位置不动，也不特意留记录
+        if (Math.random() >= 0.4) return;
+
         state.me = { mapKey: 'my_home', x: 250, y: 150 };
         state.ta = { mapKey: 'my_home', x: 300, y: 180 };
-        state.footprints.unshift({ ts: Date.now(), mapKey: 'my_home', x: 300, y: 180, locationName: '客厅（陪伴中）', comment: '和你待在一起。' });
+        state.footprints.unshift({ ts: Date.now(), mapKey: 'my_home', x: 300, y: 180, locationName: '客厅（陪伴中）', comment: generateMoveComment() });
         if (state.footprints.length > 300) state.footprints.length = 300;
         saveState();
         refreshBadge();
