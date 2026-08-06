@@ -317,7 +317,10 @@
         if (!state) return;
         state.me = { mapKey: 'my_home', x: 250, y: 150 };
         state.ta = { mapKey: 'my_home', x: 300, y: 180 };
+        state.footprints.unshift({ ts: Date.now(), mapKey: 'my_home', x: 300, y: 180, locationName: '客厅（陪伴中）', comment: '和你待在一起。' });
+        if (state.footprints.length > 300) state.footprints.length = 300;
         saveState();
+        refreshBadge();
         if (overlay && overlay.style.display !== 'none' && curKey() === 'my_home') render();
     };
 
@@ -789,7 +792,11 @@
     function show() {
         if (!overlay) buildOverlay();
         overlay.style.display = 'flex';
-        loadState().then(function () {
+        // 只在第一次打开（内存里还没有数据）时才去读存储；之后每次打开都复用内存里的
+        // state——它本来就是实时最新的，没必要重新读一遍，这样也避免"刚保存完立刻
+        // 关闭再打开，写入还没落盘、读到旧数据"这种读写抢跑导致改动看起来"变回去了"
+        var initPromise = state ? Promise.resolve() : loadState();
+        initPromise.then(function () {
             loadAvatars();
             mapStack = ['root'];
             resizeAndCenter();
