@@ -50,14 +50,16 @@
      * 通过独立的 saveRPData / loadRPData 与 localforage 同步。
      */
     if (typeof window.transferData === 'undefined' || window.transferData === null) {
-        window.transferData = { myBalance: 100000, systemBalance: 100000, records: [] };
+        window.transferData = { myBalance: 100000, systemBalance: 100000, records: [], ledger: [], lastSalaryAt: 0 };
     }
 
     window.initTransferData = function () {
         if (!window.transferData) {
-            window.transferData = { myBalance: 100000, systemBalance: 100000, records: [] };
+            window.transferData = { myBalance: 100000, systemBalance: 100000, records: [], ledger: [], lastSalaryAt: 0 };
         }
         if (!window.transferData.records) window.transferData.records = [];
+        if (!window.transferData.ledger) window.transferData.ledger = [];
+        if (typeof window.transferData.lastSalaryAt !== 'number') window.transferData.lastSalaryAt = 0;
         if (typeof window.transferData.myBalance !== 'number') window.transferData.myBalance = 100000;
         if (typeof window.transferData.systemBalance !== 'number') window.transferData.systemBalance = 100000;
     };
@@ -348,6 +350,13 @@
                         '</div>' +
                         '<span style="font-size:13px;font-weight:600;color:var(--text-primary,#1a1a1a);">余额设置</span>' +
                     '</button>' +
+                    // 账单
+                    '<button id="rp-menu-ledger" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:10px;padding:20px;border:1.5px solid var(--border-color,#e8e8e8);border-radius:16px;background:var(--secondary-bg,#f5f5f5);cursor:pointer;">' +
+                        '<div style="width:48px;height:48px;border-radius:50%;background:#5b9279;display:flex;align-items:center;justify-content:center;">' +
+                            '<i class="fas fa-receipt" style="color:#fff;font-size:20px;"></i>' +
+                        '</div>' +
+                        '<span style="font-size:13px;font-weight:600;color:var(--text-primary,#1a1a1a);">账单</span>' +
+                    '</button>' +
                 '</div>' +
             '</div>';
 
@@ -361,6 +370,10 @@
         overlay.querySelector('#rp-menu-balance').onclick = function () {
             overlay.remove();
             window.showTransferBalanceSettings();
+        };
+        overlay.querySelector('#rp-menu-ledger').onclick = function () {
+            overlay.remove();
+            window.showLedgerModal();
         };
     };
 
@@ -697,6 +710,132 @@
     };
 
     // =============================================
+    // 拉帝奥的经济生活：工资 / 日常开销 / 给你的生活费
+    // =============================================
+
+    function pushLedger(entry) {
+        window.initTransferData();
+        entry.id = entry.id || genId();
+        entry.at = entry.at || Date.now();
+        window.transferData.ledger.unshift(entry);
+        if (window.transferData.ledger.length > 200) window.transferData.ledger.length = 200;
+    }
+
+    var SALARY_MIN = 5000000, SALARY_MAX = 12000000;    // ¥50000 ~ ¥120000
+    var SALARY_CYCLE_MIN_DAYS = 25, SALARY_CYCLE_MAX_DAYS = 35; // 每25~35天发一次，不用死板卡"每月1号"
+
+    var EXPENSE_MIN = 2000, EXPENSE_MAX = 15000;         // ¥20 ~ ¥150
+    var EXPENSE_LINES = [
+        '中午随便吃了点，扣了顿饭钱。', '路过便利店买了点东西。', '交了这个月的水电网费。',
+        '给实验室/办公室添置了点小东西。', '晚上叫了外卖。', '路上打车花了点钱。'
+    ];
+
+    var ALLOWANCE_MIN = 50000, ALLOWANCE_MAX = 200000;   // ¥500 ~ ¥2000
+    var ALLOWANCE_LINES = [
+        '给你打点生活费，学生党不容易，别太省。', '看你最近可能手头紧，先给你转点钱。',
+        '这个月的生活费，记得吃好点。', '刚发了工资，先分你一点。',
+        '别老是吃泡面，这点钱拿去改善伙食。', '想到你还是学生，随手给你打点钱。'
+    ];
+
+    /** 发工资：25~35天一次，进他自己的余额，记一笔账，附带聊天提示 */
+    window.trySalaryPayment = function (force) {
+        window.initTransferData();
+        var now = Date.now();
+        var cycleMs = (SALARY_CYCLE_MIN_DAYS + Math.random() * (SALARY_CYCLE_MAX_DAYS - SALARY_CYCLE_MIN_DAYS)) * 24 * 60 * 60 * 1000;
+        if (!force && window.transferData.lastSalaryAt && (now - window.transferData.lastSalaryAt) < cycleMs) return false;
+
+        var amount = Math.floor(Math.random() * (SALARY_MAX - SALARY_MIN)) + SALARY_MIN;
+        window.transferData.systemBalance += amount;
+        window.transferData.lastSalaryAt = now;
+        pushLedger({ category: 'salary', amount: amount, note: '发工资啦', at: now });
+        saveRPData();
+
+        var pn = (typeof settings !== 'undefined' && settings.partnerName) ? settings.partnerName : '对方';
+        if (typeof addMessage === 'function') {
+            addMessage({ id: genId(), sender: 'system', text: pn + ' 这个月发工资啦，到账 ¥' + fmt(amount) + ' ✦', timestamp: new Date(), type: 'system' });
+        }
+        if (typeof showNotification === 'function') showNotification(pn + ' 发工资了 ¥' + fmt(amount), 'success');
+
+        // 发工资之后，有点概率顺手给你也包个红包
+        if (Math.random() < 0.5) {
+            setTimeout(function () { window.tryGiveAllowance(true, '刚发了工资，给你也包一个~'); }, 3000 + Math.random() * 4000);
+        }
+        return true;
+    };
+
+    /** 他自己的日常开销：小额、频繁，背景消耗，不用你管 */
+    window.trySpendDailyExpense = function () {
+        window.initTransferData();
+        if (window.transferData.systemBalance <= 0) return false;
+        var amount = Math.floor(Math.random() * (EXPENSE_MAX - EXPENSE_MIN)) + EXPENSE_MIN;
+        amount = Math.min(amount, window.transferData.systemBalance);
+        window.transferData.systemBalance -= amount;
+        var note = EXPENSE_LINES[Math.floor(Math.random() * EXPENSE_LINES.length)];
+        pushLedger({ category: 'expense', amount: -amount, note: note });
+        saveRPData();
+        return true;
+    };
+
+    /** 给你的生活费：随机间隔，真正的红包（可领取），因为你是学生没收入 */
+    window.tryGiveAllowance = function (force, customMsg) {
+        window.initTransferData();
+        var maxYuan = Math.floor(window.transferData.systemBalance / 100);
+        if (maxYuan <= 0) return false;
+
+        var amount = Math.floor(Math.random() * (ALLOWANCE_MAX - ALLOWANCE_MIN)) + ALLOWANCE_MIN;
+        amount = Math.min(amount, window.transferData.systemBalance);
+        if (amount <= 0) return false;
+
+        window.transferData.systemBalance -= amount;
+        var message = customMsg || ALLOWANCE_LINES[Math.floor(Math.random() * ALLOWANCE_LINES.length)];
+
+        var record = {
+            id: genId(), from: 'system', to: 'me', amount: amount,
+            message: message, status: 'pending', createdAt: Date.now()
+        };
+        window.transferData.records.push(record);
+        pushLedger({ category: 'allowance', amount: -amount, note: message, at: record.createdAt });
+        saveRPData();
+
+        addRedPacketMessage({
+            id: record.id, sender: 'partner', text: '【红包】' + message,
+            timestamp: new Date(), type: 'red-packet', redPacket: record
+        });
+        if (typeof playSound === 'function') playSound('message');
+        if (typeof showNotification === 'function') showNotification('收到生活费红包 ¥' + fmt(amount), 'success');
+        return true;
+    };
+
+    function _scheduleSalaryCheck() {
+        // 每天检查一次是不是到发薪日了，而不是掐着固定周期硬算
+        setTimeout(function () {
+            try { window.trySalaryPayment(); } catch (e) { console.warn('[RedPacket] 工资检查出错:', e); }
+            _scheduleSalaryCheck();
+        }, 24 * 60 * 60 * 1000);
+    }
+    function _scheduleExpenseCheck() {
+        var delay = (3 + Math.random() * 5) * 60 * 60 * 1000; // 3~8小时检查一次
+        setTimeout(function () {
+            if (Math.random() < 0.5) { try { window.trySpendDailyExpense(); } catch (e) {} }
+            _scheduleExpenseCheck();
+        }, delay);
+    }
+    function _scheduleAllowanceCheck() {
+        // 间隔完全随机（1~4天），不固定周期，保留"惊喜感"
+        var delay = (1 + Math.random() * 3) * 24 * 60 * 60 * 1000;
+        setTimeout(function () {
+            if (Math.random() < 0.3) { try { window.tryGiveAllowance(); } catch (e) {} }
+            _scheduleAllowanceCheck();
+        }, delay);
+    }
+    setTimeout(function () {
+        window.trySalaryPayment(); // 第一次进来先补发一次（如果从没发过）
+        _scheduleSalaryCheck();
+        _scheduleExpenseCheck();
+        _scheduleAllowanceCheck();
+    }, 15000);
+
+    // =============================================
     // 定时自动触发：对方主动发红包（每 2~3 小时判定一次，50% 概率）
     // =============================================
 
@@ -767,6 +906,65 @@
     // =============================================
     // 余额设置弹窗
     // =============================================
+
+    /** 账单：把工资/日常开销/生活费/手动红包合并成一条时间线 */
+    window.showLedgerModal = function () {
+        window.initTransferData();
+
+        var items = [];
+        (window.transferData.ledger || []).forEach(function (e) {
+            items.push({ at: e.at, amount: e.amount, note: e.note, category: e.category });
+        });
+        (window.transferData.records || []).forEach(function (r) {
+            // 手动/惊喜红包（不是走 allowance/salary 那几个专门渠道的）单独归一类，避免跟生活费重复统计
+            if (r.from === 'system' && r.to === 'me') {
+                items.push({ at: r.createdAt, amount: -r.amount, note: r.message, category: 'redpacket_out' });
+            } else if (r.from === 'me') {
+                items.push({ at: r.createdAt, amount: r.amount, note: r.message || '你发的红包', category: 'redpacket_in' });
+            }
+        });
+        items.sort(function (a, b) { return (b.at || 0) - (a.at || 0); });
+        items = items.slice(0, 100);
+
+        var CATEGORY_LABEL = {
+            salary: { label: '发工资', icon: 'fa-sack-dollar', color: '#4a9c6d' },
+            expense: { label: '日常开销', icon: 'fa-cart-shopping', color: '#c48a4a' },
+            allowance: { label: '给你的生活费', icon: 'fa-hand-holding-heart', color: '#c4453c' },
+            redpacket_out: { label: '发来的红包', icon: 'fa-gift', color: '#c4453c' },
+            redpacket_in: { label: '你发的红包', icon: 'fa-gift', color: '#4a7fc4' }
+        };
+
+        var rowsHtml = items.length === 0
+            ? '<div style="text-align:center;padding:40px 0;color:var(--text-secondary,#999);font-size:13px;">还没有账单记录</div>'
+            : items.map(function (it) {
+                var cat = CATEGORY_LABEL[it.category] || { label: '其它', icon: 'fa-circle', color: '#999' };
+                var isIncome = it.amount > 0;
+                var d = it.at ? new Date(it.at) : new Date();
+                var dateStr = (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+                return '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:0.5px solid var(--border-color,#e8e8e8);">' +
+                    '<div style="width:36px;height:36px;border-radius:50%;background:' + cat.color + '22;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
+                        '<i class="fas ' + cat.icon + '" style="color:' + cat.color + ';font-size:14px;"></i>' +
+                    '</div>' +
+                    '<div style="flex:1;min-width:0;">' +
+                        '<div style="font-size:13.5px;color:var(--text-primary,#1a1a1a);font-weight:600;">' + cat.label + '</div>' +
+                        '<div style="font-size:11px;color:var(--text-secondary,#999);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (it.note || '') + ' · ' + dateStr + '</div>' +
+                    '</div>' +
+                    '<div style="font-size:14px;font-weight:700;color:' + (isIncome ? '#4a9c6d' : '#c4453c') + ';flex-shrink:0;">' + (isIncome ? '+' : '-') + fmt(Math.abs(it.amount)) + '</div>' +
+                '</div>';
+            }).join('');
+
+        var overlay = _createOverlay('flex-end');
+        overlay.innerHTML =
+            '<div style="width:100%;max-width:420px;max-height:78vh;background:var(--primary-bg,#fff);border-radius:20px 20px 0 0;padding:0;display:flex;flex-direction:column;animation:rpSlideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);">' +
+                _drawerHandle() +
+                '<div style="padding:16px 20px 4px;font-size:17px;font-weight:700;text-align:center;color:var(--text-primary,#1a1a1a);flex-shrink:0;">账单</div>' +
+                '<div style="padding:2px 20px 0;text-align:center;font-size:12px;color:var(--text-secondary,#999);flex-shrink:0;">对方余额 ¥' + fmt(window.transferData.systemBalance) + '</div>' +
+                '<div style="padding:12px 20px 24px;overflow-y:auto;flex:1;">' + rowsHtml + '</div>' +
+            '</div>';
+
+        document.body.appendChild(overlay);
+        _injectRpStyles();
+    };
 
     window.showTransferBalanceSettings = function () {
         window.initTransferData();
