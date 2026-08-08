@@ -916,6 +916,9 @@
             items.push({ at: e.at, amount: e.amount, note: e.note, category: e.category });
         });
         (window.transferData.records || []).forEach(function (r) {
+            // 只统计真正被领取的红包——退回的钱已经还回去了，不算真实支出；
+            // 还没被打开的红包结果未定，也先不计入，不然会跟实际余额对不上
+            if (r.status !== 'received') return;
             // 手动/惊喜红包（不是走 allowance/salary 那几个专门渠道的）单独归一类，避免跟生活费重复统计
             if (r.from === 'system' && r.to === 'me') {
                 items.push({ at: r.createdAt, amount: -r.amount, note: r.message, category: 'redpacket_out' });
