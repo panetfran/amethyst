@@ -617,10 +617,11 @@
             openBtn.onmouseenter = function () { this.style.transform = 'scale(1.1)'; };
             openBtn.onmouseleave = function () { this.style.transform = 'scale(1)'; };
             openBtn.onclick = function () {
-                // 更新余额
+                // 更新余额：对方发来的红包，金额在"发出去"那一刻就已经从对方余额里扣过了
+                // （创建 pending 记录时就扣了），这里领取只是把钱加到你自己账上，
+                // 不能再扣一次对方余额——不然同一笔钱会被扣两次
                 if (record.from === 'system') {
-                    window.transferData.myBalance    += record.amount;
-                    window.transferData.systemBalance -= record.amount;
+                    window.transferData.myBalance += record.amount;
                 }
                 record.status = 'received';
                 record.receivedAt = Date.now();
