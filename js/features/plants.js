@@ -35,22 +35,111 @@
         dracaena: {
             name: '巴西木',
             color: '#6b9e5e',
-            waterCooldownHrs: 12,       // 半天就能再浇一次
-            fertilizeCooldownHrs: 24 * 7,  // 一周施一次肥
-            loosenCooldownHrs: 24 * 3,
-            sunCooldownHrs: 8,
-            decayPerHour: { moisture: 0.4, nutrients: 0.15, sunlight: 0.6, soil: 0.2 }
+            waterCooldownHrs: 12, fertilizeCooldownHrs: 24 * 7, loosenCooldownHrs: 24 * 3, sunCooldownHrs: 8,
+            decayPerHour: { moisture: 0.4, nutrients: 0.15, sunlight: 0.6, soil: 0.2 },
+            flowerChancePerHour: 0.0015, shapeType: 'foliage', flowerMeaning: '坚韧、生命力'
         },
         sansevieria: {
             name: '虎尾兰',
             color: '#4a7c59',
-            waterCooldownHrs: 24,       // 耐旱，但也不用等太久
-            fertilizeCooldownHrs: 24 * 10,
-            loosenCooldownHrs: 24 * 5,
-            sunCooldownHrs: 10,
-            decayPerHour: { moisture: 0.2, nutrients: 0.12, sunlight: 0.5, soil: 0.15 }
+            waterCooldownHrs: 24, fertilizeCooldownHrs: 24 * 10, loosenCooldownHrs: 24 * 5, sunCooldownHrs: 10,
+            decayPerHour: { moisture: 0.2, nutrients: 0.12, sunlight: 0.5, soil: 0.15 },
+            flowerChancePerHour: 0.0008, shapeType: 'foliage', flowerMeaning: '守护、坚强不屈'
+        },
+        platycodon: {
+            name: '桔梗',
+            color: '#6f8fcf',
+            waterCooldownHrs: 16, fertilizeCooldownHrs: 24 * 8, loosenCooldownHrs: 24 * 4, sunCooldownHrs: 9,
+            decayPerHour: { moisture: 0.35, nutrients: 0.15, sunlight: 0.5, soil: 0.18 },
+            flowerChancePerHour: 0.0038, shapeType: 'singleBloom', flowerMeaning: '永恒的爱，无论如何都不会改变'
+        },
+        forgetMeNot: {
+            name: '勿忘我',
+            color: '#7ba9d9',
+            waterCooldownHrs: 20, fertilizeCooldownHrs: 24 * 9, loosenCooldownHrs: 24 * 5, sunCooldownHrs: 10,
+            decayPerHour: { moisture: 0.3, nutrients: 0.13, sunlight: 0.45, soil: 0.16 },
+            flowerChancePerHour: 0.0035, shapeType: 'bushy', flowerMeaning: '请不要忘记我'
+        },
+        babysBreath: {
+            name: '满天星',
+            color: '#f5f0ee',
+            waterCooldownHrs: 18, fertilizeCooldownHrs: 24 * 8, loosenCooldownHrs: 24 * 4, sunCooldownHrs: 9,
+            decayPerHour: { moisture: 0.32, nutrients: 0.14, sunlight: 0.5, soil: 0.17 },
+            flowerChancePerHour: 0.004, shapeType: 'starry', flowerMeaning: '喜欢藏在心里，也心甘情愿'
+        },
+        lilyOfValley: {
+            name: '铃兰',
+            color: '#e8f0e3',
+            waterCooldownHrs: 16, fertilizeCooldownHrs: 24 * 9, loosenCooldownHrs: 24 * 5, sunCooldownHrs: 12,
+            decayPerHour: { moisture: 0.35, nutrients: 0.14, sunlight: 0.4, soil: 0.16 },
+            flowerChancePerHour: 0.0032, shapeType: 'bell', flowerMeaning: '幸福归来，纯洁'
+        },
+        hyacinth: {
+            name: '风信子',
+            color: '#8f7dc9',
+            waterCooldownHrs: 14, fertilizeCooldownHrs: 24 * 7, loosenCooldownHrs: 24 * 4, sunCooldownHrs: 8,
+            decayPerHour: { moisture: 0.4, nutrients: 0.17, sunlight: 0.55, soil: 0.2 },
+            flowerChancePerHour: 0.0042, shapeType: 'spike', flowerMeaning: '恒久的思念'
+        },
+        violet: {
+            name: '紫罗兰',
+            color: '#9b7fc7',
+            waterCooldownHrs: 18, fertilizeCooldownHrs: 24 * 9, loosenCooldownHrs: 24 * 5, sunCooldownHrs: 10,
+            decayPerHour: { moisture: 0.3, nutrients: 0.13, sunlight: 0.45, soil: 0.16 },
+            flowerChancePerHour: 0.003, shapeType: 'bushy', flowerMeaning: '永恒的美，谦逊的爱'
+        },
+        eustoma: {
+            name: '洋桔梗',
+            color: '#e8c8dc',
+            waterCooldownHrs: 15, fertilizeCooldownHrs: 24 * 7, loosenCooldownHrs: 24 * 4, sunCooldownHrs: 9,
+            decayPerHour: { moisture: 0.38, nutrients: 0.16, sunlight: 0.5, soil: 0.19 },
+            flowerChancePerHour: 0.0036, shapeType: 'singleBloom', flowerMeaning: '真诚不变的爱'
+        },
+        lavender: {
+            name: '薰衣草',
+            color: '#b39ddb',
+            waterCooldownHrs: 28, fertilizeCooldownHrs: 24 * 10, loosenCooldownHrs: 24 * 6, sunCooldownHrs: 7,
+            decayPerHour: { moisture: 0.2, nutrients: 0.1, sunlight: 0.65, soil: 0.15 },
+            flowerChancePerHour: 0.0032, shapeType: 'spike', flowerMeaning: '静静等待着一场爱情'
+        },
+        pansy: {
+            name: '三色堇',
+            color: '#c77dbd',
+            waterCooldownHrs: 16, fertilizeCooldownHrs: 24 * 8, loosenCooldownHrs: 24 * 4, sunCooldownHrs: 8,
+            decayPerHour: { moisture: 0.36, nutrients: 0.15, sunlight: 0.55, soil: 0.18 },
+            flowerChancePerHour: 0.0038, shapeType: 'bushy', flowerMeaning: '请思念我'
+        },
+        plumbago: {
+            name: '蓝雪花',
+            color: '#9ec3e0',
+            waterCooldownHrs: 20, fertilizeCooldownHrs: 24 * 9, loosenCooldownHrs: 24 * 5, sunCooldownHrs: 9,
+            decayPerHour: { moisture: 0.28, nutrients: 0.12, sunlight: 0.5, soil: 0.15 },
+            flowerChancePerHour: 0.003, shapeType: 'bushy', flowerMeaning: '静静地等候一场重逢'
+        },
+        statice: {
+            name: '星辰花',
+            color: '#c9a8dd',
+            waterCooldownHrs: 26, fertilizeCooldownHrs: 24 * 12, loosenCooldownHrs: 24 * 6, sunCooldownHrs: 8,
+            decayPerHour: { moisture: 0.22, nutrients: 0.11, sunlight: 0.55, soil: 0.14 },
+            flowerChancePerHour: 0.0034, shapeType: 'starry', flowerMeaning: '永不改变的心意'
+        },
+        camellia: {
+            name: '白山茶',
+            color: '#fbfbf6',
+            waterCooldownHrs: 22, fertilizeCooldownHrs: 24 * 10, loosenCooldownHrs: 24 * 6, sunCooldownHrs: 11,
+            decayPerHour: { moisture: 0.26, nutrients: 0.13, sunlight: 0.42, soil: 0.15 },
+            flowerChancePerHour: 0.0028, shapeType: 'singleBloom', flowerMeaning: '谦让，理想中的爱'
+        },
+        sunflower: {
+            name: '向日葵',
+            color: '#f2c94c',
+            waterCooldownHrs: 14, fertilizeCooldownHrs: 24 * 7, loosenCooldownHrs: 24 * 4, sunCooldownHrs: 5,
+            decayPerHour: { moisture: 0.45, nutrients: 0.18, sunlight: 0.9, soil: 0.2 },
+            flowerChancePerHour: 0.0045, shapeType: 'singleBloom', flowerMeaning: '沉默的爱，只属于你的注视'
         }
     };
+    var STARTER_SPECIES = ['dracaena', 'sansevieria']; // 一开始默认养的两盆
+    var ALL_SPECIES_KEYS = Object.keys(SPECIES);
 
     var GROWTH_LOG_LINES = {
         water: ['土壤湿润了一些，根须舒展开来。', '水珠顺着叶片滑落，看起来精神了一点。', '喝饱了水，叶尖的颜色深了一些。'],
@@ -149,8 +238,9 @@
                     addLog(p, '花谢了，又变回了熟悉的绿色模样。');
                 }
             } else if (p.stage === 4 && p.health >= 80 && hoursPassed > 0) {
-                // 按小时累积开花概率，不用等到下次固定周期检查才有机会
-                var flowerChancePerHour = 0.0015; // 大约平均一两周会开一次
+                // 按小时累积开花概率，不用等到下次固定周期检查才有机会；
+                // 不同品种开花频率不一样（玫瑰/向日葵这种观花植物比虎尾兰勤快得多）
+                var flowerChancePerHour = sp.flowerChancePerHour || 0.0015;
                 if (Math.random() < flowerChancePerHour * hoursPassed) {
                     p.flowering = { startedAt: now, durationDays: 3 + Math.floor(Math.random() * 4) };
                     addLog(p, '悄悄开出了几朵小花！', 'system');
@@ -291,33 +381,153 @@
         var sp = SPECIES[species];
         var color = sp.color;
         var wilted = health < 30;
-        var leafColor = wilted ? '#b5a86a' : color;
+        var drawColor = wilted ? '#b5a86a' : color;
         var potColor = '#c98a5e';
+        var shapeType = sp.shapeType || 'foliage';
 
-        var leaves = '';
-        var flowers = '';
-        var leafCount = stage; // 1~4
-        var baseY = 150;
-        for (var i = 0; i < leafCount + 2; i++) {
-            var angle = (i / (leafCount + 2)) * Math.PI - Math.PI / 2;
-            var len = 30 + stage * 12 + (i % 2 === 0 ? 8 : 0);
-            var lx = 100 + Math.sin(angle) * len * 0.5;
-            var ly = baseY - Math.cos(angle) * len;
-            leaves += '<path d="M100,' + baseY + ' Q' + (100 + Math.sin(angle) * len * 0.3) + ',' + (baseY - len * 0.6) + ' ' + lx + ',' + ly + '" '
-                + 'stroke="' + leafColor + '" stroke-width="' + (6 - stage * 0.5) + '" fill="none" stroke-linecap="round" opacity="' + (wilted ? 0.55 : 0.9) + '"/>';
-            if (flowering && !wilted && i % 2 === 0) {
-                flowers += '<circle cx="' + lx + '" cy="' + ly + '" r="5" fill="#f4a6c1"/>'
-                    + '<circle cx="' + lx + '" cy="' + ly + '" r="2" fill="#fff2a8"/>';
-            }
+        var body;
+        switch (shapeType) {
+            case 'singleBloom': body = _shapeSingleBloom(drawColor, stage, flowering, wilted); break;
+            case 'spike':       body = _shapeSpike(drawColor, stage, flowering, wilted); break;
+            case 'bell':        body = _shapeBell(drawColor, stage, flowering, wilted); break;
+            case 'starry':      body = _shapeStarry(drawColor, stage, flowering, wilted); break;
+            case 'bushy':       body = _shapeBushy(drawColor, stage, flowering, wilted); break;
+            default:             body = _shapeFoliage(drawColor, stage, flowering, wilted); break;
         }
 
         return '<svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">'
             + '<ellipse cx="100" cy="205" rx="42" ry="8" fill="rgba(0,0,0,0.08)"/>'
             + '<path d="M65,150 L75,205 L125,205 L135,150 Z" fill="' + potColor + '"/>'
             + '<rect x="60" y="140" width="80" height="14" rx="4" fill="' + potColor + '"/>'
-            + leaves
-            + flowers
+            + body
             + '</svg>';
+    }
+
+    // ── 观叶型（巴西木/虎尾兰）：从盆口放射出去的几笔叶子，原来的画法 ──
+    function _shapeFoliage(color, stage, flowering, wilted) {
+        var out = '', baseY = 150;
+        var leafCount = stage;
+        for (var i = 0; i < leafCount + 2; i++) {
+            var angle = (i / (leafCount + 2)) * Math.PI - Math.PI / 2;
+            var len = 30 + stage * 12 + (i % 2 === 0 ? 8 : 0);
+            var lx = 100 + Math.sin(angle) * len * 0.5;
+            var ly = baseY - Math.cos(angle) * len;
+            out += '<path d="M100,' + baseY + ' Q' + (100 + Math.sin(angle) * len * 0.3) + ',' + (baseY - len * 0.6) + ' ' + lx + ',' + ly + '" '
+                + 'stroke="' + color + '" stroke-width="' + (6 - stage * 0.5) + '" fill="none" stroke-linecap="round" opacity="' + (wilted ? 0.55 : 0.9) + '"/>';
+            if (flowering && !wilted && i % 2 === 0) {
+                out += '<circle cx="' + lx + '" cy="' + ly + '" r="5" fill="#f4a6c1"/><circle cx="' + lx + '" cy="' + ly + '" r="2" fill="#fff2a8"/>';
+            }
+        }
+        return out;
+    }
+
+    // ── 单朵大花型（向日葵/洋桔梗/桔梗/白山茶）：一根主茎，顶端一朵明显的大花 ──
+    function _shapeSingleBloom(color, stage, flowering, wilted) {
+        var stemH = 25 + stage * 22;
+        var topY = 150 - stemH;
+        var leafColor = wilted ? '#b5a86a' : '#6b9e5e';
+        var out = '<path d="M100,150 L100,' + topY + '" stroke="' + leafColor + '" stroke-width="5" fill="none" stroke-linecap="round"/>';
+        // 茎两侧的小叶子
+        if (stage >= 2) {
+            out += '<path d="M100,' + (topY + stemH * 0.4) + ' Q85,' + (topY + stemH * 0.3) + ' 78,' + (topY + stemH * 0.5) + '" stroke="' + leafColor + '" stroke-width="4" fill="none" stroke-linecap="round"/>';
+            out += '<path d="M100,' + (topY + stemH * 0.6) + ' Q115,' + (topY + stemH * 0.5) + ' 122,' + (topY + stemH * 0.7) + '" stroke="' + leafColor + '" stroke-width="4" fill="none" stroke-linecap="round"/>';
+        }
+        // 花苞/花朵：没开花之前是个含苞的小圆，开花之后是一圈花瓣+花心
+        var budR = 8 + stage * 2;
+        if (flowering && !wilted) {
+            var petalCount = 10;
+            for (var i = 0; i < petalCount; i++) {
+                var a = (i / petalCount) * Math.PI * 2;
+                var px = 100 + Math.cos(a) * (budR + 6);
+                var py = topY + Math.sin(a) * (budR + 6);
+                out += '<ellipse cx="' + px + '" cy="' + py + '" rx="7" ry="4" fill="' + color + '" opacity="0.92" transform="rotate(' + (a * 180 / Math.PI) + ' ' + px + ' ' + py + ')"/>';
+            }
+            out += '<circle cx="100" cy="' + topY + '" r="' + (budR - 2) + '" fill="#7a5a3a"/>';
+        } else {
+            out += '<circle cx="100" cy="' + topY + '" r="' + budR + '" fill="' + (wilted ? '#b5a86a' : color) + '" opacity="0.7"/>';
+        }
+        return out;
+    }
+
+    // ── 细穗簇型（薰衣草/风信子）：好几根细穗，顶端一串串小花苞 ──
+    function _shapeSpike(color, stage, flowering, wilted) {
+        var out = '';
+        var spikeCount = Math.min(stage + 1, 5);
+        var leafColor = wilted ? '#b5a86a' : '#6b9e5e';
+        for (var i = 0; i < spikeCount; i++) {
+            var xOff = (i - (spikeCount - 1) / 2) * 14;
+            var h = 40 + stage * 18 - Math.abs(xOff) * 0.6;
+            var topY = 150 - h;
+            var baseX = 100 + xOff * 0.4;
+            var topX = 100 + xOff;
+            out += '<path d="M' + baseX + ',150 Q' + (baseX + xOff * 0.3) + ',' + (150 - h * 0.5) + ' ' + topX + ',' + topY + '" stroke="' + leafColor + '" stroke-width="3" fill="none" stroke-linecap="round"/>';
+            // 穗上一串小花苞
+            var budCount = flowering && !wilted ? 6 : 3;
+            for (var j = 0; j < budCount; j++) {
+                var by = topY + j * 6;
+                var bColor = flowering && !wilted ? color : (wilted ? '#c9bd8f' : '#a8c79a');
+                out += '<circle cx="' + topX + '" cy="' + by + '" r="' + (flowering ? 4 : 2.5) + '" fill="' + bColor + '" opacity="0.9"/>';
+            }
+        }
+        return out;
+    }
+
+    // ── 小铃铛/垂坠型（铃兰）：弯曲的茎，几个小铃铛状的花朵垂下来 ──
+    function _shapeBell(color, stage, flowering, wilted) {
+        var leafColor = wilted ? '#b5a86a' : '#6b9e5e';
+        var out = '<path d="M100,150 Q95,' + (150 - stage * 15) + ' 70,' + (145 - stage * 18) + '" stroke="' + leafColor + '" stroke-width="6" fill="none" stroke-linecap="round"/>';
+        out += '<path d="M100,150 Q105,' + (150 - stage * 15) + ' 130,' + (140 - stage * 18) + '" stroke="' + leafColor + '" stroke-width="6" fill="none" stroke-linecap="round"/>';
+        var stemH = 30 + stage * 20;
+        var curveTopX = 130, curveTopY = 150 - stemH;
+        out += '<path d="M100,150 Q120,' + (150 - stemH * 0.6) + ' ' + curveTopX + ',' + curveTopY + '" stroke="' + leafColor + '" stroke-width="3" fill="none" stroke-linecap="round"/>';
+        var bellCount = Math.min(stage + 2, 6);
+        for (var i = 0; i < bellCount; i++) {
+            var t = i / (bellCount - 1 || 1);
+            var bx = 100 + (curveTopX - 100) * t;
+            var by = (150 - stemH * 0.6 * t) - stemH * 0.4 * t * t + 6;
+            var bColor = flowering && !wilted ? '#fdfdf5' : (wilted ? '#c9bd8f' : '#e5e8dc');
+            out += '<path d="M' + bx + ',' + by + ' a5,6 0 1,0 0.1,0" fill="' + bColor + '" opacity="0.95"/>';
+            if (flowering && !wilted) out += '<circle cx="' + bx + '" cy="' + (by + 4) + '" r="1.2" fill="' + color + '"/>';
+        }
+        return out;
+    }
+
+    // ── 满天繁星型（满天星/星辰花）：很多细枝，每根顶端一个小圆点 ──
+    function _shapeStarry(color, stage, flowering, wilted) {
+        var out = '';
+        var branchCount = 6 + stage * 3;
+        var leafColor = wilted ? '#c9bd8f' : '#8fae7c';
+        for (var i = 0; i < branchCount; i++) {
+            var angle = (i / branchCount) * Math.PI * 1.3 - Math.PI * 0.65;
+            var len = 20 + stage * 10 + (i % 3) * 6;
+            var lx = 100 + Math.sin(angle) * len * 0.6;
+            var ly = 150 - Math.cos(angle) * len;
+            out += '<path d="M100,150 L' + lx + ',' + ly + '" stroke="' + leafColor + '" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.7"/>';
+            var dotColor = flowering && !wilted ? color : (wilted ? '#c9bd8f' : '#d8e0cc');
+            out += '<circle cx="' + lx + '" cy="' + ly + '" r="' + (flowering ? 3.5 : 2) + '" fill="' + dotColor + '"/>';
+        }
+        return out;
+    }
+
+    // ── 低矮丛生型（紫罗兰/三色堇/勿忘我/蓝雪花）：矮丛状，一簇簇小花挤在一起 ──
+    function _shapeBushy(color, stage, flowering, wilted) {
+        var out = '';
+        var clumpCount = Math.min(stage + 2, 6);
+        var leafColor = wilted ? '#b5a86a' : '#6b9e5e';
+        for (var i = 0; i < clumpCount; i++) {
+            var xOff = (i - (clumpCount - 1) / 2) * 12;
+            var h = 18 + stage * 6 + (i % 2) * 5;
+            var topY = 150 - h;
+            var topX = 100 + xOff;
+            out += '<path d="M100,150 Q' + (100 + xOff * 0.5) + ',' + (150 - h * 0.5) + ' ' + topX + ',' + topY + '" stroke="' + leafColor + '" stroke-width="2.5" fill="none" stroke-linecap="round"/>';
+            var petalColor = flowering && !wilted ? color : (wilted ? '#c9bd8f' : '#c3d4b5');
+            var r = flowering ? 5 : 3;
+            for (var j = 0; j < (flowering ? 4 : 1); j++) {
+                var pa = (j / 4) * Math.PI * 2;
+                out += '<circle cx="' + (topX + Math.cos(pa) * r * 0.7) + '" cy="' + (topY + Math.sin(pa) * r * 0.7) + '" r="' + r * 0.6 + '" fill="' + petalColor + '" opacity="0.9"/>';
+            }
+        }
+        return out;
     }
 
     // ==================== 角标 ====================
@@ -355,6 +565,52 @@
         refreshBadge();
     }
 
+    /** 梦角自己判断"这盆养得够好了"，主动帮你结业一盆 */
+    function taTryGraduate() {
+        if (!state) return false;
+        var ready = state.plants.filter(function (p) {
+            return p.stage === 4 && p.health >= 85 && p.milestones.indexOf('stage4') !== -1;
+        });
+        if (!ready.length) return false;
+
+        var p = pick(ready);
+        var pn = getPartnerName();
+        graduatePlant(p); // 复用用户手动结业的同一套逻辑（挪进纪念墙、写日志）
+        if (typeof addMessage === 'function') {
+            addMessage({ id: Date.now() + Math.random(), sender: 'system', text: pn + ' 觉得"' + p.nickname + '"已经养得很好了，帮你把它放进了纪念墙 ✦', timestamp: new Date(), type: 'system' });
+        }
+        return true;
+    }
+
+    /** 梦角自己决定"种点新的"，从全部品种里随机挑一种（不局限于最初那两种） */
+    function taTryPlantNew() {
+        if (!state) return false;
+        if (state.plants.length >= MAX_PLANTS) return false;
+
+        var speciesKey = pick(ALL_SPECIES_KEYS);
+        var sp = SPECIES[speciesKey];
+        var now = Date.now();
+        var newPlant = {
+            id: 'p_' + now + '_' + Math.floor(Math.random() * 10000),
+            species: speciesKey,
+            nickname: sp.name,
+            plantedAt: now,
+            moisture: 65, nutrients: 55, sunlight: 55, soil: 65, health: 60, stage: 1,
+            lastWater: 0, lastFertilize: 0, lastLoosen: 0, lastSun: 0, lastDivide: 0,
+            careCount: 0, flowering: null, milestones: [], log: []
+        };
+        addLog(newPlant, getPartnerName() + '给你种下的新植物，才刚刚开始长。');
+        state.plants.push(newPlant);
+        saveState();
+
+        var pn = getPartnerName();
+        if (typeof showNotification === 'function') showNotification(pn + ' 给你种了一盆' + sp.name + '~', 'success', 3500);
+        if (typeof addMessage === 'function') {
+            addMessage({ id: Date.now() + Math.random(), sender: 'system', text: pn + ' 突然想种点新的，给你种了一盆' + sp.name + ' ✦', timestamp: new Date(), type: 'system' });
+        }
+        return true;
+    }
+
     function scheduleTaCare() {
         if (_taCareTimer) clearTimeout(_taCareTimer);
         var delay = (20 + Math.random() * 20) * 60 * 1000; // 20~40分钟检查一次
@@ -366,6 +622,34 @@
     window.plantsTestTaCare = function () {
         if (state) taTryCare();
         else loadState().then(taTryCare);
+    };
+
+    var _taGraduateTimer = null, _taPlantNewTimer = null;
+
+    function scheduleTaGraduateCheck() {
+        if (_taGraduateTimer) clearTimeout(_taGraduateTimer);
+        var delay = (12 + Math.random() * 12) * 60 * 60 * 1000; // 12~24小时检查一次，比日常照顾低频很多
+        _taGraduateTimer = setTimeout(function () {
+            if (Math.random() < 0.15) taTryGraduate(); // 15%概率
+            scheduleTaGraduateCheck();
+        }, delay);
+    }
+    window.plantsTestTaGraduate = function () {
+        if (state) taTryGraduate();
+        else loadState().then(taTryGraduate);
+    };
+
+    function scheduleTaPlantNewCheck() {
+        if (_taPlantNewTimer) clearTimeout(_taPlantNewTimer);
+        var delay = (24 + Math.random() * 48) * 60 * 60 * 1000; // 1~3天检查一次
+        _taPlantNewTimer = setTimeout(function () {
+            if (Math.random() < 0.2) taTryPlantNew(); // 20%概率
+            scheduleTaPlantNewCheck();
+        }, delay);
+    }
+    window.plantsTestTaPlantNew = function () {
+        if (state) taTryPlantNew();
+        else loadState().then(taTryPlantNew);
     };
 
     function refreshBadge() {
@@ -438,7 +722,9 @@
         if (!p) return;
         var sp = SPECIES[p.species];
 
-        var flowerBadge = p.flowering ? '<div class="pl-flower-badge"><i class="fas fa-fan"></i> 正在开花～</div>' : '';
+        var flowerBadge = p.flowering
+            ? ('<div class="pl-flower-badge"><i class="fas fa-fan"></i> 正在开花～' + (sp.flowerMeaning ? ('<br><span class="pl-flower-meaning">花语：' + escapeHtml(sp.flowerMeaning) + '</span>') : '') + '</div>')
+            : '';
 
         var milestonesHtml = (p.milestones || []).length
             ? '<div class="pl-milestones">' + p.milestones.map(function (key) {
@@ -482,6 +768,7 @@
             + '<div class="pl-detail-svg">' + plantSvg(p.species, p.stage, p.health, !!p.flowering) + '</div>'
             + flowerBadge
             + '<div class="pl-detail-title">' + escapeHtml(p.nickname) + ' <span class="pl-detail-species">· ' + escapeHtml(sp.name) + '</span></div>'
+            + (sp.flowerMeaning ? ('<div class="pl-species-meaning">花语：' + escapeHtml(sp.flowerMeaning) + '</div>') : '')
             + milestonesHtml
             + '<div class="pl-stats">'
             +   statBar('水分', 'fa-tint', p.moisture)
@@ -548,6 +835,16 @@
             taTryCare();
             renderList();
         });
+        document.getElementById('plants-test-graduate-btn')?.addEventListener('click', function () {
+            var ok = taTryGraduate();
+            if (!ok && typeof showNotification === 'function') showNotification('现在没有够格毕业的植株（得先长到茂盛阶段、健康度85以上）', 'warning');
+            renderList();
+        });
+        document.getElementById('plants-test-plantnew-btn')?.addEventListener('click', function () {
+            var ok = taTryPlantNew();
+            if (!ok && typeof showNotification === 'function') showNotification('植株数量已经到上限啦', 'warning');
+            renderList();
+        });
         document.getElementById('close-plants-detail-modal')?.addEventListener('click', function () {
             if (typeof hideModal === 'function') hideModal(document.getElementById('plants-detail-modal'));
             else document.getElementById('plants-detail-modal').classList.remove('active');
@@ -562,6 +859,8 @@
                 loadState().then(function () {
                     refreshBadge();
                     scheduleTaCare();
+                    scheduleTaGraduateCheck();
+                    scheduleTaPlantNewCheck();
                 });
                 setInterval(function () { if (state) { applyDecay(); saveState(); refreshBadge(); } }, 30 * 60 * 1000);
             }
