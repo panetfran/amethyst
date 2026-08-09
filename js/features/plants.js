@@ -77,6 +77,7 @@
                   lastWater: 0, lastFertilize: 0, lastLoosen: 0, lastSun: 0, lastDivide: 0,
                   careCount: 0, flowering: null, milestones: [], log: [] }
             ],
+            graduated: [],
             lastTick: now
         };
     }
@@ -94,6 +95,7 @@
     }
     function normalizeState() {
         // 兼容旧存档：老数据里没有这几个新字段，缺了就补上默认值，不然后面代码会报错
+        if (!state.graduated) state.graduated = [];
         state.plants.forEach(function (p) {
             if (typeof p.careCount !== 'number') p.careCount = 0;
             if (!p.milestones) p.milestones = [];
@@ -249,6 +251,29 @@
         if (typeof showNotification === 'function') showNotification('分株成功！多了一株"' + childNickname + '"', 'success', 3500);
     }
 
+    function graduatePlant(p) {
+        var sp = SPECIES[p.species];
+        var snapshot = {
+            id: p.id,
+            species: p.species,
+            nickname: p.nickname,
+            plantedAt: p.plantedAt,
+            graduatedAt: Date.now(),
+            finalHealth: p.health,
+            careCount: p.careCount || 0,
+            milestones: (p.milestones || []).slice(),
+            everFlowered: (p.milestones || []).indexOf('flowered') !== -1,
+            everDivided: (p.milestones || []).indexOf('divided') !== -1
+        };
+        state.graduated.unshift(snapshot);
+        state.plants = state.plants.filter(function (x) { return x.id !== p.id; });
+        saveState();
+        if (typeof showNotification === 'function') showNotification(p.nickname + ' 结业啦，已经放进纪念墙~', 'success', 3500);
+        if (typeof addMessage === 'function') {
+            addMessage({ id: Date.now() + Math.random(), sender: 'system', text: sp.name + '"' + p.nickname + '"结业啦，已经养得很好了 ✦', timestamp: new Date(), type: 'system' });
+        }
+    }
+
     function doAction(p, actionKey, actor) {
         var a = ACTIONS[actionKey];
         if (!canDo(p, actionKey)) return false;
@@ -368,6 +393,34 @@
         wrap.querySelectorAll('.pl-card').forEach(function (el) {
             el.addEventListener('click', function () { openDetail(this.getAttribute('data-id')); });
         });
+
+        renderGraduatedWall();
+    }
+
+    function renderGraduatedWall() {
+        var wallWrap = document.getElementById('plants-graduated-wall');
+        if (!wallWrap) return;
+        if (!state.graduated || !state.graduated.length) {
+            wallWrap.style.display = 'none';
+            return;
+        }
+        wallWrap.style.display = 'block';
+        var listEl = document.getElementById('plants-graduated-list');
+        listEl.innerHTML = state.graduated.map(function (g) {
+            var sp = SPECIES[g.species];
+            var d = new Date(g.graduatedAt);
+            var badges = [];
+            if (g.everFlowered) badges.push('<i class="fas fa-fan" title="开过花"></i>');
+            if (g.everDivided) badges.push('<i class="fas fa-code-branch" title="分过株"></i>');
+            return '<div class="pl-grad-item">'
+                + '<div class="pl-grad-icon" style="background:' + sp.color + '22;color:' + sp.color + ';"><i class="fas fa-seedling"></i></div>'
+                + '<div class="pl-grad-info">'
+                +   '<div class="pl-grad-name">' + escapeHtml(g.nickname) + ' <span class="pl-grad-species">· ' + escapeHtml(sp.name) + '</span></div>'
+                +   '<div class="pl-grad-date">' + d.toLocaleDateString('zh-CN') + ' 结业 · 照顾了 ' + (g.careCount || 0) + ' 次</div>'
+                + '</div>'
+                + '<div class="pl-grad-badges">' + badges.join('') + '</div>'
+                + '</div>';
+        }).join('');
     }
 
     function statBar(label, icon, value) {
@@ -402,6 +455,9 @@
                 + (canDivide ? '' : ('<small>' + (state.plants.length >= MAX_PLANTS ? '（植株数量已达上限）' : ('还需 ' + fmtHours(DIVIDE_COOLDOWN_HRS - hoursSince(p.lastDivide)))) + '</small>'))
                 + '</button>')
             : '';
+        var graduateBtn = p.stage === 4
+            ? '<button class="pl-list-btn pl-graduate-btn" id="pl-graduate-btn"><i class="fas fa-trophy"></i> 结业，放进纪念墙</button>'
+            : '';
 
         var actionsHtml = Object.keys(ACTIONS).map(function (key) {
             var a = ACTIONS[key];
@@ -435,6 +491,7 @@
             + '</div>'
             + '<div class="pl-actions">' + actionsHtml + '</div>'
             + divideBtn
+            + graduateBtn
             + '<div class="pl-log-title">成长记录</div>'
             + '<div class="pl-log-list">' + logHtml + '</div>';
 
@@ -446,6 +503,16 @@
             document.getElementById('pl-divide-btn').addEventListener('click', function () {
                 divideePlant(p);
                 openDetail(id);
+                renderList();
+            });
+        }
+        var graduateBtnEl = document.getElementById('pl-graduate-btn');
+        if (graduateBtnEl) {
+            graduateBtnEl.addEventListener('click', function () {
+                if (!confirm('确定让"' + p.nickname + '"结业吗？\n\n结业之后会移进纪念墙，定格成现在的样子，不用再日常照顾，但记录会一直留着。')) return;
+                graduatePlant(p);
+                if (typeof hideModal === 'function') hideModal(document.getElementById('plants-detail-modal'));
+                else document.getElementById('plants-detail-modal').classList.remove('active');
                 renderList();
             });
         }
