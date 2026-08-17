@@ -1714,6 +1714,12 @@
         stopPartnerGoodnightCheck();
         recordHistory();
 
+        // 复位陪伴中临时调高的播放器层级，不然退出陪伴之后它会一直盖在别的东西上面
+        try {
+            const player = document.getElementById('player');
+            if (player && player.style.zIndex === '4500') player.style.zIndex = '';
+        } catch (e) {}
+
         // 阶段三B：停止并清理背景视频（防止退出后声音继续播放）
         try {
             const container = document.getElementById('companion-bg-container');
@@ -2720,7 +2726,7 @@
 
     // ─── 倒计时归零后：梦角先发起延长 ──────────────────────────────────────
     const EXTEND_INVITE_LINES = [
-        '时间过得好快，再陪我一会儿？',
+        '时间过得好看，再陪我一会儿？',
         '舍不得你走，再来一会儿？',
         '刚刚状态正好，可以继续？',
         '我还想你陪着我，再一会儿可以吗？'
@@ -4048,6 +4054,33 @@
                 e.stopPropagation();  // 阻止冒泡
                 historyBtn.classList.add('active');
                 openCompanionHistory();
+            });
+        }
+
+        // 陪伴中快捷打开外部音乐播放器（陪伴页面层级比播放器高，不这样处理点了也看不见）
+        const musicBtn = $('companion-music-btn');
+        if (musicBtn) {
+            musicBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const player = document.getElementById('player');
+                if (player) {
+                    player.classList.add('visible');
+                    player.style.zIndex = '4500'; // 临时盖过陪伴页面的4000，退出陪伴时会复位
+                }
+            });
+        }
+
+        // 陪伴中快捷查看信箱（同理，临时把信箱弹窗提到陪伴页面之上）
+        const mailBtn = $('companion-mail-btn');
+        if (mailBtn) {
+            mailBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const entryBtn = document.getElementById('envelope-function');
+                if (entryBtn) entryBtn.click(); // 复用正常入口，保证加载数据等逻辑都正常跑一遍
+                setTimeout(() => {
+                    const envModal = document.getElementById('envelope-modal');
+                    if (envModal) envModal.style.zIndex = '4500';
+                }, 60);
             });
         }
 
