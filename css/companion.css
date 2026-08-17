@@ -1747,3 +1747,38 @@ html[data-theme="dark"] .companion-mode-card i {
     background: rgba(var(--accent-color-rgb, 197,164,126), 0.45);
     color: #fff;
 }
+
+/* 陪伴页面内快捷入口：外部播放器 / 信箱（跟其他角落按钮同一套视觉风格）*/
+.companion-music-corner {
+    position: absolute;
+    right: 20px;
+    bottom: calc(max(30px, env(safe-area-inset-bottom, 30px)) + 156px);
+    z-index: 5;
+    background: rgba(40,40,40,0.65) !important;
+    border: 1px solid rgba(255,255,255,0.2) !important;
+    color: #fff !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+#companion-page.companion-light-bg .companion-music-corner {
+    color: #fff !important;
+    background: rgba(40,40,40,0.65) !important;
+    border-color: rgba(255,255,255,0.2) !important;
+}
+
+.companion-mail-corner {
+    position: absolute;
+    right: 20px;
+    bottom: calc(max(30px, env(safe-area-inset-bottom, 30px)) + 208px);
+    z-index: 5;
+    background: rgba(40,40,40,0.65) !important;
+    border: 1px solid rgba(255,255,255,0.2) !important;
+    color: #fff !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+#companion-page.companion-light-bg .companion-mail-corner {
+    color: #fff !important;
+    background: rgba(40,40,40,0.65) !important;
+    border-color: rgba(255,255,255,0.2) !important;
+}
