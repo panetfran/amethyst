@@ -1714,10 +1714,12 @@
         stopPartnerGoodnightCheck();
         recordHistory();
 
-        // 复位陪伴中临时调高的播放器层级，不然退出陪伴之后它会一直盖在别的东西上面
+        // 复位陪伴中临时调高的播放器/信箱层级，不然退出陪伴之后它们会一直盖在别的东西上面
         try {
             const player = document.getElementById('player');
             if (player && player.style.zIndex === '4500') player.style.zIndex = '';
+            const envModal = document.getElementById('envelope-modal');
+            if (envModal && envModal.style.zIndex === '4500') envModal.style.zIndex = '';
         } catch (e) {}
 
         // 阶段三B：停止并清理背景视频（防止退出后声音继续播放）
@@ -4076,11 +4078,22 @@
             mailBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const entryBtn = document.getElementById('envelope-function');
-                if (entryBtn) entryBtn.click(); // 复用正常入口，保证加载数据等逻辑都正常跑一遍
-                setTimeout(() => {
+                if (entryBtn) entryBtn.click(); // 复用正常入口的点击处理（内部是异步的：要先读数据、查新邮件状态）
+
+                // 入口按钮那个点击处理是 async 的，不能猜一个固定延迟——
+                // 改成每50毫秒检查一次，等弹窗真的从"隐藏"变成"显示"了，才去提层级，
+                // 最多等2秒，等不到就放弃（避免弹窗一直没打开时无限空转）
+                let checks = 0;
+                const waitAndBoost = setInterval(() => {
+                    checks++;
                     const envModal = document.getElementById('envelope-modal');
-                    if (envModal) envModal.style.zIndex = '4500';
-                }, 60);
+                    if (envModal && getComputedStyle(envModal).display !== 'none') {
+                        envModal.style.zIndex = '4500';
+                        clearInterval(waitAndBoost);
+                    } else if (checks > 40) {
+                        clearInterval(waitAndBoost);
+                    }
+                }, 50);
             });
         }
 
