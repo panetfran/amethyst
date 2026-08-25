@@ -32,6 +32,7 @@
     <link rel="stylesheet" href="css/wallpaper.css">
     <link rel="stylesheet" href="css/map.css">
     <link rel="stylesheet" href="css/plants.css">
+    <link rel="stylesheet" href="css/wishes.css">
 
     <style id="css-live-preview-style"></style>
 
@@ -2981,6 +2982,20 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <!-- 养植物：植株列表弹窗 -->
+<!-- 心愿 -->
+<div class="modal" id="wishes-modal">
+    <div class="modal-content">
+        <div class="modal-title">
+            <i class="fas fa-star-of-life"></i><span>心愿</span>
+        </div>
+        <div id="wishes-modal-body"></div>
+        <div class="modal-buttons">
+            <button class="modal-btn modal-btn-secondary" id="wishes-test-btn" style="flex:1;"><i class="fas fa-shuffle"></i> 现在冒一个心愿</button>
+            <button class="modal-btn modal-btn-secondary" id="close-wishes-modal" style="flex:1;">关闭</button>
+        </div>
+    </div>
+</div>
+
 <div class="modal" id="plants-modal">
     <div class="modal-content">
         <div class="modal-title">
@@ -3235,6 +3250,9 @@ document.addEventListener('DOMContentLoaded', function() {
 <div class="settings-item app-tile" id="plants-function">
  <i class="fas fa-seedling"></i><span>养植物</span>
 </div>
+<div class="settings-item app-tile" id="wishes-function">
+ <i class="fas fa-star-of-life"></i><span>心愿</span>
+</div>
 <div class="settings-item app-tile" id="mood-function">
  <i class="fas fa-calendar-day"></i><span>心晴手账</span>
 </div>
@@ -3350,6 +3368,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <script src="js/features/wallpaper.js"></script>
         <script src="js/features/map.js"></script>
         <script src="js/features/plants.js"></script>
+        <script src="js/features/wishes.js"></script>
 
 </body>
 </html>
