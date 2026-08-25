@@ -173,6 +173,17 @@
         }
     }
 
+    // 给其它功能（比如心愿满足）调用的钩子：直接把连接状态提到一个满级的文案上，
+    // 不用等后台自然重抽。没有加载好（extras还没初始化）就静默跳过，不影响调用方。
+    window.wallpaperBoostLinkStatus = function () {
+        if (!extras) return;
+        const topIndices = LINK_STATUS_LIST.reduce((arr, item, i) => { if (item.level === 5) arr.push(i); return arr; }, []);
+        if (!topIndices.length) return;
+        extras.linkStatus = { idx: topIndices[Math.floor(Math.random() * topIndices.length)], changedAt: Date.now() };
+        saveExtras();
+        renderLinkStatus();
+    };
+
     function scheduleLinkStatusReroll() {
         if (linkStatusTimer) clearTimeout(linkStatusTimer);
         const base = 2.5 * 60 * 60 * 1000;
