@@ -1212,14 +1212,7 @@ autoSendSlider.addEventListener('change', () => {
             hideModal(DOMElements.advancedModal.modal);
             await loadEnvelopeData();
             await checkEnvelopeStatus();
-            currentEnvTab = 'outbox';
-            document.getElementById('env-tab-outbox').classList.add('active');
-            document.getElementById('env-tab-inbox').classList.remove('active');
-            document.getElementById('env-outbox-section').style.display = 'block';
-            document.getElementById('env-inbox-section').style.display = 'none';
-            document.getElementById('env-compose-form').style.display = 'none';
-            document.getElementById('env-main-close-btn').style.display = 'flex';
-            renderEnvelopeLists();
+            switchEnvTab('inbox'); // 默认打开"来信"标签，switchEnvTab内部会处理四个分类的状态和渲染
             showModal(document.getElementById('envelope-modal'));
         });
     }
