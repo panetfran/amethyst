@@ -1,5 +1,5 @@
 let envelopeData = { outbox: [], inbox: [] }; 
-let currentEnvTab = 'outbox';
+let currentEnvTab = 'inbox';
 let editingEnvId = null; 
 let editingEnvSection = null; 
 
@@ -181,11 +181,13 @@ function generateEnvelopeReplyText() {
 
 window.switchEnvTab = function(tab) {
     currentEnvTab = tab;
-    document.getElementById('env-tab-outbox').classList.toggle('active', tab === 'outbox');
     document.getElementById('env-tab-inbox').classList.toggle('active', tab === 'inbox');
+    document.getElementById('env-tab-reply').classList.toggle('active', tab === 'reply');
+    document.getElementById('env-tab-outbox').classList.toggle('active', tab === 'outbox');
     document.getElementById('env-tab-starred').classList.toggle('active', tab === 'starred');
-    document.getElementById('env-outbox-section').style.display = tab === 'outbox' ? 'block' : 'none';
     document.getElementById('env-inbox-section').style.display = tab === 'inbox' ? 'block' : 'none';
+    document.getElementById('env-reply-section').style.display = tab === 'reply' ? 'block' : 'none';
+    document.getElementById('env-outbox-section').style.display = tab === 'outbox' ? 'block' : 'none';
     document.getElementById('env-starred-section').style.display = tab === 'starred' ? 'block' : 'none';
     document.getElementById('env-compose-form').style.display = 'none';
     document.getElementById('env-main-close-btn').style.display = 'flex';
@@ -196,15 +198,20 @@ window.switchEnvTab = function(tab) {
 function renderEnvelopeLists() {
     renderOutboxList();
     renderInboxList();
+    renderReplyList();
     renderStarredList();
     const pendingCount = envelopeData.outbox.filter(l => l.status === 'pending').length;
-    const newInboxCount = envelopeData.inbox.filter(l => l.isNew).length;
+    const newInboxCount = envelopeData.inbox.filter(l => l.isNew && !l.refId).length;
+    const newReplyCount = envelopeData.inbox.filter(l => l.isNew && l.refId).length;
     const outboxBadge = document.getElementById('env-outbox-badge');
     const inboxBadge = document.getElementById('env-inbox-badge');
+    const replyBadge = document.getElementById('env-reply-badge');
     if (outboxBadge) { outboxBadge.textContent = pendingCount; outboxBadge.style.display = pendingCount > 0 ? 'inline-block' : 'none'; }
     if (inboxBadge) { inboxBadge.textContent = newInboxCount; inboxBadge.style.display = newInboxCount > 0 ? 'inline-block' : 'none'; }
+    if (replyBadge) { replyBadge.textContent = newReplyCount; replyBadge.style.display = newReplyCount > 0 ? 'inline-block' : 'none'; }
+    const totalNew = newInboxCount + newReplyCount;
     const envelopeEntryBadge = document.getElementById('env-entry-badge');
-    if (envelopeEntryBadge) { envelopeEntryBadge.style.display = newInboxCount > 0 ? 'inline-block' : 'none'; }
+    if (envelopeEntryBadge) { envelopeEntryBadge.style.display = totalNew > 0 ? 'inline-block' : 'none'; }
 }
 
 function renderStarredList() {
@@ -368,17 +375,24 @@ function renderOutboxList() {
 }
 
 function renderInboxList() {
-    const list = document.getElementById('env-inbox-list');
+    renderInboxLikeList('env-inbox-list', l => !l.refId, '还没有收到来信', `${(typeof settings !== 'undefined' && settings.partnerName) || '对方'}还没有主动写信给你`);
+}
+function renderReplyList() {
+    renderInboxLikeList('env-reply-list', l => !!l.refId, '还没有收到回信', '对方正在认真回复中，请稍候~');
+}
+function renderInboxLikeList(listId, filterFn, emptyTitle, emptySub) {
+    const list = document.getElementById(listId);
     if (!list) return;
-    if (envelopeData.inbox.length === 0) {
+    const letters = envelopeData.inbox.filter(filterFn);
+    if (letters.length === 0) {
         list.innerHTML = `<div class="env-empty">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/><polyline points="22 13 12 13"/><path d="M19 16l-5-3-5 3"/></svg>
-            <div style="font-size:14px;font-weight:500;margin-top:4px;">还没有收到回信</div>
-            <div style="font-size:12px;margin-top:6px;opacity:0.6;">对方正在认真回复中，请稍候~</div>
+            <div style="font-size:14px;font-weight:500;margin-top:4px;">${emptyTitle}</div>
+            <div style="font-size:12px;margin-top:6px;opacity:0.6;">${emptySub}</div>
         </div>`;
         return;
     }
-    list.innerHTML = envelopeData.inbox.slice().reverse().map(letter => {
+    list.innerHTML = letters.slice().reverse().map(letter => {
         const date = new Date(letter.receivedTime).toLocaleDateString('zh-CN', {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'});
         const preview = letter.content.length > 50 ? letter.content.substring(0, 50) + '…' : letter.content;
         const isNew = letter.isNew;
