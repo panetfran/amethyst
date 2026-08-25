@@ -1,0 +1,93 @@
+/* ==================== 心愿功能样式 ==================== */
+
+#wishes-modal .modal-content { max-width: 440px; max-height: 82vh; overflow-y: auto; }
+
+.wish-current-card {
+    border: 1.5px solid var(--border-color);
+    border-radius: 18px;
+    padding: 18px 16px;
+    margin-bottom: 18px;
+    position: relative;
+}
+.wish-type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 11px;
+    border-radius: 20px;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+.wish-text {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.6;
+    margin-bottom: 8px;
+}
+.wish-time {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+.wish-actions { display: flex; gap: 10px; }
+.wish-fulfill-btn {
+    flex: 1;
+    padding: 11px;
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font-family);
+}
+.wish-dismiss-btn {
+    padding: 11px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--primary-bg);
+    color: var(--text-secondary);
+    font-size: 12.5px;
+    cursor: pointer;
+    font-family: var(--font-family);
+}
+
+.wish-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-secondary);
+}
+.wish-empty i { font-size: 30px; opacity: 0.35; margin-bottom: 10px; display: block; }
+.wish-empty p { font-size: 14px; font-weight: 600; margin-bottom: 4px; color: var(--text-primary); }
+.wish-empty span { font-size: 12px; opacity: 0.75; }
+
+.wish-history-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin: 4px 0 10px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+}
+.wish-history-list { display: flex; flex-direction: column; gap: 2px; }
+.wish-history-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 4px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 12.5px;
+}
+.wish-history-item:last-child { border-bottom: none; }
+.wish-history-item i { width: 16px; text-align: center; flex-shrink: 0; font-size: 12px; }
+.wish-history-text {
+    flex: 1;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.wish-history-date { font-size: 10.5px; color: var(--text-secondary); flex-shrink: 0; }
