@@ -111,10 +111,24 @@
 .moments-cover-change-btn:hover {
     background: rgba(0,0,0,0.55);
 }
-.moments-avatar-inline {
+.moments-profile-inline {
     position: absolute;
     bottom: 0px;
     right: 16px;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    z-index: 2;
+}
+.moments-profile-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+    margin-bottom: 10px;
+    white-space: nowrap;
+}
+.moments-avatar-inline {
     width: 50px;
     height: 50px;
     border-radius: 12px;
@@ -124,8 +138,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2;
     box-shadow: 0 3px 12px rgba(0,0,0,0.18);
+    flex-shrink: 0;
 }
 .moments-avatar-inline img {
     width: 100%;
