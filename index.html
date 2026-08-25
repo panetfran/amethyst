@@ -451,6 +451,20 @@
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:4px;"><path d="M22 13V19a2 2 0 01-2 2H4a2 2 0 01-2-2v-6"/><polyline points="15 3 21 3 21 9"/><line x1="21" y1="3" x2="10" y2="14"/></svg>收到的信
                     <span id="env-inbox-badge" class="env-badge" style="display:none;"></span>
                 </button>
+                <button class="env-tab-btn" id="env-tab-starred" onclick="switchEnvTab('starred')">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:4px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>星标
+                </button>
+            </div>
+
+            <div class="env-manage-bar" id="env-manage-bar">
+                <button class="env-manage-toggle" id="env-manage-toggle" onclick="enterEnvBatchMode()">管理</button>
+            </div>
+            <div class="env-manage-bar env-manage-bar-batch" id="env-manage-bar-batch" style="display:none;">
+                <button class="env-manage-toggle" onclick="exitEnvBatchMode()">取消</button>
+                <div style="display:flex;gap:8px;">
+                    <button class="env-manage-toggle" onclick="batchMarkReadEnvLetters()">全部已读</button>
+                    <button class="env-manage-toggle env-manage-danger" onclick="batchDeleteEnvLetters()">删除</button>
+                </div>
             </div>
 
             <div id="env-outbox-section">
@@ -459,6 +473,10 @@
 
             <div id="env-inbox-section" style="display:none;">
                 <div id="env-inbox-list"></div>
+            </div>
+
+            <div id="env-starred-section" style="display:none;">
+                <div id="env-starred-list"></div>
             </div>
 
             <div id="env-compose-form" style="display:none;">
@@ -551,6 +569,7 @@
         
         <div class="modal-buttons" style="margin:0;padding:12px 18px 16px;border-top:1px solid var(--border-color);flex-shrink:0;">
             <button class="modal-btn modal-btn-secondary" id="close-env-view" onclick="closeEnvViewModal()">关闭</button>
+            <button class="modal-btn modal-btn-secondary" id="env-view-star-btn" onclick="toggleEnvLetterStarInView()">☆ 标星</button>
             <button class="modal-btn modal-btn-secondary" id="env-view-edit-btn" onclick="toggleEnvEdit()">编辑</button>
             <button class="modal-btn modal-btn-primary" id="env-view-save-btn" onclick="saveEnvEdit()" style="display:none;">保存</button>
         </div>
@@ -2161,21 +2180,16 @@
 </div>
 
 <!-- ==================== 朋友圈模态框 ==================== -->
-<div class="modal" id="moments-modal">
-    <div class="modal-content">
-        <div class="moments-header">
-            <div class="moments-header-title">
-                <i class="fa-solid fa-face-kiss-wink-heart" style="color: var(--accent-color);"></i>
-                <span>朋友圈</span>
-            </div>
-            <button class="delivery-back-btn" id="moments-close" style="width:30px;height:30px;"><i class="fas fa-times"></i></button>
+<div id="moments-page">
+    <div class="moments-header">
+        <button class="delivery-back-btn" id="moments-close" style="width:32px;height:32px;"><i class="fas fa-chevron-left"></i></button>
+        <div class="moments-header-title">
+            <i class="fa-solid fa-face-kiss-wink-heart" style="color: var(--accent-color);"></i>
+            <span>朋友圈</span>
         </div>
-        <div class="moments-tabs" id="moments-tabs">
-            <div class="moments-tab active" data-tab="mine">我的</div>
-            <div class="moments-tab" data-tab="partner" id="moments-tab-partner">对方的</div>
-        </div>
-        <div class="moments-content" id="moments-content"></div>
+        <button class="delivery-back-btn" id="moments-settings-btn" style="width:32px;height:32px;" onclick="window.openMomentsSettingsMenu()"><i class="fas fa-ellipsis"></i></button>
     </div>
+    <div class="moments-content" id="moments-content"></div>
 </div>
 
 <!-- 发布朋友圈编辑器 -->
@@ -3160,6 +3174,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="wp-weather-time" id="wp-ta-time">00:00</div>
                     <div class="wp-weather-label" id="wp-ta-weather-label">晴</div>
                 </div>
+            </div>
+            <div id="wp-link-status">
+                <div id="wp-link-hearts">
+                    <i class="fas fa-heart wp-heart"></i>
+                    <i class="fas fa-heart wp-heart"></i>
+                    <i class="fas fa-heart wp-heart"></i>
+                    <i class="fas fa-heart wp-heart"></i>
+                    <i class="fas fa-heart wp-heart"></i>
+                </div>
+                <div id="wp-link-text">共鸣中</div>
             </div>
             <div id="wallpaper-quote"></div>
         </div>
