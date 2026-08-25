@@ -491,6 +491,12 @@
             if (typeof showNotification === 'function') showNotification('红包已发送 ✦', 'success');
             overlay.remove();
 
+            // 心愿联动：如果这次是从"满足心愿"跳转过来发的红包，顺手标记心愿完成
+            // （心愿功能不一定存在，用 typeof 检查一下，没有就跳过，不影响红包本身）
+            try {
+                if (typeof window.wishesNotifyRedPacketSent === 'function') window.wishesNotifyRedPacketSent();
+            } catch (e) {}
+
             // 系统延迟处理
             _scheduleSystemResponse(record);
         };
