@@ -65,8 +65,8 @@ async function checkEnvelopeStatus() {
     // 逻辑 B：系统主动找你
     if (!isBusy) {
         const lastActiveTime = localStorage.getItem('last_system_mail_time') || 0;
-        const cooldown = 3 * 60 * 60 * 1000; // 缩短到 3 小时
-        if (now - lastActiveTime > cooldown && Math.random() < 0.5) { // 50% 概率
+        const cooldown = 10 * 60 * 60 * 1000; // 10小时冷却，不再是1小时
+        if (now - lastActiveTime > cooldown && Math.random() < 0.25) { // 25% 概率，不再是50%
             const activeContent = generateEnvelopeReplyText();
             const systemLetter = {
                 id: 'sys_' + Date.now(),
@@ -183,16 +183,20 @@ window.switchEnvTab = function(tab) {
     currentEnvTab = tab;
     document.getElementById('env-tab-outbox').classList.toggle('active', tab === 'outbox');
     document.getElementById('env-tab-inbox').classList.toggle('active', tab === 'inbox');
+    document.getElementById('env-tab-starred').classList.toggle('active', tab === 'starred');
     document.getElementById('env-outbox-section').style.display = tab === 'outbox' ? 'block' : 'none';
     document.getElementById('env-inbox-section').style.display = tab === 'inbox' ? 'block' : 'none';
+    document.getElementById('env-starred-section').style.display = tab === 'starred' ? 'block' : 'none';
     document.getElementById('env-compose-form').style.display = 'none';
     document.getElementById('env-main-close-btn').style.display = 'flex';
+    exitEnvBatchMode(); // 切标签页的时候，批量管理模式自动退出，避免跨标签页选中状态搞混
     renderEnvelopeLists();
 };
 
 function renderEnvelopeLists() {
     renderOutboxList();
     renderInboxList();
+    renderStarredList();
     const pendingCount = envelopeData.outbox.filter(l => l.status === 'pending').length;
     const newInboxCount = envelopeData.inbox.filter(l => l.isNew).length;
     const outboxBadge = document.getElementById('env-outbox-badge');
@@ -202,6 +206,120 @@ function renderEnvelopeLists() {
     const envelopeEntryBadge = document.getElementById('env-entry-badge');
     if (envelopeEntryBadge) { envelopeEntryBadge.style.display = newInboxCount > 0 ? 'inline-block' : 'none'; }
 }
+
+function renderStarredList() {
+    const list = document.getElementById('env-starred-list');
+    if (!list) return;
+    const starredOutbox = envelopeData.outbox.filter(l => l.starred).map(l => ({ ...l, _section: 'outbox' }));
+    const starredInbox = envelopeData.inbox.filter(l => l.starred).map(l => ({ ...l, _section: 'inbox' }));
+    const all = starredOutbox.concat(starredInbox).sort((a, b) => (b.sentTime || b.receivedTime || 0) - (a.sentTime || a.receivedTime || 0));
+    if (all.length === 0) {
+        list.innerHTML = `<div class="env-empty">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <div style="font-size:14px;font-weight:500;margin-top:4px;">还没有星标信件</div>
+            <div style="font-size:12px;margin-top:6px;opacity:0.6;">重要的信件可以标个星，方便以后回看</div>
+        </div>`;
+        return;
+    }
+    list.innerHTML = all.map(letter => {
+        const isOut = letter._section === 'outbox';
+        const date = new Date(letter.sentTime || letter.receivedTime).toLocaleDateString('zh-CN', {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'});
+        const preview = letter.content.length > 38 ? letter.content.substring(0, 38) + '…' : letter.content;
+        return `
+        <div class="env-letter-item ${isOut ? '' : 'reply'} env-batch-item" data-section="${letter._section}" data-id="${letter.id}" onclick="envItemClick(event,'${letter._section}','${letter.id}')">
+            <div class="env-batch-check" onclick="event.stopPropagation();toggleEnvBatchCheck(this)"></div>
+            <div class="env-letter-header">
+                <div class="env-letter-header-from">${isOut ? '寄出' : '收到'} · ${date}</div>
+                <button class="env-star-btn starred" onclick="event.stopPropagation();toggleEnvLetterStar('${letter._section}','${letter.id}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                </button>
+            </div>
+            <div class="env-letter-body"><div class="env-letter-preview">${preview}</div></div>
+        </div>`;
+    }).join('');
+}
+
+function envItemClick(event, section, id) {
+    if (envBatchMode) { toggleEnvBatchCheck(event.currentTarget.querySelector('.env-batch-check')); return; }
+    viewEnvLetter(section, id);
+}
+
+// ==================== 星标 ====================
+window.toggleEnvLetterStar = function(section, id) {
+    const letters = section === 'outbox' ? envelopeData.outbox : envelopeData.inbox;
+    const letter = letters.find(l => l.id === id);
+    if (!letter) return;
+    letter.starred = !letter.starred;
+    saveEnvelopeData();
+    renderEnvelopeLists();
+};
+
+// ==================== 批量管理 ====================
+let envBatchMode = false;
+
+window.enterEnvBatchMode = function() {
+    envBatchMode = true;
+    document.getElementById('env-manage-bar').style.display = 'none';
+    document.getElementById('env-manage-bar-batch').style.display = 'flex';
+    document.querySelectorAll('.env-letter-item').forEach(el => el.classList.add('env-batch-active'));
+};
+
+window.exitEnvBatchMode = function() {
+    envBatchMode = false;
+    const bar = document.getElementById('env-manage-bar');
+    const barBatch = document.getElementById('env-manage-bar-batch');
+    if (bar) bar.style.display = 'flex';
+    if (barBatch) barBatch.style.display = 'none';
+    document.querySelectorAll('.env-letter-item').forEach(el => {
+        el.classList.remove('env-batch-active');
+        const check = el.querySelector('.env-batch-check');
+        if (check) check.classList.remove('checked');
+    });
+};
+
+window.toggleEnvBatchCheck = function(checkEl) {
+    checkEl.classList.toggle('checked');
+};
+
+function getEnvBatchSelected() {
+    const items = [];
+    document.querySelectorAll('.env-letter-item.env-batch-active').forEach(el => {
+        const check = el.querySelector('.env-batch-check');
+        if (check && check.classList.contains('checked')) {
+            items.push({ section: el.getAttribute('data-section'), id: el.getAttribute('data-id') });
+        }
+    });
+    return items;
+}
+
+window.batchMarkReadEnvLetters = function() {
+    const selected = getEnvBatchSelected();
+    if (!selected.length) { showNotification('还没有选中任何信件', 'info'); return; }
+    selected.forEach(({ section, id }) => {
+        if (section === 'inbox') {
+            const letter = envelopeData.inbox.find(l => l.id === id);
+            if (letter) letter.isNew = false;
+        }
+    });
+    saveEnvelopeData();
+    exitEnvBatchMode();
+    renderEnvelopeLists();
+    showNotification('已标记已读', 'success');
+};
+
+window.batchDeleteEnvLetters = function() {
+    const selected = getEnvBatchSelected();
+    if (!selected.length) { showNotification('还没有选中任何信件', 'info'); return; }
+    if (!confirm(`确定删除选中的 ${selected.length} 封信吗？`)) return;
+    selected.forEach(({ section, id }) => {
+        if (section === 'outbox') envelopeData.outbox = envelopeData.outbox.filter(l => l.id !== id);
+        else envelopeData.inbox = envelopeData.inbox.filter(l => l.id !== id);
+    });
+    saveEnvelopeData();
+    exitEnvBatchMode();
+    renderEnvelopeLists();
+    showNotification('已删除', 'success');
+};
 
 function renderOutboxList() {
     const list = document.getElementById('env-outbox-list');
@@ -224,12 +342,16 @@ function renderOutboxList() {
         const statusText = isPending ? `${statusIcon} 预计 ${replyTime} 回信` : `${statusIcon} 已收到回信`;
         const preview = letter.content.length > 38 ? letter.content.substring(0, 38) + '…' : letter.content;
         return `
-        <div class="env-letter-item" onclick="viewEnvLetter('outbox','${letter.id}')">
+        <div class="env-letter-item env-batch-item" data-section="outbox" data-id="${letter.id}" onclick="envItemClick(event,'outbox','${letter.id}')">
+            <div class="env-batch-check" onclick="event.stopPropagation();toggleEnvBatchCheck(this)"></div>
             <div class="env-letter-header">
                 <div class="env-letter-header-from">
                     <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:3px;"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
                     寄出 · ${date}
                 </div>
+                <button class="env-star-btn ${letter.starred ? 'starred' : ''}" onclick="event.stopPropagation();toggleEnvLetterStar('outbox','${letter.id}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="${letter.starred ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                </button>
                 <div class="env-stamp">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                 </div>
@@ -262,13 +384,17 @@ function renderInboxList() {
         const isNew = letter.isNew;
         const origPreview = letter.originalContent ? (letter.originalContent.length > 32 ? letter.originalContent.substring(0, 32) + '…' : letter.originalContent) : '';
         return `
-        <div class="env-letter-item reply ${isNew ? 'env-letter-new' : ''}" onclick="viewEnvLetter('inbox','${letter.id}')">
+        <div class="env-letter-item reply env-batch-item ${isNew ? 'env-letter-new' : ''}" data-section="inbox" data-id="${letter.id}" onclick="envItemClick(event,'inbox','${letter.id}')">
+            <div class="env-batch-check" onclick="event.stopPropagation();toggleEnvBatchCheck(this)"></div>
             <div class="env-letter-header">
                 <div class="env-letter-header-from">
                     <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:3px;"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
                     收到 · ${date}
                     ${isNew ? '<span style="background:rgba(255,255,255,0.3);color:#fff;font-size:9px;padding:1px 5px;border-radius:6px;margin-left:6px;">新</span>' : ''}
                 </div>
+                <button class="env-star-btn ${letter.starred ? 'starred' : ''}" onclick="event.stopPropagation();toggleEnvLetterStar('inbox','${letter.id}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="${letter.starred ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                </button>
                 <div class="env-stamp">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                 </div>
@@ -347,6 +473,13 @@ window.viewEnvLetter = function(section, id) {
     document.getElementById('env-view-edit-btn').style.display = 'inline-flex';
     document.getElementById('env-view-save-btn').style.display = 'none';
 
+    // 更新详情页里的星标按钮状态
+    const starBtn = document.getElementById('env-view-star-btn');
+    if (starBtn) {
+        starBtn.textContent = letter.starred ? '★ 已标星' : '☆ 标星';
+        starBtn.classList.toggle('env-star-btn-active', !!letter.starred);
+    }
+
     // 处理回信引用
     const origCtx = document.getElementById('env-view-original-ctx');
     const origText = document.getElementById('env-view-original-text');
@@ -390,6 +523,18 @@ window.viewEnvLetter = function(section, id) {
         };
     }
     showModal(document.getElementById('envelope-view-modal'));
+};
+
+window.toggleEnvLetterStarInView = function() {
+    if (!editingEnvId || !editingEnvSection) return;
+    toggleEnvLetterStar(editingEnvSection, editingEnvId);
+    const letters = editingEnvSection === 'outbox' ? envelopeData.outbox : envelopeData.inbox;
+    const letter = letters.find(l => l.id === editingEnvId);
+    const starBtn = document.getElementById('env-view-star-btn');
+    if (starBtn && letter) {
+        starBtn.textContent = letter.starred ? '★ 已标星' : '☆ 标星';
+        starBtn.classList.toggle('env-star-btn-active', !!letter.starred);
+    }
 };
 
 window.toggleEnvEdit = function() {

@@ -15,6 +15,7 @@
     let clockTimer = null;
     let extras = null;        // { dailyQuote, myWeather, taWeather, taOffset }
     let taRerollTimer = null;
+    let linkStatusTimer = null;
 
     function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
     function getPartnerName() {
@@ -43,6 +44,24 @@
         { type: 'vacuum', icon: 'fa-circle-notch', label: '静谧真空' },
         { type: 'stardust', icon: 'fa-star', label: '星尘飘落' }
     ]);
+
+    // ==================== 连接状态 ====================
+    const LINK_STATUS_LIST = [
+        { text: '共鸣中', level: 5 },
+        { text: '链接稳定', level: 4 },
+        { text: '心意相通', level: 5 },
+        { text: '梦境相连', level: 5 },
+        { text: '心跳同频', level: 4 },
+        { text: '能量交汇', level: 4 },
+        { text: '正在连接...', level: 3 },
+        { text: '努力靠近中', level: 3 },
+        { text: '信号微弱', level: 1 },
+        { text: '频率校准中', level: 3 },
+        { text: '断断续续', level: 2 },
+        { text: '正在搜寻...', level: 2 },
+        { text: '若有若无', level: 1 },
+        { text: '努力中...', level: 2 }
+    ];
 
 
     async function loadData() {
@@ -104,7 +123,9 @@
         ensureDailyQuote();
         ensureMyWeather();
         ensureTaWeatherAndOffset();
+        ensureLinkStatus();
         renderQuoteAndWeather();
+        renderLinkStatus();
     }
 
     // ==================== 每日一言（每天固定一条，第二天换新）====================
@@ -137,6 +158,45 @@
             extras.taOffset = { hours: hours, changedAt: now };
         }
         saveExtras();
+    }
+
+    function ensureLinkStatus(force) {
+        const now = Date.now();
+        const STALE_MS = 2.5 * 60 * 60 * 1000 + (Math.random() - 0.5) * 30 * 60 * 1000; // 2.5小时±15分钟
+        if (force || !extras.linkStatus || (now - (extras.linkStatus.changedAt || 0)) > STALE_MS) {
+            let idx;
+            const prevIdx = extras.linkStatus ? extras.linkStatus.idx : -1;
+            do { idx = Math.floor(Math.random() * LINK_STATUS_LIST.length); }
+            while (idx === prevIdx && LINK_STATUS_LIST.length > 1);
+            extras.linkStatus = { idx: idx, changedAt: now };
+            saveExtras();
+        }
+    }
+
+    function scheduleLinkStatusReroll() {
+        if (linkStatusTimer) clearTimeout(linkStatusTimer);
+        const base = 2.5 * 60 * 60 * 1000;
+        const jitter = (Math.random() - 0.5) * 30 * 60 * 1000;
+        linkStatusTimer = setTimeout(() => {
+            if (extras) {
+                ensureLinkStatus(true);
+                renderLinkStatus();
+            }
+            scheduleLinkStatusReroll();
+        }, base + jitter);
+    }
+
+    function renderLinkStatus() {
+        if (!extras.linkStatus) return;
+        const item = LINK_STATUS_LIST[extras.linkStatus.idx];
+        if (!item) return;
+        const textEl = document.getElementById('wp-link-text');
+        if (textEl) textEl.textContent = item.text;
+        const hearts = document.querySelectorAll('#wp-link-hearts .wp-heart');
+        hearts.forEach((h, i) => {
+            h.classList.toggle('active', i < item.level);
+            h.classList.toggle('pulse', i < item.level && item.level <= 2);
+        });
     }
 
     function scheduleTaReroll() {
@@ -324,6 +384,7 @@
         });
         startClockTicker();
         scheduleTaReroll();
+        scheduleLinkStatusReroll();
     }
 
     document.addEventListener('DOMContentLoaded', function () {

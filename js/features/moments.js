@@ -144,13 +144,11 @@
         return escapeHtml(text).replace(/\n/g, '<br>');
     }
 
-    // ─── 渲染朋友圈列表 ──────────────────────
-    function renderMomentsList(tab, preserveScroll) {
-        currentMomentsTab = tab;
+    // ─── 渲染朋友圈列表（合并版：我的+对方的混在一条时间线里，像真实朋友圈）──
+    function renderMomentsFeed(preserveScroll) {
         const container = document.getElementById('moments-content');
         if (!container) return;
         const savedScrollTop = container.scrollTop;
-        document.querySelectorAll('#moments-tabs .moments-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
 
         const pn = getPartnerName();
         const mn = getMyName();
@@ -159,50 +157,34 @@
         const myAvatar = myAvatarImg ? myAvatarImg.src : null;
         const partnerAvatar = partnerAvatarImg ? partnerAvatarImg.src : null;
 
-        const coverUrl = tab === 'mine' ? momentsData.myCover : momentsData.partnerCover;
+        // 页面顶部封面固定用"我的封面"——这是"我的朋友圈主页"，跟真实微信朋友圈逻辑一致
+        const coverUrl = momentsData.myCover;
 
-        const posts = momentsData.posts
-            .filter(p => p.author === (tab === 'mine' ? 'me' : 'partner'))
-            .sort((a, b) => b.timestamp - a.timestamp);
+        const posts = momentsData.posts.slice().sort((a, b) => b.timestamp - a.timestamp);
 
         let html = '';
 
         html += `<div class="moments-cover-wrap">
             ${coverUrl ? `<img src="${escapeHtml(coverUrl)}" alt="封面">` : '<div style="width:100%;height:100%;background:linear-gradient(135deg,#2c3e50,#4a6fa5);"></div>'}
-            <button class="moments-cover-change-btn" onclick="window.momentsChangeCover('${tab}')">
+            <button class="moments-cover-change-btn" onclick="window.momentsChangeCover('mine')">
                 <i class="fas fa-camera"></i> 更换封面
             </button>
             <div class="moments-avatar-inline">
-                ${(tab === 'mine' ? myAvatar : partnerAvatar)
-                    ? `<img src="${escapeHtml(tab === 'mine' ? myAvatar : partnerAvatar)}" alt="">`
-                    : `<i class="fas fa-user"></i>`}
+                ${myAvatar ? `<img src="${escapeHtml(myAvatar)}" alt="">` : `<i class="fas fa-user"></i>`}
             </div>
         </div>`;
 
-        if (tab === 'partner') {
-            html += `<div class="moments-partner-actions">
-                <button class="moments-partner-action-btn" onclick="window.openPartnerCoverManager()">
-                    <i class="fas fa-images"></i> 管理封面
-                </button>
-                <button class="moments-partner-action-btn" onclick="window.openPartnerImagePool()">
-                    <i class="fas fa-camera"></i> 管理图片库
-                </button>
-            </div>`;
-        }
-
-        if (tab === 'mine') {
-            html += `<div class="moments-publish-bar moments-publish-bar-top">
-                <button class="moments-publish-btn" onclick="window.openMomentEditor()">
-                    <i class="fas fa-pen"></i> 发布朋友圈
-                </button>
-            </div>`;
-        }
+        html += `<div class="moments-publish-bar moments-publish-bar-top">
+            <button class="moments-publish-btn" onclick="window.openMomentEditor()">
+                <i class="fas fa-pen"></i> 发布朋友圈
+            </button>
+        </div>`;
 
         if (posts.length === 0) {
             html += `<div class="moments-empty">
                 <i class="fas fa-camera-retro"></i>
-                <p>${tab === 'mine' ? '还没有发过朋友圈' : escapeHtml(pn) + '还没有发过朋友圈'}</p>
-                <span>${tab === 'mine' ? '记录下这一刻的想法吧~' : '等待ta分享生活点滴'}</span>
+                <p>还没有朋友圈动态</p>
+                <span>记录下这一刻的想法，或者等${escapeHtml(pn)}分享点什么~</span>
             </div>`;
         } else {
             posts.forEach(post => {
@@ -281,8 +263,6 @@
 
         container.innerHTML = html;
         container.scrollTop = preserveScroll ? savedScrollTop : 0;
-        const fab = document.getElementById('partner-post-fab');
-        if (fab) fab.style.display = (tab === 'partner') ? 'flex' : 'none';
     }
 
     // ─── 更换封面 ──────────────────────────
@@ -323,7 +303,7 @@
                     if (tab === 'mine') momentsData.myCover = ev.target.result;
                     else momentsData.partnerCover = ev.target.result;
                     saveMomentsData();
-                    renderMomentsList(tab);
+                    renderMomentsFeed();
                     showNotification('封面已更新 ✨', 'success');
                 };
                 reader.readAsDataURL(file);
@@ -337,7 +317,7 @@
                 if (tab === 'mine') momentsData.myCover = url.trim();
                 else momentsData.partnerCover = url.trim();
                 saveMomentsData();
-                renderMomentsList(tab);
+                renderMomentsFeed();
                 showNotification('封面已更新 ✨', 'success');
             }
         };
@@ -416,7 +396,7 @@
         document.getElementById('moments-editor-text').value = '';
         momentsEditorImages = [];
         renderEditorImages();
-        renderMomentsList('mine');
+        renderMomentsFeed();
         showNotification('朋友圈已发布 ✨', 'success');
 
         schedulePartnerReaction(post.id);
@@ -437,7 +417,7 @@
                 if (post.likes.includes('partner')) return; // 一条朋友圈只能点一次赞
                 post.likes.push('partner');
                 saveMomentsData();
-                if (currentMomentsTab === 'mine') renderMomentsList('mine', true);
+                renderMomentsFeed(true);
                 const pn = getPartnerName();
                 showNotification(`${pn} 点赞了你的朋友圈 ✦`, 'success', 2500);
             }, randomDelay(30 * 1000, 6 * 60 * 1000));
@@ -462,7 +442,7 @@
 
                 const pn = getPartnerName();
                 notifyInChat(`${pn} 评论了你的朋友圈 ✦`);
-                if (currentMomentsTab === 'mine') renderMomentsList('mine', true);
+                renderMomentsFeed(true);
                 showNotification(`${pn} 评论了你的朋友圈 ✦`, 'success', 3000);
             }, randomDelay(60 * 1000, 10 * 60 * 1000));
         }
@@ -477,7 +457,7 @@
         if (idx >= 0) post.likes.splice(idx, 1);
         else post.likes.push('me');
         saveMomentsData();
-        renderMomentsList(currentMomentsTab, true);
+        renderMomentsFeed(true);
     };
 
     // ─── 评论 ──────────────────────────────
@@ -498,7 +478,7 @@
         if (!post.comments) post.comments = [];
         post.comments.push(comment);
         saveMomentsData();
-        renderMomentsList(currentMomentsTab, true);
+        renderMomentsFeed(true);
         showNotification('评论成功 ✦', 'success');
 
         // 80% 概率对方会回复，不是每次都回；20秒~4分钟内回，不会秒回也不会太久
@@ -524,7 +504,7 @@
             const pn = getPartnerName();
             notifyInChat(`${pn} 回复了你在朋友圈的评论 ✦`);
 
-            if (currentMomentsTab === 'partner' || currentMomentsTab === 'mine') renderMomentsList(currentMomentsTab, true);
+            renderMomentsFeed(true);
             showNotification(`${pn} 回复了你的评论 ✦`, 'success', 3000);
         }, delay);
         }
@@ -543,7 +523,7 @@
         if (!comment.replies) comment.replies = [];
         comment.replies.push(reply);
         saveMomentsData();
-        renderMomentsList(currentMomentsTab, true);
+        renderMomentsFeed(true);
         showNotification('回复成功 ✦', 'success');
 
         // 75% 概率对方会再回一句，20秒~4分钟内回
@@ -564,7 +544,7 @@
             const pn = getPartnerName();
             notifyInChat(`${pn} 回复了你在朋友圈的评论 ✦`);
 
-            if (currentMomentsTab === 'mine') renderMomentsList('mine', true);
+            renderMomentsFeed(true);
             showNotification(`${pn} 回复了你的评论 ✦`, 'success', 3000);
         }, delay);
         }
@@ -574,7 +554,7 @@
         if (!confirm('确定要删除这条朋友圈吗？')) return;
         momentsData.posts = momentsData.posts.filter(p => p.id !== postId);
         saveMomentsData();
-        renderMomentsList(currentMomentsTab, true);
+        renderMomentsFeed(true);
         showNotification('已删除', 'success');
     };
 
@@ -607,7 +587,7 @@
         if (opt) {
             momentsData.partnerCover = opt.url;
             saveMomentsData();
-            renderMomentsList('partner');
+            renderMomentsFeed();
             window.openPartnerCoverManager();
             showNotification('封面已切换', 'success');
         }
@@ -621,7 +601,7 @@
             momentsData.partnerCover = momentsData.partnerCoverOptions.length > 0 ? momentsData.partnerCoverOptions[0].url : null;
         }
         saveMomentsData();
-        renderMomentsList('partner');
+        renderMomentsFeed();
         window.openPartnerCoverManager();
         showNotification('封面已删除', 'success');
     };
@@ -641,7 +621,7 @@
                     momentsData.partnerCoverOptions.push({ id: 'cover_' + Date.now(), url: ev.target.result });
                     if (!momentsData.partnerCover) momentsData.partnerCover = ev.target.result;
                     saveMomentsData();
-                    renderMomentsList('partner');
+                    renderMomentsFeed();
                     window.openPartnerCoverManager();
                     showNotification('封面已添加', 'success');
                 };
@@ -654,7 +634,7 @@
                 momentsData.partnerCoverOptions.push({ id: 'cover_' + Date.now(), url: url.trim() });
                 if (!momentsData.partnerCover) momentsData.partnerCover = url.trim();
                 saveMomentsData();
-                renderMomentsList('partner');
+                renderMomentsFeed();
                 window.openPartnerCoverManager();
                 showNotification('封面已添加', 'success');
             }
@@ -795,7 +775,7 @@
         momentsData.posts.push(post);
         saveMomentsData();
 
-        if (currentMomentsTab === 'partner') renderMomentsList('partner', true);
+        renderMomentsFeed(true);
         const pn = getPartnerName();
         showNotification(`${pn} 发布了一条朋友圈 ✦`, 'success', 3000);
         notifyInChat(`${pn} 发布了一条新朋友圈，快去看看吧 ✦`);
@@ -803,6 +783,40 @@
     window.publishPartnerMomentNow = publishPartnerMoment; // 供数据管理面板测试按钮调用
 
     // ─── 初始化 ──────────────────────────────
+    // ─── 全屏页面开关（替代原来的小弹窗）──────
+    window.openMomentsPage = function () {
+        const page = document.getElementById('moments-page');
+        if (page) page.classList.add('active');
+    };
+    window.closeMomentsPage = function () {
+        const page = document.getElementById('moments-page');
+        if (page) page.classList.remove('active');
+    };
+    window.openMomentsSettingsMenu = function () {
+        const existing = document.getElementById('moments-settings-menu');
+        if (existing) { existing.remove(); return; }
+        const menu = document.createElement('div');
+        menu.id = 'moments-settings-menu';
+        menu.className = 'moments-settings-menu';
+        menu.innerHTML = `
+            <button onclick="window.openPartnerCoverManager();document.getElementById('moments-settings-menu').remove();">
+                <i class="fas fa-images"></i> 管理${escapeHtml(getPartnerName())}的封面
+            </button>
+            <button onclick="window.openPartnerImagePool();document.getElementById('moments-settings-menu').remove();">
+                <i class="fas fa-camera"></i> 管理${escapeHtml(getPartnerName())}的图片库
+            </button>
+        `;
+        document.body.appendChild(menu);
+        setTimeout(() => {
+            document.addEventListener('click', function closeOnce(e) {
+                if (!menu.contains(e.target) && e.target.id !== 'moments-settings-btn') {
+                    menu.remove();
+                    document.removeEventListener('click', closeOnce);
+                }
+            });
+        }, 0);
+    };
+
     async function initMoments() {
         await loadMomentsData();
 
@@ -812,18 +826,14 @@
                 const advancedModal = document.getElementById('advanced-modal');
                 if (advancedModal && typeof hideModal === 'function') hideModal(advancedModal);
                 await loadMomentsData();
-                renderMomentsList('mine');
-                if (typeof showModal === 'function') showModal(document.getElementById('moments-modal'));
+                renderMomentsFeed();
+                window.openMomentsPage();
                 markMomentsSeen();
             });
         }
 
-        document.querySelectorAll('#moments-tabs .moments-tab').forEach(tab => {
-            tab.addEventListener('click', () => renderMomentsList(tab.dataset.tab));
-        });
-
         const closeBtn = document.getElementById('moments-close');
-        if (closeBtn) closeBtn.addEventListener('click', () => hideModal(document.getElementById('moments-modal')));
+        if (closeBtn) closeBtn.addEventListener('click', () => window.closeMomentsPage());
 
         document.getElementById('moments-editor-close').addEventListener('click', () => {
             document.getElementById('moments-editor-overlay').classList.remove('active');
@@ -871,11 +881,6 @@
                 document.getElementById('moments-cover-manager-overlay').classList.remove('active');
             }
         });
-
-        setInterval(() => {
-            const tab = document.getElementById('moments-tab-partner');
-            if (tab) tab.textContent = getPartnerName() + '的';
-        }, 1000);
 
         initPartnerMomentsSchedule();
     }
