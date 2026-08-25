@@ -443,13 +443,17 @@
 
         <div class="env-body">
             <div class="env-tab-bar">
-                <button class="env-tab-btn active" id="env-tab-outbox" onclick="switchEnvTab('outbox')">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:4px;"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>寄出的信
-                    <span id="env-outbox-badge" class="env-badge" style="display:none;"></span>
-                </button>
-                <button class="env-tab-btn" id="env-tab-inbox" onclick="switchEnvTab('inbox')">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:4px;"><path d="M22 13V19a2 2 0 01-2 2H4a2 2 0 01-2-2v-6"/><polyline points="15 3 21 3 21 9"/><line x1="21" y1="3" x2="10" y2="14"/></svg>收到的信
+                <button class="env-tab-btn active" id="env-tab-inbox" onclick="switchEnvTab('inbox')">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:4px;"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>来信
                     <span id="env-inbox-badge" class="env-badge" style="display:none;"></span>
+                </button>
+                <button class="env-tab-btn" id="env-tab-reply" onclick="switchEnvTab('reply')">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:4px;"><path d="M22 13V19a2 2 0 01-2 2H4a2 2 0 01-2-2v-6"/><polyline points="15 3 21 3 21 9"/><line x1="21" y1="3" x2="10" y2="14"/></svg>回信
+                    <span id="env-reply-badge" class="env-badge" style="display:none;"></span>
+                </button>
+                <button class="env-tab-btn" id="env-tab-outbox" onclick="switchEnvTab('outbox')">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:4px;"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>寄信
+                    <span id="env-outbox-badge" class="env-badge" style="display:none;"></span>
                 </button>
                 <button class="env-tab-btn" id="env-tab-starred" onclick="switchEnvTab('starred')">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:4px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>星标
@@ -467,12 +471,16 @@
                 </div>
             </div>
 
-            <div id="env-outbox-section">
-                <div id="env-outbox-list"></div>
+            <div id="env-inbox-section">
+                <div id="env-inbox-list"></div>
             </div>
 
-            <div id="env-inbox-section" style="display:none;">
-                <div id="env-inbox-list"></div>
+            <div id="env-reply-section" style="display:none;">
+                <div id="env-reply-list"></div>
+            </div>
+
+            <div id="env-outbox-section" style="display:none;">
+                <div id="env-outbox-list"></div>
             </div>
 
             <div id="env-starred-section" style="display:none;">
