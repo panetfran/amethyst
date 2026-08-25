@@ -2430,6 +2430,55 @@
         }
         .env-letter-meta { font-size: 10px; color: var(--text-secondary); margin-bottom: 5px; display:flex; justify-content:space-between; }
         .env-letter-preview { font-size: 13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width: 86%; font-style: italic; color: var(--text-primary); }
+
+        /* 星标按钮（在信件卡片头部，跟邮票并排） */
+        .env-star-btn {
+            background: none; border: none; padding: 2px;
+            color: rgba(255,255,255,0.55); cursor: pointer;
+            display: flex; align-items: center; flex-shrink: 0;
+            transition: color 0.2s, transform 0.2s;
+        }
+        .env-star-btn:hover { transform: scale(1.15); }
+        .env-star-btn.starred { color: #ffd76a; }
+
+        /* 详情弹窗里的星标按钮 */
+        #env-view-star-btn.env-star-btn-active {
+            color: #d4a017; border-color: rgba(212,160,23,0.4);
+            background: rgba(212,160,23,0.08);
+        }
+
+        /* 管理工具条 */
+        .env-manage-bar {
+            display: flex; align-items: center; justify-content: flex-end;
+            padding: 0 2px 8px;
+        }
+        .env-manage-bar-batch { justify-content: space-between; }
+        .env-manage-toggle {
+            background: none; border: none; cursor: pointer;
+            font-size: 12.5px; font-weight: 500; color: var(--accent-color);
+            padding: 4px 8px; font-family: var(--font-family);
+        }
+        .env-manage-toggle.env-manage-danger { color: #e74c3c; }
+
+        /* 批量选择勾选框（默认隐藏，进入管理模式才显示） */
+        .env-batch-check {
+            display: none;
+            position: absolute; top: 10px; left: 10px; z-index: 3;
+            width: 18px; height: 18px; border-radius: 50%;
+            border: 1.5px solid rgba(255,255,255,0.85);
+            background: rgba(255,255,255,0.15);
+        }
+        .env-batch-check.checked {
+            background: var(--accent-color); border-color: var(--accent-color);
+        }
+        .env-batch-check.checked::after {
+            content: '✓'; position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 11px; font-weight: 700;
+        }
+        .env-letter-item.env-batch-active { padding-left: 30px; }
+        .env-letter-item.env-batch-active .env-batch-check { display: block; }
+
         .env-letter-status { font-size: 10px; color: var(--accent-color); margin-top: 5px; display: flex; align-items: center; gap: 4px; }
         .env-letter-delete-btn {
             position: absolute; bottom: 10px; right: 10px;
