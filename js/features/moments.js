@@ -169,8 +169,11 @@
             <button class="moments-cover-change-btn" onclick="window.momentsChangeCover('mine')">
                 <i class="fas fa-camera"></i> 更换封面
             </button>
-            <div class="moments-avatar-inline">
-                ${myAvatar ? `<img src="${escapeHtml(myAvatar)}" alt="">` : `<i class="fas fa-user"></i>`}
+            <div class="moments-profile-inline">
+                <div class="moments-profile-name">${escapeHtml(mn)}</div>
+                <div class="moments-avatar-inline">
+                    ${myAvatar ? `<img src="${escapeHtml(myAvatar)}" alt="">` : `<i class="fas fa-user"></i>`}
+                </div>
             </div>
         </div>`;
 
