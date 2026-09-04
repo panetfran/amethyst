@@ -18,6 +18,41 @@
     function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
     function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
     function storageKey() { return (typeof getStorageKey === 'function') ? getStorageKey('plantsData') : 'plantsData'; }
+
+    // ==================== 持久化的后台调度（跟地图梦角移动用的是同一套思路）====================
+    // 纯内存的 setTimeout 有个坑：页面一刷新/关掉标签页重开，计时就清零重新算，
+    // 网页应用很少会连续开着十几小时甚至几天不关，长间隔的调度几乎永远攒不到触发的那一刻。
+    // 改成把"下次检查时间"存到本地，刷新/重开都能接着算，不会清零重来。
+    var _scheduleTimers = {};
+    function nextCheckKey(name) {
+        return (typeof getStorageKey === 'function') ? getStorageKey('plantsNextCheck_' + name) : ('plantsNextCheck_' + name);
+    }
+    function scheduleWithPersistence(name, minHours, maxHours, chance, actionFn) {
+        if (_scheduleTimers[name]) clearTimeout(_scheduleTimers[name]);
+        function pickInterval() { return (minHours + Math.random() * (maxHours - minHours)) * 60 * 60 * 1000; }
+
+        function runCheck() {
+            if (Math.random() < chance) { try { actionFn(); } catch (e) {} }
+            var nextTime = Date.now() + pickInterval();
+            if (typeof localforage !== 'undefined') localforage.setItem(nextCheckKey(name), nextTime).catch(function () {});
+            scheduleWithPersistence(name, minHours, maxHours, chance, actionFn);
+        }
+
+        if (typeof localforage === 'undefined') {
+            _scheduleTimers[name] = setTimeout(runCheck, pickInterval());
+            return;
+        }
+        localforage.getItem(nextCheckKey(name)).then(function (savedTime) {
+            var now = Date.now();
+            var nextTime = (savedTime && savedTime > now) ? savedTime : (now + pickInterval());
+            if (!savedTime || savedTime <= now) {
+                localforage.setItem(nextCheckKey(name), nextTime).catch(function () {});
+            }
+            _scheduleTimers[name] = setTimeout(runCheck, Math.max(1000, nextTime - now));
+        }).catch(function () {
+            _scheduleTimers[name] = setTimeout(runCheck, pickInterval());
+        });
+    }
     function getPartnerName() {
         return (typeof settings !== 'undefined' && settings && settings.partnerName) ? settings.partnerName : '梦角';
     }
@@ -532,7 +567,6 @@
 
     // ==================== 角标 ====================
     // ==================== 梦角自己照顾植物（后台）====================
-    var _taCareTimer = null;
 
     function taTryCare() {
         if (!state) return;
@@ -612,27 +646,17 @@
     }
 
     function scheduleTaCare() {
-        if (_taCareTimer) clearTimeout(_taCareTimer);
-        var delay = (20 + Math.random() * 20) * 60 * 1000; // 20~40分钟检查一次
-        _taCareTimer = setTimeout(function () {
-            if (Math.random() < 0.3) taTryCare(); // 30%概率真的照顾一下
-            scheduleTaCare();
-        }, delay);
+        // 频率降下来了：45~90分钟检查一次、20%概率（原来是20~40分钟+30%，
+        // 算下来平均1.5~2小时就照顾一次，太勤快了，你自己都没什么可做的）
+        scheduleWithPersistence('care', 45 / 60, 90 / 60, 0.2, taTryCare);
     }
     window.plantsTestTaCare = function () {
         if (state) taTryCare();
         else loadState().then(taTryCare);
     };
 
-    var _taGraduateTimer = null, _taPlantNewTimer = null;
-
     function scheduleTaGraduateCheck() {
-        if (_taGraduateTimer) clearTimeout(_taGraduateTimer);
-        var delay = (12 + Math.random() * 12) * 60 * 60 * 1000; // 12~24小时检查一次，比日常照顾低频很多
-        _taGraduateTimer = setTimeout(function () {
-            if (Math.random() < 0.15) taTryGraduate(); // 15%概率
-            scheduleTaGraduateCheck();
-        }, delay);
+        scheduleWithPersistence('graduate', 12, 24, 0.15, taTryGraduate);
     }
     window.plantsTestTaGraduate = function () {
         if (state) taTryGraduate();
@@ -640,12 +664,7 @@
     };
 
     function scheduleTaPlantNewCheck() {
-        if (_taPlantNewTimer) clearTimeout(_taPlantNewTimer);
-        var delay = (24 + Math.random() * 48) * 60 * 60 * 1000; // 1~3天检查一次
-        _taPlantNewTimer = setTimeout(function () {
-            if (Math.random() < 0.2) taTryPlantNew(); // 20%概率
-            scheduleTaPlantNewCheck();
-        }, delay);
+        scheduleWithPersistence('plantnew', 24, 72, 0.2, taTryPlantNew);
     }
     window.plantsTestTaPlantNew = function () {
         if (state) taTryPlantNew();
