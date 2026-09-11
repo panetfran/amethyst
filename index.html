@@ -33,6 +33,7 @@
     <link rel="stylesheet" href="css/map.css">
     <link rel="stylesheet" href="css/plants.css">
     <link rel="stylesheet" href="css/wishes.css">
+    <link rel="stylesheet" href="css/supervise.css">
 
     <style id="css-live-preview-style"></style>
 
@@ -2983,6 +2984,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!-- 养植物：植株列表弹窗 -->
 <!-- 心愿 -->
+<!-- 监督打卡 -->
+<div class="modal" id="supervise-modal">
+    <div class="modal-content">
+        <div class="modal-title">
+            <i class="fas fa-clipboard-check"></i><span>监督打卡</span>
+        </div>
+        <div id="supervise-modal-body"></div>
+        <div class="modal-buttons">
+            <button class="modal-btn modal-btn-secondary" id="supervise-test-nag-btn" style="flex:1;"><i class="fas fa-bell"></i> 模拟一次催促</button>
+            <button class="modal-btn modal-btn-secondary" id="close-supervise-modal" style="flex:1;">关闭</button>
+        </div>
+    </div>
+</div>
+
 <div class="modal" id="wishes-modal">
     <div class="modal-content">
         <div class="modal-title">
@@ -3253,6 +3268,9 @@ document.addEventListener('DOMContentLoaded', function() {
 <div class="settings-item app-tile" id="wishes-function">
  <i class="fas fa-star-of-life"></i><span>心愿</span>
 </div>
+<div class="settings-item app-tile" id="supervise-function">
+ <i class="fas fa-clipboard-check"></i><span>监督打卡</span>
+</div>
 <div class="settings-item app-tile" id="mood-function">
  <i class="fas fa-calendar-day"></i><span>心晴手账</span>
 </div>
@@ -3369,6 +3387,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <script src="js/features/map.js"></script>
         <script src="js/features/plants.js"></script>
         <script src="js/features/wishes.js"></script>
+        <script src="js/features/supervise.js"></script>
 
 </body>
 </html>
