@@ -1,0 +1,66 @@
+/* ==================== 监督打卡样式 ==================== */
+
+#supervise-modal .modal-content { max-width: 440px; max-height: 82vh; overflow-y: auto; }
+
+.sv-card {
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+}
+.sv-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.sv-card-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+}
+.sv-card-info { flex: 1; min-width: 0; }
+.sv-card-name { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+.sv-card-streak { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+.sv-checkin-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 20px;
+    background: var(--accent-color);
+    color: #fff;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font-family);
+    flex-shrink: 0;
+}
+.sv-checkin-btn.done {
+    background: var(--primary-bg);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    cursor: default;
+}
+
+.sv-log-strip {
+    display: flex;
+    gap: 4px;
+    margin-top: 12px;
+    justify-content: space-between;
+}
+.sv-log-dot {
+    width: 100%;
+    aspect-ratio: 1;
+    max-width: 18px;
+    border-radius: 4px;
+    background: var(--primary-bg);
+    border: 1px solid var(--border-color);
+}
+.sv-log-dot.checked {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+}
