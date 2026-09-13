@@ -1,134 +1,332 @@
-/* ==================== 养植物样式 ==================== */
+/* ==================== 养植物样式（重新设计版）==================== */
 
-#plants-modal .modal-content { max-width: 460px; max-height: 85vh; overflow-y: auto; }
+#plants-modal .modal-content {
+    max-width: 460px;
+    max-height: 85vh;
+    overflow-y: auto;
+    background: var(--primary-bg);
+}
+#plants-modal .modal-title {
+    padding-bottom: 4px;
+}
+
+/* 植株网格 */
 #plants-list {
-    display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;
-    padding: 6px 2px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 4px 2px 10px;
 }
 .pl-card {
-    background: var(--secondary-bg); border: 1px solid var(--border-color);
-    border-radius: 16px; padding: 14px 12px; text-align: center; cursor: pointer;
-    transition: transform 0.15s;
+    position: relative;
+    background: linear-gradient(160deg, var(--secondary-bg) 0%, var(--primary-bg) 100%);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 16px 12px 12px;
+    text-align: center;
+    cursor: pointer;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
-.pl-card:hover { transform: translateY(-2px); }
-.pl-card-svg { width: 100%; height: 110px; display: flex; align-items: flex-end; justify-content: center; }
-.pl-card-name { font-size: 13px; font-weight: 700; color: var(--text-primary); margin-top: 6px; }
-.pl-card-species { font-size: 10.5px; color: var(--text-secondary); margin-bottom: 8px; }
-.pl-bar-mini { width: 100%; height: 5px; background: var(--primary-bg); border-radius: 3px; overflow: hidden; }
-.pl-bar-fill { height: 100%; transition: width 0.3s; }
+.pl-card::before {
+    content: '';
+    position: absolute;
+    top: -30%; right: -30%;
+    width: 80px; height: 80px;
+    background: radial-gradient(circle, var(--pl-card-color, var(--accent-color)) 0%, transparent 70%);
+    opacity: 0.12;
+    border-radius: 50%;
+    pointer-events: none;
+}
+.pl-card:active {
+    transform: scale(0.97);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.pl-card-svg {
+    width: 100%;
+    height: 104px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+}
+.pl-card-name {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-top: 8px;
+    position: relative;
+    z-index: 1;
+}
+.pl-card-species {
+    font-size: 10.5px;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 1;
+}
+.pl-bar-mini {
+    width: 100%;
+    height: 6px;
+    background: var(--border-color);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+}
+.pl-bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.3s;
+}
 
-/* 详情弹窗 */
-#plants-detail-modal .modal-content { max-width: 420px; max-height: 85vh; overflow-y: auto; }
-.pl-detail-svg { width: 100%; height: 180px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 6px; }
-.pl-detail-title { font-size: 17px; font-weight: 700; color: var(--text-primary); text-align: center; margin-bottom: 14px; }
-.pl-detail-species { font-size: 12px; font-weight: 400; color: var(--text-secondary); }
+/* ==================== 详情弹窗 ==================== */
+#plants-detail-modal .modal-content {
+    max-width: 420px;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+.pl-detail-svg {
+    width: 100%;
+    height: 190px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    margin-bottom: 4px;
+}
+.pl-detail-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-align: center;
+    margin-bottom: 2px;
+}
+.pl-detail-species {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-secondary);
+}
+.pl-species-meaning {
+    text-align: center;
+    font-size: 11.5px;
+    color: var(--accent-color);
+    opacity: 0.85;
+    margin: 4px 0 16px;
+    font-style: italic;
+}
 
-.pl-stats { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
-.pl-stat-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); }
-.pl-stat-row i { width: 14px; color: var(--accent-color); }
+/* 数值条 */
+.pl-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 18px;
+    background: var(--secondary-bg);
+    border-radius: 16px;
+    padding: 14px 14px 12px;
+}
+.pl-stat-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+.pl-stat-row i { width: 14px; color: var(--accent-color); text-align: center; }
 .pl-stat-label { width: 42px; flex-shrink: 0; }
-.pl-stat-bar { flex: 1; height: 7px; background: var(--primary-bg); border-radius: 4px; overflow: hidden; }
-.pl-stat-fill { height: 100%; transition: width 0.3s; }
-.pl-stat-num { width: 26px; text-align: right; font-size: 11px; color: var(--text-primary); }
-
-.pl-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 18px; }
-.pl-action-btn {
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
-    padding: 10px 4px; border: 1px solid var(--border-color); border-radius: 12px;
-    background: var(--primary-bg); color: var(--text-primary); cursor: pointer;
-    font-size: 11px; font-family: var(--font-family);
+.pl-stat-bar {
+    flex: 1;
+    height: 7px;
+    background: var(--border-color);
+    border-radius: 6px;
+    overflow: hidden;
 }
-.pl-action-btn i { font-size: 15px; color: var(--accent-color); }
+.pl-stat-fill { height: 100%; border-radius: 6px; transition: width 0.3s; }
+.pl-stat-num { width: 26px; text-align: right; font-size: 11px; color: var(--text-primary); font-weight: 600; }
+
+/* 操作按钮 */
+.pl-actions {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+}
+.pl-action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 12px 4px 10px;
+    border: none;
+    border-radius: 16px;
+    background: var(--secondary-bg);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 11px;
+    font-family: var(--font-family);
+    transition: transform 0.12s, background 0.15s;
+}
+.pl-action-btn i {
+    font-size: 16px;
+    color: var(--accent-color);
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(var(--accent-color-rgb), 0.1);
+    border-radius: 50%;
+}
 .pl-action-btn.disabled { opacity: 0.4; cursor: not-allowed; }
 .pl-action-btn small { font-size: 8.5px; color: var(--text-secondary); }
-.pl-action-btn:not(.disabled):active { background: rgba(var(--accent-color-rgb), 0.12); }
+.pl-action-btn:not(.disabled):active { transform: scale(0.93); background: rgba(var(--accent-color-rgb), 0.1); }
 
-.pl-log-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
-.pl-log-list { display: flex; flex-direction: column; gap: 6px; }
-.pl-log-item { font-size: 12px; color: var(--text-primary); line-height: 1.5; }
+/* 成长记录 */
+.pl-log-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+.pl-log-list { display: flex; flex-direction: column; gap: 2px; }
+.pl-log-item {
+    font-size: 12px;
+    color: var(--text-primary);
+    line-height: 1.6;
+    padding: 6px 2px;
+    border-bottom: 1px solid var(--border-color);
+}
+.pl-log-item:last-child { border-bottom: none; }
 .pl-log-time { color: var(--text-secondary); font-size: 10.5px; margin-right: 6px; }
-.pl-empty { text-align: center; color: var(--text-secondary); font-size: 12px; padding: 16px 0; }
-
 .pl-log-actor { color: var(--accent-color); font-weight: 700; margin-right: 2px; }
+.pl-empty { text-align: center; color: var(--text-secondary); font-size: 12px; padding: 16px 0; }
 
 /* 开花提示 */
 .pl-flower-badge {
-    text-align: center; font-size: 12px; color: #d16b93;
-    background: rgba(244,166,193,0.15); border-radius: 10px;
-    padding: 6px 10px; margin-bottom: 10px;
+    text-align: center;
+    font-size: 12px;
+    color: #d16b93;
+    background: linear-gradient(90deg, rgba(244,166,193,0.12), rgba(244,166,193,0.22), rgba(244,166,193,0.12));
+    border-radius: 12px;
+    padding: 8px 10px;
+    margin-bottom: 12px;
 }
+.pl-flower-meaning { display: inline-block; margin-top: 3px; font-size: 11px; opacity: 0.9; }
 
 /* 成就徽章 */
 .pl-milestones {
-    display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;
-    margin-bottom: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 16px;
 }
 .pl-milestone-badge {
-    font-size: 10.5px; color: var(--accent-color);
+    font-size: 10.5px;
+    color: var(--accent-color);
     background: rgba(var(--accent-color-rgb), 0.1);
-    border-radius: 10px; padding: 4px 9px;
-    display: flex; align-items: center; gap: 4px;
+    border-radius: 10px;
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 .pl-milestone-badge i { font-size: 10px; }
 
-/* 分株按钮 */
+/* 分株 / 结业 按钮 */
 .pl-list-btn {
-    width: 100%; display: flex; flex-direction: column; align-items: center; gap: 2px;
-    padding: 11px; margin-bottom: 14px;
-    border: 1px dashed var(--accent-color); border-radius: 12px;
-    background: rgba(var(--accent-color-rgb), 0.06); color: var(--accent-color);
-    font-size: 13px; font-weight: 600; cursor: pointer; font-family: var(--font-family);
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 12px;
+    margin-bottom: 10px;
+    border: 1.5px dashed var(--accent-color);
+    border-radius: 14px;
+    background: rgba(var(--accent-color-rgb), 0.06);
+    color: var(--accent-color);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font-family);
 }
 .pl-list-btn.disabled {
-    border-color: var(--border-color); color: var(--text-secondary);
-    background: var(--primary-bg); cursor: not-allowed;
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+    background: var(--secondary-bg);
+    cursor: not-allowed;
 }
 .pl-list-btn small { font-size: 10px; font-weight: 400; opacity: 0.8; }
-
-/* 结业按钮 */
 .pl-graduate-btn {
     border-color: #d4a94a;
     background: rgba(212,169,74,0.08);
     color: #b8862f;
 }
 
-/* 纪念墙 */
+/* ==================== 纪念墙（可折叠）==================== */
 #plants-graduated-wall {
-    margin-top: 16px;
-    padding-top: 14px;
+    margin-top: 8px;
+    padding-top: 12px;
     border-top: 1px solid var(--border-color);
 }
 .pl-grad-title {
-    font-size: 13px; font-weight: 700; color: #b8862f;
-    margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #b8862f;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 6px 4px;
+    border-radius: 10px;
+    user-select: none;
 }
+.pl-grad-title:active { background: rgba(212,169,74,0.08); }
+.pl-grad-count {
+    background: rgba(212,169,74,0.15);
+    color: #b8862f;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 10px;
+}
+.pl-grad-chevron {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--text-secondary);
+    transition: transform 0.25s ease;
+}
+#plants-graduated-wall.expanded .pl-grad-chevron { transform: rotate(180deg); }
+
+#plants-graduated-list {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+#plants-graduated-wall.expanded #plants-graduated-list {
+    max-height: 1000px;
+}
+
 .pl-grad-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 4px; border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 4px;
+    border-bottom: 1px solid var(--border-color);
 }
 .pl-grad-item:last-child { border-bottom: none; }
 .pl-grad-icon {
-    width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center; font-size: 14px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
 }
 .pl-grad-info { flex: 1; min-width: 0; }
 .pl-grad-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
 .pl-grad-species { font-size: 11px; font-weight: 400; color: var(--text-secondary); }
 .pl-grad-date { font-size: 10.5px; color: var(--text-secondary); margin-top: 2px; }
 .pl-grad-badges { display: flex; gap: 6px; flex-shrink: 0; color: #b8862f; font-size: 12px; }
-
-/* 花语展示 */
-.pl-species-meaning {
-    text-align: center;
-    font-size: 11.5px;
-    color: var(--accent-color);
-    opacity: 0.85;
-    margin: -6px 0 12px;
-    font-style: italic;
-}
-.pl-flower-meaning {
-    display: inline-block;
-    margin-top: 3px;
-    font-size: 11px;
-    opacity: 0.9;
-}
