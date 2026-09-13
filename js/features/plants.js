@@ -686,7 +686,7 @@
         applyDecay(); saveState(); refreshBadge();
         wrap.innerHTML = state.plants.map(function (p) {
             var sp = SPECIES[p.species];
-            return '<div class="pl-card" data-id="' + p.id + '">'
+            return '<div class="pl-card" data-id="' + p.id + '" style="--pl-card-color:' + sp.color + ';">'
                 + '<div class="pl-card-svg">' + plantSvg(p.species, p.stage, p.health, !!p.flowering) + '</div>'
                 + '<div class="pl-card-name">' + escapeHtml(p.nickname) + '</div>'
                 + '<div class="pl-card-species">' + escapeHtml(sp.name) + ' · 阶段 ' + p.stage + '/4</div>'
@@ -708,6 +708,10 @@
             return;
         }
         wallWrap.style.display = 'block';
+
+        var titleEl = document.getElementById('plants-graduated-title-count');
+        if (titleEl) titleEl.textContent = state.graduated.length;
+
         var listEl = document.getElementById('plants-graduated-list');
         listEl.innerHTML = state.graduated.map(function (g) {
             var sp = SPECIES[g.species];
@@ -725,6 +729,11 @@
                 + '</div>';
         }).join('');
     }
+
+    window.togglePlantsGraduatedWall = function () {
+        var wallWrap = document.getElementById('plants-graduated-wall');
+        if (wallWrap) wallWrap.classList.toggle('expanded');
+    };
 
     function statBar(label, icon, value) {
         var color = value < 30 ? '#e74c3c' : value < 60 ? '#e0a83c' : '#4cb96a';
