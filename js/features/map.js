@@ -267,7 +267,7 @@
         state.ta = { mapKey: mapKey, x: x, y: y };
         var comment = generateMoveComment();
         state.footprints.unshift({ ts: Date.now(), mapKey: mapKey, x: x, y: y, locationName: label, comment: comment });
-        if (state.footprints.length > 300) state.footprints.length = 300;
+        if (state.footprints.length > 500) state.footprints.length = 500;
         state.taChecksSinceMove = 0;
         saveState();
         refreshBadge();
@@ -323,7 +323,7 @@
         state.me = { mapKey: 'my_home', x: 250, y: 150 };
         state.ta = { mapKey: 'my_home', x: 300, y: 180 };
         state.footprints.unshift({ ts: Date.now(), mapKey: 'my_home', x: 300, y: 180, locationName: '客厅（陪伴中）', comment: generateMoveComment() });
-        if (state.footprints.length > 300) state.footprints.length = 300;
+        if (state.footprints.length > 500) state.footprints.length = 500;
         saveState();
         refreshBadge();
         if (overlay && overlay.style.display !== 'none' && curKey() === 'my_home') render();
@@ -384,6 +384,7 @@
                 + '<div class="m2-sheet-title">更多</div>'
                 + '<button class="m2-list-btn" id="m2-menu-testmove"><i class="fas fa-shuffle"></i> 让' + escapeHtml(getPartnerName()) + '现在移动</button>'
                 + '<button class="m2-list-btn" id="m2-menu-testmove-rand"><i class="fas fa-dice"></i> 让' + escapeHtml(getPartnerName()) + '去一个随机坐标</button>'
+                + '<button class="m2-list-btn" id="m2-menu-clear-footprints"><i class="fas fa-trash-alt"></i> 清空足迹记录</button>'
                 + '<button class="m2-list-btn m2-danger" id="m2-menu-reset"><i class="fas fa-arrow-rotate-left"></i> 重置为默认布局</button>'
             );
             document.getElementById('m2-menu-testmove').addEventListener('click', function () {
@@ -391,6 +392,15 @@
             });
             document.getElementById('m2-menu-testmove-rand').addEventListener('click', function () {
                 moveTaNow('random'); closeSheet();
+            });
+            document.getElementById('m2-menu-clear-footprints').addEventListener('click', function () {
+                if (!state.footprints.length) { if (typeof showNotification === 'function') showNotification('现在还没有足迹记录', 'info'); return; }
+                if (!confirm('确定清空全部足迹记录吗？地点和位置本身不会受影响，不可撤销。')) return;
+                state.footprints = [];
+                saveState();
+                refreshBadge();
+                closeSheet();
+                if (typeof showNotification === 'function') showNotification('足迹记录已清空', 'success');
             });
             document.getElementById('m2-menu-reset').addEventListener('click', function () {
                 if (!confirm('确定要重置吗？所有自定义地点和足迹记录都会清空，恢复默认布局，不可撤销。')) return;
@@ -781,7 +791,7 @@
             openSheet('<div class="m2-sheet-title">足迹</div><div class="m2-empty">还没有足迹记录</div>');
             return;
         }
-        var html = state.footprints.slice(0, 100).map(function (f) {
+        var html = state.footprints.slice(0, 150).map(function (f) {
             var d = new Date(f.ts);
             var timeStr = d.toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
             return '<div class="m2-footprint-item">'
@@ -790,7 +800,23 @@
                 + '<div class="m2-fp-comment">' + escapeHtml(f.comment || '') + '</div>'
                 + '</div>';
         }).join('');
-        openSheet('<div class="m2-sheet-title">足迹（共 ' + state.footprints.length + ' 条）</div>' + html);
+        openSheet(''
+            + '<div class="m2-sheet-title-row">'
+            +   '<div class="m2-sheet-title">足迹（共 ' + state.footprints.length + ' 条）</div>'
+            +   '<button class="m2-sheet-clear-btn" id="m2-clear-footprints-btn"><i class="fas fa-trash-alt"></i> 清空</button>'
+            + '</div>'
+            + html);
+        var clearBtn = document.getElementById('m2-clear-footprints-btn');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function () {
+                if (!confirm('确定清空全部足迹记录吗？地点和位置本身不会受影响，不可撤销。')) return;
+                state.footprints = [];
+                saveState();
+                refreshBadge();
+                if (typeof showNotification === 'function') showNotification('足迹记录已清空', 'success');
+                openFootprints();
+            });
+        }
     }
 
     // ==================== 公开 API ====================
